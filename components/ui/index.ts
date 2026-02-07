@@ -16,5 +16,10 @@ export type { StatItem } from './StatsGrid'
 export { default as ExperienceList } from './ExperienceList'
 export type { ExperienceItem } from './ExperienceList'
 
+// Hinge-style components
+export { default as PhotoCard } from './PhotoCard'
+export { default as PromptCard } from './PromptCard'
+
 // Media
 export { default as VideoPlayer } from './VideoPlayer'
+

@@ -153,6 +153,60 @@ async function main() {
         ],
     })
 
+    // Add photos (Hinge-style)
+    await prisma.founderPhoto.createMany({
+        data: [
+            {
+                founderId: founder.id,
+                url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800',
+                order: 0,
+                caption: 'Speaking at TechCrunch Disrupt',
+            },
+            {
+                founderId: founder.id,
+                url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800',
+                order: 1,
+                caption: 'Team building day',
+            },
+            {
+                founderId: founder.id,
+                url: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800',
+                order: 2,
+                caption: null,
+            },
+            {
+                founderId: founder.id,
+                url: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800',
+                order: 3,
+                caption: 'Brainstorming the next feature',
+            },
+        ],
+    })
+
+    // Add prompts (Hinge-style Q&A)
+    await prisma.founderPrompt.createMany({
+        data: [
+            {
+                founderId: founder.id,
+                prompt: 'The biggest risk I ever took was...',
+                answer: 'Leaving my $400K/year job at Google to start EduAI with just an idea and $20K in savings. Best decision of my life.',
+                order: 0,
+            },
+            {
+                founderId: founder.id,
+                prompt: 'What keeps me up at night is...',
+                answer: 'Making sure we reach students who need us most before they fall behind. Every day matters.',
+                order: 1,
+            },
+            {
+                founderId: founder.id,
+                prompt: 'My unfair advantage is...',
+                answer: 'I taught myself to code at 13 in a rural village with dialup internet. I know firsthand how transformative access to education can be.',
+                order: 2,
+            },
+        ],
+    })
+
     console.log('✅ Seed complete!')
     console.log(`\n📝 Test founder: ${founder.name} (ID: ${founder.id})`)
     console.log(`🔗 Visit: http://localhost:3000/founder/${founder.id}`)

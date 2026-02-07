@@ -1,17 +1,107 @@
-.bio {
-    font-size: 1rem;
+.profile {
+    min-height: 100vh;
+    background: linear-gradient(180deg, hsl(240, 10%, 98%) 0%, hsl(240, 10%, 93%) 100%);
+}
+
+.feed {
+    max-width: 420px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    padding: var(--space-md);
+}
+
+/* Info Card - Name, Headline, Bio */
+.infoCard {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.name {
+    font-size: 1.75rem;
+    font-weight: 700;
     color: var(--color-text);
-    line-height: 1.7;
+    margin: 0 0 var(--space-xs) 0;
+}
+
+.headline {
+    font-size: 1rem;
+    color: var(--color-text-secondary);
+    margin: 0 0 var(--space-md) 0;
+}
+
+.quickInfo {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+}
+
+.quickInfo span {
+    background: hsl(220, 20%, 95%);
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+}
+
+.bio {
+    font-size: 0.9375rem;
+    color: var(--color-text);
+    line-height: 1.6;
+    margin-bottom: var(--space-md);
+}
+
+/* Video Card */
+.videoCard {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    box-shadow: var(--shadow-sm);
+}
+
+.videoLabel {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 var(--space-sm) 0;
+}
+
+/* Section Cards */
+.section {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.sectionTitle {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin: 0 0 var(--space-md) 0;
 }
 
 .productGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: var(--space-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
 }
 
-@media (max-width: 768px) {
-    .productGrid {
-        grid-template-columns: 1fr;
+/* Investor Section */
+.investorSection {
+    background: linear-gradient(135deg, hsl(220, 90%, 98%), hsl(280, 70%, 98%));
+    border: 2px solid var(--color-primary);
+}
+
+/* Mobile-first: already optimized for mobile */
+@media (min-width: 768px) {
+    .feed {
+        padding: var(--space-xl);
     }
 }

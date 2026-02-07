@@ -1,0 +1,22 @@
+.card {
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.prompt {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 var(--space-sm) 0;
+}
+
+.answer {
+    font-size: 1.125rem;
+    color: var(--color-text);
+    line-height: 1.6;
+    margin: 0;
+}

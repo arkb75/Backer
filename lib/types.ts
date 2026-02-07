@@ -1,4 +1,4 @@
-import { Founder, Product, WorkExperience, Skill, FounderProduct } from '@prisma/client'
+import { Founder, Product, WorkExperience, Skill, FounderProduct, FounderPhoto, FounderPrompt } from '@prisma/client'
 
 export type FounderWithRelations = Founder & {
     products: (FounderProduct & {
@@ -6,6 +6,8 @@ export type FounderWithRelations = Founder & {
     })[]
     workExperience: WorkExperience[]
     skills: Skill[]
+    photos: FounderPhoto[]
+    prompts: FounderPrompt[]
     _count?: {
         investorInterests: number
     }

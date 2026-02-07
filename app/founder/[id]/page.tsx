@@ -21,6 +21,8 @@ export default async function FounderPage({ params }: PageProps) {
             },
             workExperience: true,
             skills: true,
+            photos: true,
+            prompts: true,
             investorInterests: {
                 select: {
                     interestType: true,

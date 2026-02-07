@@ -67,6 +67,8 @@ model Founder {
   workExperience    WorkExperience[]
   skills            Skill[]
   investorInterests InvestorInterest[]
+  photos            FounderPhoto[]
+  prompts           FounderPrompt[]
 }
 
 enum FounderType {
@@ -209,4 +211,40 @@ model InvestorInterest {
 enum InterestType {
   LIKED
   COMMITTED
+}
+
+// ============================================
+// Founder Photos (Hinge-style)
+// ============================================
+
+model FounderPhoto {
+  id          String   @id @default(uuid())
+  founderId   String
+  url         String
+  order       Int      @default(0)
+  caption     String?  @db.VarChar(100)
+  
+  createdAt   DateTime @default(now())
+  
+  founder     Founder  @relation(fields: [founderId], references: [id], onDelete: Cascade)
+  
+  @@index([founderId])
+}
+
+// ============================================
+// Founder Prompts (Hinge-style Q&A)
+// ============================================
+
+model FounderPrompt {
+  id          String   @id @default(uuid())
+  founderId   String
+  prompt      String   @db.VarChar(100)
+  answer      String   @db.VarChar(300)
+  order       Int      @default(0)
+  
+  createdAt   DateTime @default(now())
+  
+  founder     Founder  @relation(fields: [founderId], references: [id], onDelete: Cascade)
+  
+  @@index([founderId])
 }
