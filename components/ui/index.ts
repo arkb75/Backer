@@ -5,6 +5,9 @@ export { default as ProfileLayout, ProfileHero, ProfileSection } from './Profile
 export { default as ProfileHeader } from './ProfileHeader'
 export type { ProfileHeaderProps } from './ProfileHeader'
 
+// Navigation
+export { default as BackButton } from './BackButton'
+
 // Social links
 export { default as SocialLinks } from './SocialLinks'
 export type { SocialLink } from './SocialLinks'

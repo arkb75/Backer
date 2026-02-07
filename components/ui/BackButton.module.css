@@ -1,0 +1,39 @@
+.backButton {
+    position: fixed;
+    top: var(--space-md);
+    left: var(--space-md);
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.95);
+    border: none;
+    box-shadow: var(--shadow-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 100;
+    transition: all 0.2s ease;
+    color: var(--color-text);
+    backdrop-filter: blur(10px);
+}
+
+.backButton:hover {
+    background: white;
+    transform: scale(1.05);
+    box-shadow: var(--shadow-lg);
+}
+
+.backButton:active {
+    transform: scale(0.95);
+}
+
+/* On mobile, make it slightly smaller and position it safely */
+@media (max-width: 420px) {
+    .backButton {
+        top: var(--space-sm);
+        left: var(--space-sm);
+        width: 40px;
+        height: 40px;
+    }
+}

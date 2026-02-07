@@ -2,6 +2,7 @@ import { FounderWithRelations, InvestorStats } from '@/lib/types'
 import ProductCard from './ProductCard'
 import styles from './FounderProfile.module.css'
 import {
+    BackButton,
     SocialLinks,
     SocialLink,
     TagList,
@@ -88,6 +89,7 @@ export default function FounderProfile({
 
     return (
         <div className={styles.profile}>
+            <BackButton />
             {/* Hinge-style vertical scroll */}
             <div className={styles.feed}>
                 {contentItems.map((item) => {

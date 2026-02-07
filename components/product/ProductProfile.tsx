@@ -1,6 +1,6 @@
 import { Product, FounderProduct, Founder, FounderPhoto } from '@prisma/client'
 import styles from './ProductProfile.module.css'
-import { VideoPlayer, StatsGrid, StatItem } from '@/components/ui'
+import { BackButton, VideoPlayer, StatsGrid, StatItem } from '@/components/ui'
 import TeamCard from './TeamCard'
 
 type ProductWithRelations = Product & {
@@ -53,6 +53,7 @@ export default function ProductProfile({
 
     return (
         <div className={styles.profile}>
+            <BackButton />
             {/* Hero Video - Full Width */}
             {product.videoUrl && (
                 <div className={styles.videoHero}>
