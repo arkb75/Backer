@@ -53,7 +53,7 @@ export default function ProductProfile({
 
     return (
         <div className={styles.profile}>
-            {/* Hero Video */}
+            {/* Hero Video - Full Width */}
             {product.videoUrl && (
                 <div className={styles.videoHero}>
                     <VideoPlayer videoUrl={product.videoUrl} title={`${product.name} pitch`} />
