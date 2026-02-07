@@ -1,0 +1,21 @@
+.tagList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+}
+
+.tag {
+    font-size: 0.875rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    font-weight: 500;
+}
+
+.gradient {
+    background: linear-gradient(135deg, hsl(220, 90%, 60%), hsl(280, 70%, 60%));
+    color: white;
+    border: none;
+}
