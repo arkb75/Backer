@@ -1,0 +1,212 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+// ============================================
+// User & Authentication
+// ============================================
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  passwordHash  String
+  userType      UserType
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  founder       Founder?
+  investor      Investor?
+}
+
+enum UserType {
+  FOUNDER
+  INVESTOR
+}
+
+// ============================================
+// Founder Profile
+// ============================================
+
+model Founder {
+  id                String    @id @default(uuid())
+  userId            String    @unique
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Basic Info
+  name              String    @db.VarChar(100)
+  headline          String    @db.VarChar(80)
+  location          String    @db.VarChar(50)
+  bio               String    @db.VarChar(500)
+  
+  // Video & Media
+  videoUrl          String?
+  
+  // Profile Details
+  founderType       FounderType
+  yearsExperience   Int?
+  
+  // Social Links
+  linkedinUrl       String?
+  twitterUrl        String?
+  websiteUrl        String?
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  // Relations
+  products          FounderProduct[]
+  workExperience    WorkExperience[]
+  skills            Skill[]
+  investorInterests InvestorInterest[]
+}
+
+enum FounderType {
+  FIRST_TIME
+  SERIAL
+  EXITED
+}
+
+// ============================================
+// Product
+// ============================================
+
+model Product {
+  id            String          @id @default(uuid())
+  name          String          @db.VarChar(100)
+  tagline       String          @db.VarChar(200)
+  videoUrl      String?
+  status        ProductStatus   @default(IDEA)
+  amountRaised  Int             @default(0) // in USD
+  
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  
+  // Relations
+  founders      FounderProduct[]
+  investorInterests InvestorInterest[]
+}
+
+enum ProductStatus {
+  IDEA
+  BUILDING
+  LAUNCHED
+  RAISING
+  FUNDED
+}
+
+// ============================================
+// Join Table: Founders <-> Products
+// ============================================
+
+model FounderProduct {
+  id          String   @id @default(uuid())
+  founderId   String
+  productId   String
+  role        String   @db.VarChar(80) // e.g., "CEO", "CTO", "Advisor"
+  isPrimary   Boolean  @default(false) // Featured product on their profile
+  
+  createdAt   DateTime @default(now())
+  
+  // Relations
+  founder     Founder  @relation(fields: [founderId], references: [id], onDelete: Cascade)
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  @@unique([founderId, productId])
+  @@index([founderId])
+  @@index([productId])
+}
+
+// ============================================
+// Work Experience
+// ============================================
+
+model WorkExperience {
+  id          String   @id @default(uuid())
+  founderId   String
+  company     String   @db.VarChar(100)
+  role        String   @db.VarChar(80)
+  years       String   @db.VarChar(20) // e.g., "2019-2022"
+  order       Int      @default(0) // Display order
+  
+  createdAt   DateTime @default(now())
+  
+  // Relations
+  founder     Founder  @relation(fields: [founderId], references: [id], onDelete: Cascade)
+  
+  @@index([founderId])
+}
+
+// ============================================
+// Skills (Tags)
+// ============================================
+
+model Skill {
+  id          String   @id @default(uuid())
+  founderId   String
+  name        String   @db.VarChar(50)
+  
+  createdAt   DateTime @default(now())
+  
+  // Relations
+  founder     Founder  @relation(fields: [founderId], references: [id], onDelete: Cascade)
+  
+  @@index([founderId])
+}
+
+// ============================================
+// Investor
+// ============================================
+
+model Investor {
+  id            String    @id @default(uuid())
+  userId        String    @unique
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name          String    @db.VarChar(100)
+  firmName      String?   @db.VarChar(100)
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  interests     InvestorInterest[]
+}
+
+// ============================================
+// Investor Interest (Likes/Commitments)
+// ============================================
+
+model InvestorInterest {
+  id            String           @id @default(uuid())
+  investorId    String
+  founderId     String?
+  productId     String?
+  interestType  InterestType
+  amountCommitted Int?           @default(0) // in USD, if committed
+  
+  createdAt     DateTime         @default(now())
+  
+  // Relations
+  investor      Investor         @relation(fields: [investorId], references: [id], onDelete: Cascade)
+  founder       Founder?         @relation(fields: [founderId], references: [id], onDelete: Cascade)
+  product       Product?         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  @@unique([investorId, founderId])
+  @@unique([investorId, productId])
+  @@index([founderId])
+  @@index([productId])
+}
+
+enum InterestType {
+  LIKED
+  COMMITTED
+}
