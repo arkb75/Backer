@@ -157,13 +157,6 @@ export default function FounderProfile({
                     </div>
                 )}
 
-                {/* Skills Section */}
-                {skills.length > 0 && (
-                    <div className={styles.section}>
-                        <h2 className={styles.sectionTitle}>✨ Skills</h2>
-                        <TagList tags={skills} maxDisplay={10} variant="gradient" />
-                    </div>
-                )}
 
                 {/* Investor-Only Section */}
                 {isInvestor && investorStats && (
