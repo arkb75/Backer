@@ -85,9 +85,16 @@ model Product {
   id            String          @id @default(uuid())
   name          String          @db.VarChar(100)
   tagline       String          @db.VarChar(200)
+  description   String?         @db.VarChar(1000) // Full pitch description
+  problem       String?         @db.VarChar(500)  // Problem statement
+  solution      String?         @db.VarChar(500)  // Solution overview
   videoUrl      String?
+  logoUrl       String?                            // Company logo
+  websiteUrl    String?                            // Company website
   status        ProductStatus   @default(IDEA)
-  amountRaised  Int             @default(0) // in USD
+  stage         String?         @db.VarChar(50)   // "Pre-seed", "Seed", etc.
+  askAmount     Int?                               // Funding ask in USD
+  amountRaised  Int             @default(0)        // in USD
   
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
