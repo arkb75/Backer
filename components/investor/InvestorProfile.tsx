@@ -7,7 +7,6 @@ import {
     SocialLinks,
     SocialLink,
     TagList,
-    PhotoCard,
 } from '@/components/ui'
 
 interface InvestorProfileProps {
@@ -26,12 +25,7 @@ export default function InvestorProfile({ investor, isOwnProfile = false }: Inve
     const sortedPortfolio = [...investor.portfolio].sort((a, b) => a.order - b.order)
 
     // Build Hinge-style content feed
-    const contentItems: { type: 'photo' | 'info' | 'thesis'; data: unknown; key: string }[] = []
-
-    // Profile photo card
-    if (investor.profileImage) {
-        contentItems.push({ type: 'photo', data: { url: investor.profileImage }, key: 'profile-photo' })
-    }
+    const contentItems: { type: 'info' | 'thesis'; data: unknown; key: string }[] = []
 
     // Info card
     contentItems.push({ type: 'info', data: null, key: 'info' })
@@ -46,18 +40,6 @@ export default function InvestorProfile({ investor, isOwnProfile = false }: Inve
             {/* Hinge-style vertical scroll */}
             <div className={styles.feed}>
                 {contentItems.map((item) => {
-                    if (item.type === 'photo') {
-                        const photoData = item.data as { url: string }
-                        return (
-                            <div key={item.key} className={styles.photoWrapper}>
-                                <PhotoCard
-                                    url={photoData.url}
-                                    caption={null}
-                                />
-                            </div>
-                        )
-                    }
-
                     if (item.type === 'info') {
                         return (
                             <div key={item.key} className={styles.infoCard}>
@@ -68,16 +50,27 @@ export default function InvestorProfile({ investor, isOwnProfile = false }: Inve
                                         </Link>
                                     </div>
                                 )}
-                                <h1 className={styles.name}>{investor.name}</h1>
-                                {investor.firmName && (
-                                    <p className={styles.firm}>
-                                        {investor.title ? `${investor.title} at ` : ''}
-                                        {investor.firmName}
-                                    </p>
-                                )}
-                                {!investor.firmName && investor.title && (
-                                    <p className={styles.firm}>{investor.title}</p>
-                                )}
+                                <div className={styles.identityRow}>
+                                    {investor.profileImage && (
+                                        <img
+                                            src={investor.profileImage}
+                                            alt={`${investor.name} profile`}
+                                            className={styles.avatar}
+                                        />
+                                    )}
+                                    <div className={styles.identityText}>
+                                        <h1 className={styles.name}>{investor.name}</h1>
+                                        {investor.firmName && (
+                                            <p className={styles.firm}>
+                                                {investor.title ? `${investor.title} at ` : ''}
+                                                {investor.firmName}
+                                            </p>
+                                        )}
+                                        {!investor.firmName && investor.title && (
+                                            <p className={styles.firm}>{investor.title}</p>
+                                        )}
+                                    </div>
+                                </div>
 
                                 <div className={styles.quickInfo}>
                                     {investor.location && <span>📍 {investor.location}</span>}

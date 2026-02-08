@@ -34,6 +34,7 @@ export default function FounderProfile({
     // Sort photos and prompts
     const sortedPhotos = [...founder.photos].sort((a, b) => a.order - b.order)
     const sortedPrompts = [...founder.prompts].sort((a, b) => a.order - b.order)
+    const primaryPhotoUrl = sortedPhotos[0]?.url || null
     const experiences: ExperienceItem[] = founder.workExperience
         .sort((a, b) => a.order - b.order)
         .map((exp) => ({
@@ -59,16 +60,11 @@ export default function FounderProfile({
     // Interleave photos with prompts (Hinge-style)
     const contentItems: { type: 'photo' | 'prompt' | 'video' | 'info'; data: unknown; key: string }[] = []
 
-    // First photo
-    if (sortedPhotos[0]) {
-        contentItems.push({ type: 'photo', data: sortedPhotos[0], key: `photo-0` })
-    }
-
     // Info card (header)
     contentItems.push({ type: 'info', data: null, key: 'info' })
 
     // Interleave remaining photos and prompts
-    const remainingPhotos = sortedPhotos.slice(1)
+    const remainingPhotos = primaryPhotoUrl ? sortedPhotos.slice(1) : sortedPhotos
     let photoIdx = 0
     let promptIdx = 0
 
@@ -125,8 +121,19 @@ export default function FounderProfile({
                                         </Link>
                                     </div>
                                 )}
-                                <h1 className={styles.name}>{founder.name}</h1>
-                                <p className={styles.headline}>{founder.headline}</p>
+                                <div className={styles.identityRow}>
+                                    {primaryPhotoUrl && (
+                                        <img
+                                            src={primaryPhotoUrl}
+                                            alt={`${founder.name} profile`}
+                                            className={styles.avatar}
+                                        />
+                                    )}
+                                    <div className={styles.identityText}>
+                                        <h1 className={styles.name}>{founder.name}</h1>
+                                        <p className={styles.headline}>{founder.headline}</p>
+                                    </div>
+                                </div>
 
                                 <div className={styles.quickInfo}>
                                     <span>📍 {founder.location}</span>
