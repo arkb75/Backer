@@ -136,36 +136,13 @@ export function ReelCard({
         e.stopPropagation()
         if (isMessageLoading) return
 
-        const founderId = item.founders[0]?.id
-        if (!founderId) {
-            setActionSuccess(null)
-            setActionError('No founder linked to this startup yet.')
-            return
-        }
-
-        const startConversation = async () => {
+        const openConversation = async () => {
             setIsMessageLoading(true)
             setActionError(null)
             setActionSuccess(null)
 
             try {
-                const res = await fetch('/api/messages/conversations', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        founderId,
-                        productId: item.productId,
-                    }),
-                })
-
-                const data = await res.json().catch(() => null) as
-                    | { conversation?: { id?: string }; error?: string }
-                    | null
-                const conversationId = data?.conversation?.id
-                if (!res.ok || !conversationId) {
-                    throw new Error(data?.error || 'Failed to start conversation')
-                }
-
+                const conversationId = await getOrCreateConversationId()
                 router.push(`/investor/messages/${conversationId}`)
             } catch (error) {
                 setActionSuccess(null)
@@ -175,7 +152,7 @@ export function ReelCard({
             }
         }
 
-        void startConversation()
+        void openConversation()
     }
 
     const handleFundClick = (e: React.MouseEvent) => {
@@ -225,8 +202,33 @@ export function ReelCard({
                     setLikeCount((prev) => prev + 1)
                 }
                 setIsLiked(true)
-                setIsFundModalOpen(false)
-                setActionSuccess(`Committed $${roundedAmount.toLocaleString()} successfully.`)
+
+                try {
+                    const conversationId = await getOrCreateConversationId()
+                    const introMessage = `I just committed $${roundedAmount.toLocaleString()} to ${item.name}. Looking forward to connecting.`
+
+                    const messageRes = await fetch('/api/messages/send', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            conversationId,
+                            content: introMessage,
+                        }),
+                    })
+
+                    const messageData = await messageRes.json().catch(() => null) as
+                        | { error?: string }
+                        | null
+                    if (!messageRes.ok) {
+                        throw new Error(messageData?.error || 'Failed to send intro message')
+                    }
+
+                    setIsFundModalOpen(false)
+                    router.push(`/investor/messages/${conversationId}`)
+                } catch {
+                    setIsFundModalOpen(false)
+                    setActionError('Commitment saved. Auto-message failed, so use Message to continue.')
+                }
             } catch (error) {
                 setActionSuccess(null)
                 setFundFormError(error instanceof Error ? error.message : 'Failed to commit funding')
@@ -236,6 +238,32 @@ export function ReelCard({
         }
 
         void fundStartup()
+    }
+
+    const getOrCreateConversationId = async (): Promise<string> => {
+        const founderId = item.founders[0]?.id
+        if (!founderId) {
+            throw new Error('No founder linked to this startup yet.')
+        }
+
+        const res = await fetch('/api/messages/conversations', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                founderId,
+                productId: item.productId,
+            }),
+        })
+
+        const data = await res.json().catch(() => null) as
+            | { conversation?: { id?: string }; error?: string }
+            | null
+        const conversationId = data?.conversation?.id
+        if (!res.ok || !conversationId) {
+            throw new Error(data?.error || 'Failed to start conversation')
+        }
+
+        return conversationId
     }
 
     return (
