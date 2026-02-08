@@ -21,7 +21,9 @@ import type {
     FounderRecord,
     FounderType,
     InterestType,
+    InvestmentRecord,
     InvestmentStage,
+    InvestmentStatus,
     InvestorInterestRecord,
     InvestorInterestTagRecord,
     InvestorRecord,
@@ -135,7 +137,7 @@ export async function getUserByEmail(email: string): Promise<UserRecord | null> 
     try {
         const response = await dynamo.send(new QueryCommand({
             TableName: DYNAMO_TABLES.users,
-            IndexName: DYNAMO_INDEXES.usersByEmail,
+            IndexName: DYNAMO_INDEXES.users.byEmail,
             KeyConditionExpression: "#email = :email",
             ExpressionAttributeNames: {
                 "#email": "email",
@@ -224,7 +226,7 @@ export async function listFounders(): Promise<FounderRecord[]> {
 export async function getFounderByUserId(userId: string): Promise<FounderRecord | null> {
     const response = await dynamo.send(new QueryCommand({
         TableName: DYNAMO_TABLES.founders,
-        IndexName: DYNAMO_INDEXES.foundersByUserId,
+        IndexName: DYNAMO_INDEXES.founders.byUserId,
         KeyConditionExpression: "#userId = :userId",
         ExpressionAttributeNames: {
             "#userId": "userId",
@@ -316,7 +318,7 @@ export async function getInvestorById(id: string): Promise<InvestorRecord | null
 export async function getInvestorByUserId(userId: string): Promise<InvestorRecord | null> {
     const response = await dynamo.send(new QueryCommand({
         TableName: DYNAMO_TABLES.investors,
-        IndexName: DYNAMO_INDEXES.investorsByUserId,
+        IndexName: DYNAMO_INDEXES.investors.byUserId,
         KeyConditionExpression: "#userId = :userId",
         ExpressionAttributeNames: {
             "#userId": "userId",
@@ -449,7 +451,7 @@ export async function createCompanyForFounder(input: {
 
     const countResponse = await dynamo.send(new QueryCommand({
         TableName: DYNAMO_TABLES.founderProducts,
-        IndexName: DYNAMO_INDEXES.founderProductsByFounderId,
+        IndexName: DYNAMO_INDEXES.founderProducts.byFounderId,
         KeyConditionExpression: "#founderId = :founderId",
         ExpressionAttributeNames: {
             "#founderId": "founderId",
@@ -519,7 +521,7 @@ export async function createCompanyForFounder(input: {
 export async function listFounderProductsByFounderId(founderId: string): Promise<FounderProductRecord[]> {
     const response = await dynamo.send(new QueryCommand({
         TableName: DYNAMO_TABLES.founderProducts,
-        IndexName: DYNAMO_INDEXES.founderProductsByFounderId,
+        IndexName: DYNAMO_INDEXES.founderProducts.byFounderId,
         KeyConditionExpression: "#founderId = :founderId",
         ExpressionAttributeNames: {
             "#founderId": "founderId",
@@ -536,7 +538,7 @@ export async function listFounderProductsByFounderId(founderId: string): Promise
 export async function listFounderProductsByProductId(productId: string): Promise<FounderProductRecord[]> {
     const response = await dynamo.send(new QueryCommand({
         TableName: DYNAMO_TABLES.founderProducts,
-        IndexName: DYNAMO_INDEXES.founderProductsByProductId,
+        IndexName: DYNAMO_INDEXES.founderProducts.byProductId,
         KeyConditionExpression: "#productId = :productId",
         ExpressionAttributeNames: {
             "#productId": "productId",
@@ -553,7 +555,7 @@ export async function listFounderProductsByProductId(productId: string): Promise
 export async function listInvestorInterestsByFounderId(founderId: string): Promise<InvestorInterestRecord[]> {
     const response = await dynamo.send(new QueryCommand({
         TableName: DYNAMO_TABLES.investorInterests,
-        IndexName: DYNAMO_INDEXES.investorInterestsByFounderId,
+        IndexName: DYNAMO_INDEXES.investorInterests.byFounderId,
         KeyConditionExpression: "#founderId = :founderId",
         ExpressionAttributeNames: {
             "#founderId": "founderId",
@@ -569,7 +571,7 @@ export async function listInvestorInterestsByFounderId(founderId: string): Promi
 export async function listInvestorInterestsByProductId(productId: string): Promise<InvestorInterestRecord[]> {
     const response = await dynamo.send(new QueryCommand({
         TableName: DYNAMO_TABLES.investorInterests,
-        IndexName: DYNAMO_INDEXES.investorInterestsByProductId,
+        IndexName: DYNAMO_INDEXES.investorInterests.byProductId,
         KeyConditionExpression: "#productId = :productId",
         ExpressionAttributeNames: {
             "#productId": "productId",
@@ -593,7 +595,7 @@ export async function listFounderInvitesByInviteeEmail(email: string): Promise<F
     try {
         const response = await dynamo.send(new QueryCommand({
             TableName: DYNAMO_TABLES.founderInvites,
-            IndexName: DYNAMO_INDEXES.founderInvitesByInviteeEmail,
+            IndexName: DYNAMO_INDEXES.founderInvites.byInviteeEmail,
             KeyConditionExpression: "#inviteeEmail = :inviteeEmail",
             ExpressionAttributeNames: {
                 "#inviteeEmail": "inviteeEmail",
@@ -632,7 +634,7 @@ export async function listPendingFounderInvitesByInviteeEmail(email: string): Pr
 export async function listFounderInvitesByInviterFounderId(inviterFounderId: string): Promise<FounderInviteRecord[]> {
     const response = await dynamo.send(new QueryCommand({
         TableName: DYNAMO_TABLES.founderInvites,
-        IndexName: DYNAMO_INDEXES.founderInvitesByInviterFounderId,
+        IndexName: DYNAMO_INDEXES.founderInvites.byInviterFounderId,
         KeyConditionExpression: "#inviterFounderId = :inviterFounderId",
         ExpressionAttributeNames: {
             "#inviterFounderId": "inviterFounderId",
@@ -907,7 +909,21 @@ export async function createConversation(input: {
     founderId: string
     productId: string
 }): Promise<ConversationRecord> {
+    console.log('[createConversation] Checking for existing conversation:', input)
+
+    // First check if conversation already exists
+    const existing = await getConversationByParticipants(input)
+    if (existing) {
+        console.log('[createConversation] Found existing conversation, returning:', existing.id)
+        return existing
+    }
+
+    console.log('[createConversation] No existing conversation found, creating new one')
+
     const timestamp = nowIso()
+
+    // Create composite key to ensure uniqueness
+    const compositeKey = `${input.investorId}#${input.founderId}#${input.productId}`
 
     const conversation: ConversationRecord = {
         id: randomUUID(),
@@ -918,14 +934,33 @@ export async function createConversation(input: {
         createdAt: timestamp,
     }
 
-    await dynamo.send(new PutCommand({
-        TableName: DYNAMO_TABLES.conversations,
-        Item: conversation,
-        ConditionExpression: "attribute_not_exists(#id)",
-        ExpressionAttributeNames: {
-            "#id": "id",
-        },
-    }))
+    try {
+        await dynamo.send(new PutCommand({
+            TableName: DYNAMO_TABLES.conversations,
+            Item: {
+                ...conversation,
+                compositeKey, // Add composite key for uniqueness
+            },
+            ConditionExpression: "attribute_not_exists(#id) AND attribute_not_exists(#compositeKey)",
+            ExpressionAttributeNames: {
+                "#id": "id",
+                "#compositeKey": "compositeKey",
+            },
+        }))
+        console.log('[createConversation] Successfully created conversation:', conversation.id)
+    } catch (error: any) {
+        console.log('[createConversation] Error creating conversation:', error.name)
+        // If condition fails, conversation might have been created by another request
+        // Try to fetch it again
+        if (error.name === 'ConditionalCheckFailedException') {
+            const retry = await getConversationByParticipants(input)
+            if (retry) {
+                console.log('[createConversation] Found conversation on retry:', retry.id)
+                return retry
+            }
+        }
+        throw error
+    }
 
     return conversation
 }
@@ -939,10 +974,16 @@ export async function getConversationByParticipants(input: {
     founderId: string
     productId: string
 }): Promise<ConversationRecord | null> {
+    console.log('[getConversationByParticipants] Looking for conversation:', {
+        investorId: input.investorId,
+        founderId: input.founderId,
+        productId: input.productId,
+    })
+
     // Query by investorId first, then filter by founderId and productId
     const response = await dynamo.send(new QueryCommand({
         TableName: DYNAMO_TABLES.conversations,
-        IndexName: DYNAMO_INDEXES.conversationsByInvestorId,
+        IndexName: DYNAMO_INDEXES.conversations.byInvestorId,
         KeyConditionExpression: "#investorId = :investorId",
         FilterExpression: "#founderId = :founderId AND #productId = :productId",
         ExpressionAttributeNames: {
@@ -958,13 +999,16 @@ export async function getConversationByParticipants(input: {
         Limit: 1,
     }))
 
-    return (response.Items?.[0] as ConversationRecord | undefined) || null
+    const result = (response.Items?.[0] as ConversationRecord | undefined) || null
+    console.log('[getConversationByParticipants] Found conversation:', result ? result.id : 'NONE')
+
+    return result
 }
 
 export async function listConversationsByInvestorId(investorId: string): Promise<ConversationRecord[]> {
     const response = await dynamo.send(new QueryCommand({
         TableName: DYNAMO_TABLES.conversations,
-        IndexName: DYNAMO_INDEXES.conversationsByInvestorId,
+        IndexName: DYNAMO_INDEXES.conversations.byInvestorId,
         KeyConditionExpression: "#investorId = :investorId",
         ExpressionAttributeNames: {
             "#investorId": "investorId",
@@ -980,7 +1024,7 @@ export async function listConversationsByInvestorId(investorId: string): Promise
 export async function listConversationsByFounderId(founderId: string): Promise<ConversationRecord[]> {
     const response = await dynamo.send(new QueryCommand({
         TableName: DYNAMO_TABLES.conversations,
-        IndexName: DYNAMO_INDEXES.conversationsByFounderId,
+        IndexName: DYNAMO_INDEXES.conversations.byFounderId,
         KeyConditionExpression: "#founderId = :founderId",
         ExpressionAttributeNames: {
             "#founderId": "founderId",
@@ -1045,7 +1089,7 @@ export async function createMessage(input: {
 export async function listMessagesByConversationId(conversationId: string): Promise<MessageRecord[]> {
     const response = await dynamo.send(new QueryCommand({
         TableName: DYNAMO_TABLES.messages,
-        IndexName: DYNAMO_INDEXES.messagesByConversationId,
+        IndexName: DYNAMO_INDEXES.messages.byConversationId,
         KeyConditionExpression: "#conversationId = :conversationId",
         ExpressionAttributeNames: {
             "#conversationId": "conversationId",
@@ -1097,7 +1141,7 @@ export async function getInvestorInterestByInvestorAndProduct(
 ): Promise<InvestorInterestRecord | null> {
     const response = await dynamo.send(new QueryCommand({
         TableName: DYNAMO_TABLES.investorInterests,
-        IndexName: DYNAMO_INDEXES.investorInterestsByProductId,
+        IndexName: DYNAMO_INDEXES.investorInterests.byProductId,
         KeyConditionExpression: "#productId = :productId",
         FilterExpression: "#investorId = :investorId",
         ExpressionAttributeNames: {
@@ -1117,7 +1161,7 @@ export async function getInvestorInterestByInvestorAndProduct(
 export async function listInvestorInterestsByInvestorId(investorId: string): Promise<InvestorInterestRecord[]> {
     const response = await dynamo.send(new QueryCommand({
         TableName: DYNAMO_TABLES.investorInterests,
-        IndexName: DYNAMO_INDEXES.investorInterestsByInvestorId,
+        IndexName: DYNAMO_INDEXES.investorInterests.byInvestorId,
         KeyConditionExpression: "#investorId = :investorId",
         ExpressionAttributeNames: {
             "#investorId": "investorId",
@@ -1140,7 +1184,7 @@ export async function hasInvestorInterestInFounder(
 ): Promise<boolean> {
     const response = await dynamo.send(new QueryCommand({
         TableName: DYNAMO_TABLES.investorInterests,
-        IndexName: DYNAMO_INDEXES.investorInterestsByFounderId,
+        IndexName: DYNAMO_INDEXES.investorInterests.byFounderId,
         KeyConditionExpression: "#founderId = :founderId",
         FilterExpression: "#investorId = :investorId",
         ExpressionAttributeNames: {
@@ -1155,4 +1199,107 @@ export async function hasInvestorInterestInFounder(
     }))
 
     return (response.Items?.length || 0) > 0
+}
+// ============================================
+// Investment Functions
+// ============================================
+
+export async function createInvestment(input: {
+    investorId: string
+    founderId: string
+    productId: string
+    amount: number
+}): Promise<InvestmentRecord> {
+    const timestamp = nowIso()
+
+    const investment: InvestmentRecord = {
+        id: randomUUID(),
+        investorId: input.investorId,
+        founderId: input.founderId,
+        productId: input.productId,
+        amount: input.amount,
+        status: "COMMITTED",
+        createdAt: timestamp,
+        updatedAt: timestamp,
+    }
+
+    await dynamo.send(new PutCommand({
+        TableName: DYNAMO_TABLES.investments,
+        Item: investment,
+        ConditionExpression: "attribute_not_exists(#id)",
+        ExpressionAttributeNames: {
+            "#id": "id",
+        },
+    }))
+
+    return investment
+}
+
+export async function getInvestmentById(id: string): Promise<InvestmentRecord | null> {
+    const result = await dynamo.send(new GetCommand({
+        TableName: DYNAMO_TABLES.investments,
+        Key: { id },
+    }))
+    return (result.Item as InvestmentRecord) || null
+}
+
+export async function listInvestmentsByInvestorId(investorId: string): Promise<InvestmentRecord[]> {
+    const result = await dynamo.send(new QueryCommand({
+        TableName: DYNAMO_TABLES.investments,
+        IndexName: DYNAMO_INDEXES.investments.byInvestorId,
+        KeyConditionExpression: "#investorId = :investorId",
+        ExpressionAttributeNames: {
+            "#investorId": "investorId",
+        },
+        ExpressionAttributeValues: {
+            ":investorId": investorId,
+        },
+    }))
+    return (result.Items as InvestmentRecord[]) || []
+}
+
+export async function listInvestmentsByProductId(productId: string): Promise<InvestmentRecord[]> {
+    const result = await dynamo.send(new QueryCommand({
+        TableName: DYNAMO_TABLES.investments,
+        IndexName: DYNAMO_INDEXES.investments.byProductId,
+        KeyConditionExpression: "#productId = :productId",
+        ExpressionAttributeNames: {
+            "#productId": "productId",
+        },
+        ExpressionAttributeValues: {
+            ":productId": productId,
+        },
+    }))
+    return (result.Items as InvestmentRecord[]) || []
+}
+
+export async function listInvestmentsByFounderId(founderId: string): Promise<InvestmentRecord[]> {
+    const result = await dynamo.send(new QueryCommand({
+        TableName: DYNAMO_TABLES.investments,
+        IndexName: DYNAMO_INDEXES.investments.byFounderId,
+        KeyConditionExpression: "#founderId = :founderId",
+        ExpressionAttributeNames: {
+            "#founderId": "founderId",
+        },
+        ExpressionAttributeValues: {
+            ":founderId": founderId,
+        },
+    }))
+    return (result.Items as InvestmentRecord[]) || []
+}
+
+export async function updateProductAmountRaised(productId: string, additionalAmount: number): Promise<void> {
+    await dynamo.send(new UpdateCommand({
+        TableName: DYNAMO_TABLES.products,
+        Key: { id: productId },
+        UpdateExpression: "SET #amountRaised = #amountRaised + :amount, #updatedAt = :timestamp",
+        ExpressionAttributeNames: {
+            "#amountRaised": "amountRaised",
+            "#updatedAt": "updatedAt",
+        },
+        ExpressionAttributeValues: {
+            ":amount": additionalAmount,
+            ":timestamp": nowIso(),
+        },
+    }))
 }

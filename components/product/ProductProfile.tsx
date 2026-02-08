@@ -176,34 +176,19 @@ export default function ProductProfile({
 
                 {/* Investor Actions */}
                 {isInvestor && founderId && (
-                    <div className={`${styles.section} ${styles.investorActions}`}>
+                    <div className={styles.actionsSection}>
                         <h2 className={styles.sectionTitle}>Express Interest</h2>
                         <ProductActions
                             productId={product.id}
+                            productName={product.name}
                             founderId={founderId}
+                            askAmount={product.askAmount || undefined}
                             isLiked={hasLiked}
                             isCommitted={hasCommitted}
                         />
-                        <div className={styles.actionButtons}>
-                            <button
-                                onClick={handleLike}
-                                disabled={likeLoading}
-                                className={`${styles.button} ${styles.likeButton} ${isLiked ? styles.likeButtonActive : ''}`}
-                            >
-                                {likeLoading
-                                    ? 'Updating...'
-                                    : isLiked
-                                        ? '💔 Unlike This Startup'
-                                        : '❤️ Like This Startup'}
-                            </button>
-                            <button className={`${styles.button} ${styles.commitButton}`}>
-                                💰 Commit to Invest
-                            </button>
-                        </div>
                     </div>
                 )}
             </div>
         </div>
     )
 }
-

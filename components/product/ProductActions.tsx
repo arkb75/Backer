@@ -2,18 +2,23 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import InvestmentModal from '../investment/InvestmentModal'
 import styles from './ProductActions.module.css'
 
 interface ProductActionsProps {
     productId: string
+    productName: string
     founderId: string
+    askAmount?: number
     isLiked?: boolean
     isCommitted?: boolean
 }
 
 export default function ProductActions({
     productId,
+    productName,
     founderId,
+    askAmount,
     isLiked = false,
     isCommitted = false,
 }: ProductActionsProps) {
@@ -22,6 +27,7 @@ export default function ProductActions({
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [success, setSuccess] = useState<string | null>(null)
+    const [showInvestModal, setShowInvestModal] = useState(false)
 
     const handleLike = async () => {
         if (liked || loading) return
@@ -84,27 +90,48 @@ export default function ProductActions({
     }
 
     return (
-        <div className={styles.container}>
-            <button
-                className={`${styles.button} ${styles.likeButton} ${liked ? styles.liked : ''}`}
-                onClick={handleLike}
-                disabled={liked || loading}
-            >
-                <span className={styles.icon}>{liked ? '💖' : '❤️'}</span>
-                {liked ? 'Liked!' : 'Like This Startup'}
-            </button>
+        <>
+            <div className={styles.container}>
+                <button
+                    className={`${styles.button} ${styles.likeButton} ${liked ? styles.liked : ''}`}
+                    onClick={handleLike}
+                    disabled={liked || loading}
+                >
+                    <span className={styles.icon}>{liked ? '💖' : '❤️'}</span>
+                    {liked ? 'Liked!' : 'Like This Startup'}
+                </button>
 
-            <button
-                className={`${styles.button} ${styles.messageButton}`}
-                onClick={handleMessage}
-                disabled={loading}
-            >
-                <span className={styles.icon}>💬</span>
-                Message Founder
-            </button>
+                <button
+                    className={`${styles.button} ${styles.commitButton}`}
+                    onClick={() => setShowInvestModal(true)}
+                    disabled={loading}
+                >
+                    <span className={styles.icon}>💰</span>
+                    Invest
+                </button>
 
-            {success && <p className={styles.success}>{success}</p>}
-            {error && <p className={styles.error}>{error}</p>}
-        </div>
+                <button
+                    className={`${styles.button} ${styles.messageButton}`}
+                    onClick={handleMessage}
+                    disabled={loading}
+                >
+                    <span className={styles.icon}>💬</span>
+                    Message Founder
+                </button>
+
+                {success && <p className={styles.success}>{success}</p>}
+                {error && <p className={styles.error}>{error}</p>}
+            </div>
+
+            {showInvestModal && (
+                <InvestmentModal
+                    productId={productId}
+                    productName={productName}
+                    founderId={founderId}
+                    askAmount={askAmount}
+                    onClose={() => setShowInvestModal(false)}
+                />
+            )}
+        </>
     )
 }
