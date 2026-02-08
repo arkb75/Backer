@@ -27,6 +27,9 @@ export function ReelCard({
     const [isFundLoading, setIsFundLoading] = useState(false)
     const [actionError, setActionError] = useState<string | null>(null)
     const [actionSuccess, setActionSuccess] = useState<string | null>(null)
+    const [isFundModalOpen, setIsFundModalOpen] = useState(false)
+    const [fundAmountInput, setFundAmountInput] = useState('25000')
+    const [fundFormError, setFundFormError] = useState<string | null>(null)
 
     useEffect(() => {
         const video = videoRef.current
@@ -77,6 +80,19 @@ export function ReelCard({
             active = false
         }
     }, [item.productId, shouldLoadLikeState])
+
+    useEffect(() => {
+        if (!isFundModalOpen) return
+
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape' && !isFundLoading) {
+                setIsFundModalOpen(false)
+            }
+        }
+
+        window.addEventListener('keydown', handleKeyDown)
+        return () => window.removeEventListener('keydown', handleKeyDown)
+    }, [isFundLoading, isFundModalOpen])
 
     const handleVideoClick = (e: React.MouseEvent) => {
         e.stopPropagation()
@@ -165,21 +181,25 @@ export function ReelCard({
     const handleFundClick = (e: React.MouseEvent) => {
         e.stopPropagation()
         if (isFundLoading) return
+        setFundFormError(null)
+        setIsFundModalOpen(true)
+    }
 
-        const amountInput = window.prompt('How much would you like to commit (USD)?', '25000')
-        if (amountInput === null) return
+    const handleFundSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+        if (isFundLoading) return
 
-        const amount = Number.parseFloat(amountInput.replace(/[^0-9.]/g, ''))
-        if (!Number.isFinite(amount) || amount <= 0) {
-            setActionSuccess(null)
-            setActionError('Enter a valid funding amount.')
+        const parsedAmount = Number.parseFloat(fundAmountInput.replace(/[^0-9.]/g, ''))
+        if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
+            setFundFormError('Enter a valid funding amount.')
             return
         }
 
-        const roundedAmount = Math.round(amount)
+        const roundedAmount = Math.round(parsedAmount)
 
         const fundStartup = async () => {
             setIsFundLoading(true)
+            setFundFormError(null)
             setActionError(null)
             setActionSuccess(null)
 
@@ -195,7 +215,7 @@ export function ReelCard({
                 })
 
                 const data = await res.json().catch(() => null) as
-                    | { message?: string; error?: string }
+                    | { error?: string }
                     | null
                 if (!res.ok) {
                     throw new Error(data?.error || 'Failed to commit funding')
@@ -205,10 +225,11 @@ export function ReelCard({
                     setLikeCount((prev) => prev + 1)
                 }
                 setIsLiked(true)
+                setIsFundModalOpen(false)
                 setActionSuccess(`Committed $${roundedAmount.toLocaleString()} successfully.`)
             } catch (error) {
                 setActionSuccess(null)
-                setActionError(error instanceof Error ? error.message : 'Failed to commit funding')
+                setFundFormError(error instanceof Error ? error.message : 'Failed to commit funding')
             } finally {
                 setIsFundLoading(false)
             }
@@ -292,6 +313,65 @@ export function ReelCard({
                 >
                     {actionError || actionSuccess}
                 </p>
+            )}
+
+            {isFundModalOpen && (
+                <div
+                    className={styles.modalBackdrop}
+                    onClick={(e) => {
+                        e.stopPropagation()
+                        if (!isFundLoading) {
+                            setIsFundModalOpen(false)
+                        }
+                    }}
+                    role="presentation"
+                >
+                    <div
+                        className={styles.modal}
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby={`fund-title-${item.id}`}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <h3 className={styles.modalTitle} id={`fund-title-${item.id}`}>Fund {item.name}</h3>
+                        <p className={styles.modalSubtitle}>Enter your commitment amount in USD.</p>
+
+                        <form className={styles.modalForm} onSubmit={handleFundSubmit}>
+                            <label className={styles.modalLabel} htmlFor={`fund-amount-${item.id}`}>
+                                Amount
+                            </label>
+                            <input
+                                id={`fund-amount-${item.id}`}
+                                className={styles.modalInput}
+                                type="text"
+                                inputMode="decimal"
+                                value={fundAmountInput}
+                                onChange={(e) => setFundAmountInput(e.target.value)}
+                                placeholder="25000"
+                                autoFocus
+                                disabled={isFundLoading}
+                            />
+                            {fundFormError && <p className={styles.modalError}>{fundFormError}</p>}
+                            <div className={styles.modalActions}>
+                                <button
+                                    type="button"
+                                    className={styles.modalCancel}
+                                    onClick={() => setIsFundModalOpen(false)}
+                                    disabled={isFundLoading}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    className={styles.modalSubmit}
+                                    disabled={isFundLoading}
+                                >
+                                    {isFundLoading ? 'Funding...' : 'Confirm'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             )}
 
             {/* Bottom info overlay */}
