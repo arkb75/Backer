@@ -1,8 +1,21 @@
-export default function Home() {
+import { getServerSession } from "next-auth/next"
+import { redirect } from "next/navigation"
+import { authOptions } from "@/lib/auth"
+import AuthLayout from "@/components/auth/AuthLayout"
+import LoginForm from "@/components/auth/LoginForm"
+
+export default async function Home() {
+    const session = await getServerSession(authOptions)
+
+    if (session) {
+        // If logged in, redirect to onboarding (or feed if already onboarded logic added later)
+        redirect("/onboarding")
+    }
+
+    // If not logged in, show Login page at root
     return (
-        <main style={{ padding: '2rem' }}>
-            <h1>Backer</h1>
-            <p>Connect Founders with Investors</p>
-        </main>
+        <AuthLayout title="Welcome" subtitle="Sign in to continue">
+            <LoginForm />
+        </AuthLayout>
     )
 }

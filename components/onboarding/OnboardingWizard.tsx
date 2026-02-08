@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import styles from './Onboarding.module.css'
+import PhotoUploadGrid from './PhotoUploadGrid'
+import PromptSelector, { PromptItem } from './PromptSelector'
 
 export default function OnboardingWizard() {
     const router = useRouter()
@@ -15,36 +17,23 @@ export default function OnboardingWizard() {
         headline: '',
         location: '',
         bio: '',
-        yearsExperience: 0,
-        skills: [] as string[],
-        founderType: 'TECHNICAL', // Default
-        linkedinUrl: '',
-        twitterUrl: '',
-        websiteUrl: '',
+        founderType: 'FIRST_TIME',
+        photos: [] as string[],
+        prompts: [] as PromptItem[],
+        videoUrl: '' // optional
     })
-
-    const [currentSkill, setCurrentSkill] = useState('')
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target
         setFormData(prev => ({ ...prev, [name]: value }))
     }
 
-    const handleSkillKeyDown = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter' && currentSkill.trim()) {
-            e.preventDefault()
-            if (!formData.skills.includes(currentSkill.trim())) {
-                setFormData(prev => ({ ...prev, skills: [...prev.skills, currentSkill.trim()] }))
-            }
-            setCurrentSkill('')
-        }
-    }
-
-    const removeSkill = (skill: string) => {
-        setFormData(prev => ({ ...prev, skills: prev.skills.filter(s => s !== skill) }))
-    }
-
     const handleSubmit = async () => {
+        if (formData.photos.length === 0) {
+            alert("Please add at least one photo.")
+            return
+        }
+
         setLoading(true)
         try {
             const res = await fetch('/api/onboarding/founder', {
@@ -54,11 +43,14 @@ export default function OnboardingWizard() {
             })
 
             if (res.ok) {
-                // Find out the founder ID or redirect to profile
                 const data = await res.json()
+                // Success! Redirect.
+                // TODO: In Phase 2, redirect to /start-company or similar.
+                // For now, go to profile.
                 router.push(`/founder/${data.id}`)
             } else {
-                alert('Failed to create profile. Please try again.') // Simple error handling for now
+                const errData = await res.json()
+                alert(`Failed to create profile: ${errData.error || 'Unknown error'}`)
             }
         } catch (err) {
             console.error(err)
@@ -73,20 +65,28 @@ export default function OnboardingWizard() {
 
     return (
         <div className={styles.container}>
+            {/* Header */}
             <div className={styles.header}>
                 <h1 className={styles.title}>
-                    {step === 1 ? 'Build your Profile' : 'Experience & Skills'}
+                    {step === 1 && 'The Basics'}
+                    {step === 2 && 'Your Story'}
+                    {step === 3 && 'Digging Deeper'}
                 </h1>
                 <p className={styles.subtitle}>
-                    {step === 1 ? 'Tell investors who you are.' : 'Showcase your expertise.'}
+                    {step === 1 && 'Let\'s start with the essentials.'}
+                    {step === 2 && 'Show investors who you are.'}
+                    {step === 3 && 'Share what makes you tick.'}
                 </p>
             </div>
 
+            {/* Progress */}
             <div className={styles.progress}>
                 <div className={`${styles.stepIndicator} ${step >= 1 ? styles.active : ''}`} />
                 <div className={`${styles.stepIndicator} ${step >= 2 ? styles.active : ''}`} />
+                <div className={`${styles.stepIndicator} ${step >= 3 ? styles.active : ''}`} />
             </div>
 
+            {/* Step 1: Vitals */}
             {step === 1 && (
                 <div className={styles.step}>
                     <div className={styles.inputGroup}>
@@ -106,7 +106,7 @@ export default function OnboardingWizard() {
                             value={formData.headline}
                             onChange={handleInputChange}
                             className={styles.input}
-                            placeholder="e.g. AI Engineer turning Founder"
+                            placeholder="e.g. Building the future of AI"
                         />
                     </div>
                     <div className={styles.inputGroup}>
@@ -118,6 +118,19 @@ export default function OnboardingWizard() {
                             className={styles.input}
                             placeholder="e.g. San Francisco, CA"
                         />
+                    </div>
+                    <div className={styles.inputGroup}>
+                        <label className={styles.label}>Founder Type</label>
+                        <select
+                            name="founderType"
+                            value={formData.founderType}
+                            onChange={handleInputChange}
+                            className={styles.select}
+                        >
+                            <option value="FIRST_TIME">First-time Founder</option>
+                            <option value="SERIAL">Serial Founder</option>
+                            <option value="EXITED">Exited Founder</option>
+                        </select>
                     </div>
                     <div className={styles.inputGroup}>
                         <label className={styles.label}>Bio</label>
@@ -132,77 +145,48 @@ export default function OnboardingWizard() {
                 </div>
             )}
 
+            {/* Step 2: Photos */}
             {step === 2 && (
                 <div className={styles.step}>
-                    <div className={styles.inputGroup}>
-                        <label className={styles.label}>Founder Type</label>
-                        <select
-                            name="founderType"
-                            value={formData.founderType}
-                            onChange={handleInputChange}
-                            className={styles.select}
-                        >
-                            <option value="TECHNICAL">Technical Founder</option>
-                            <option value="BUSINESS">Business Founder</option>
-                            <option value="PRODUCT">Product Founder</option>
-                            <option value="DESIGN">Design Founder</option>
-                        </select>
-                    </div>
+                    <PhotoUploadGrid
+                        photos={formData.photos}
+                        onChange={(photos) => setFormData(prev => ({ ...prev, photos }))}
+                    />
 
-                    <div className={styles.inputGroup}>
-                        <label className={styles.label}>Years of Experience</label>
+                    <div className={styles.inputGroup} style={{ marginTop: '32px' }}>
+                        <label className={styles.label}>Video Intro (Optional)</label>
                         <input
-                            type="number"
-                            name="yearsExperience"
-                            value={formData.yearsExperience}
+                            name="videoUrl"
+                            value={formData.videoUrl}
                             onChange={handleInputChange}
                             className={styles.input}
-                            min="0"
-                        />
-                    </div>
-
-                    <div className={styles.inputGroup}>
-                        <label className={styles.label}>Skills (Press Enter to add)</label>
-                        <div className={styles.tagsInput}>
-                            {formData.skills.map(skill => (
-                                <span key={skill} className={styles.tag}>
-                                    {skill}
-                                    <span className={styles.removeTag} onClick={() => removeSkill(skill)}>×</span>
-                                </span>
-                            ))}
-                            <input
-                                value={currentSkill}
-                                onChange={(e) => setCurrentSkill(e.target.value)}
-                                onKeyDown={handleSkillKeyDown}
-                                className={styles.tagInputRaw}
-                                placeholder="Add a skill..."
-                            />
-                        </div>
-                    </div>
-
-                    <div className={styles.inputGroup}>
-                        <label className={styles.label}>LinkedIn URL (Optional)</label>
-                        <input
-                            name="linkedinUrl"
-                            value={formData.linkedinUrl}
-                            onChange={handleInputChange}
-                            className={styles.input}
-                            placeholder="https://linkedin.com/in/..."
+                            placeholder="https://youtube.com/..."
                         />
                     </div>
                 </div>
             )}
 
+            {/* Step 3: Prompts */}
+            {step === 3 && (
+                <div className={styles.step}>
+                    <PromptSelector
+                        prompts={formData.prompts}
+                        onChange={(prompts) => setFormData(prev => ({ ...prev, prompts }))}
+                    />
+                </div>
+            )}
+
+            {/* Footer / Navigation */}
             <div className={styles.buttonGroup}>
                 {step > 1 ? (
                     <button onClick={prevStep} className={`${styles.button} ${styles.backButton}`}>
                         Back
                     </button>
                 ) : (
-                    <div></div> // Spacer
+                    <div></div>
                 )}
 
-                {step < 2 ? (
+                {step < 3 ? (
                     <button onClick={nextStep} className={`${styles.button} ${styles.nextButton}`}>
                         Next
                     </button>

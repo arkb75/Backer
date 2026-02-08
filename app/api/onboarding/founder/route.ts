@@ -18,12 +18,10 @@ export async function POST(req: Request) {
             headline,
             location,
             bio,
-            yearsExperience,
-            skills, // Array of strings
             founderType,
-            linkedinUrl,
-            twitterUrl,
-            websiteUrl,
+            photos, // Array of strings (URLs)
+            prompts, // Array of { prompt, answer }
+            videoUrl, // Optional string
         } = body
 
         // Validate required fields
@@ -34,16 +32,24 @@ export async function POST(req: Request) {
             )
         }
 
-        // Create Founder Profile
-        // We transaction to ensure atomicity
+        // Validate photos
+        if (!photos || !Array.isArray(photos) || photos.length === 0) {
+            return NextResponse.json(
+                { error: "At least one photo is required" },
+                { status: 400 }
+            )
+        }
+
+        // Create Founder Profile with nested writes for photos and prompts
         const founder = await prisma.$transaction(async (tx) => {
-            // 1. Check if founder profile already exists for this user
+            // 1. Check if founder profile already exists
             const existing = await tx.founder.findUnique({
                 where: { userId: session.user.id },
             })
 
             if (existing) {
-                throw new Error("Founder profile already exists")
+                // If profile exists, return it (idempotency for double-clicks/refreshes)
+                return existing
             }
 
             // 2. Create the founder
@@ -54,14 +60,23 @@ export async function POST(req: Request) {
                     headline,
                     location,
                     bio,
-                    yearsExperience: yearsExperience ? parseInt(yearsExperience) : null,
                     founderType: founderType as FounderType,
-                    linkedinUrl: linkedinUrl || null,
-                    twitterUrl: twitterUrl || null,
-                    websiteUrl: websiteUrl || null,
-                    skills: {
-                        create: skills.map((skillName: string) => ({
-                            name: skillName,
+                    videoUrl: videoUrl || null,
+
+                    // Create Photos
+                    photos: {
+                        create: photos.map((url: string, index: number) => ({
+                            url,
+                            order: index,
+                        })),
+                    },
+
+                    // Create Prompts
+                    prompts: {
+                        create: prompts.map((p: any, index: number) => ({
+                            prompt: p.prompt,
+                            answer: p.answer,
+                            order: index,
                         })),
                     },
                 },
