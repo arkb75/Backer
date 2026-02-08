@@ -47,7 +47,7 @@
 }
 
 .conversationItem:hover {
-    border-color: #b8c0d1;
+    border-color: var(--color-border-strong);
     box-shadow: var(--shadow-md);
     transform: translateY(-1px);
 }
@@ -60,7 +60,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
+    color: var(--color-text-inverse);
     font-weight: 700;
     font-size: 1.25rem;
     flex-shrink: 0;

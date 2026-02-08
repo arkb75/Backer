@@ -36,9 +36,9 @@ export default async function OnboardingPage() {
                 <div style={{
                     width: 'min(100%, 720px)',
                     margin: '0 auto 16px auto',
-                    background: '#eef2ff',
-                    border: '1px solid #c7d2fe',
-                    color: '#312e81',
+                    background: 'var(--color-info-bg)',
+                    border: '1px solid var(--color-info-border)',
+                    color: 'var(--color-info)',
                     borderRadius: 12,
                     padding: '12px 14px',
                     fontSize: 14,

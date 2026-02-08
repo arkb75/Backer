@@ -34,7 +34,7 @@
 }
 
 .highlighted {
-    background: linear-gradient(135deg, hsl(214, 78%, 97%), hsl(186, 62%, 96%));
+    background: linear-gradient(135deg, var(--color-surface-subtle), var(--color-surface-muted));
     padding: var(--space-lg);
     border-radius: var(--radius-lg);
     border: 2px solid var(--color-primary);

@@ -33,7 +33,7 @@
 .title {
     font-size: 1.5rem;
     font-weight: 700;
-    color: white;
+    color: var(--color-text-inverse);
     margin: 0;
 }
 
@@ -48,7 +48,7 @@
 }
 
 .closeButton:hover {
-    color: white;
+    color: var(--color-text-inverse);
 }
 
 .productInfo {
@@ -60,7 +60,7 @@
 
 .productName {
     font-weight: 600;
-    color: white;
+    color: var(--color-text-inverse);
     margin-bottom: 0.5rem;
 }
 
@@ -100,7 +100,7 @@
     border: 2px solid rgba(255, 255, 255, 0.2);
     border-radius: 12px;
     padding: 1rem 1rem 1rem 2.5rem;
-    color: white;
+    color: var(--color-text-inverse);
     font-size: 1.25rem;
     font-weight: 600;
     outline: none;
@@ -133,7 +133,7 @@
 
 .cancelButton {
     background: rgba(255, 255, 255, 0.1);
-    color: white;
+    color: var(--color-text-inverse);
 }
 
 .cancelButton:hover {
@@ -142,7 +142,7 @@
 
 .commitButton {
     background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: white;
+    color: var(--color-text-inverse);
 }
 
 .commitButton:hover:not(:disabled) {
@@ -156,7 +156,7 @@
 }
 
 .error {
-    color: #ef4444;
+    color: var(--color-danger);
     font-size: 0.9rem;
     margin-top: 0.5rem;
 }

@@ -52,9 +52,9 @@ export default function IndustryTagInput({ selectedTags, onChange }: IndustryTag
                             style={{
                                 padding: '8px 16px',
                                 borderRadius: '20px',
-                                border: isSelected ? '2px solid #10a37f' : '1px solid #e5e5e5',
-                                background: isSelected ? '#f0fdf4' : 'white',
-                                color: isSelected ? '#166534' : '#666',
+                                border: isSelected ? '2px solid #10a37f' : '1px solid var(--color-border)',
+                                background: isSelected ? 'var(--color-success-bg)' : 'var(--color-surface)',
+                                color: isSelected ? 'var(--color-success)' : 'var(--color-text-secondary)',
                                 cursor: 'pointer',
                                 fontSize: '14px',
                                 fontWeight: isSelected ? '600' : '400',
@@ -66,7 +66,7 @@ export default function IndustryTagInput({ selectedTags, onChange }: IndustryTag
                     )
                 })}
             </div>
-            <p style={{ fontSize: '14px', color: '#666', marginTop: '8px' }}>
+            <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', marginTop: '8px' }}>
                 Select up to 10 industries you&apos;re interested in ({selectedTags.length}/10)
             </p>
         </div>

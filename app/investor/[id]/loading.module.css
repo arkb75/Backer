@@ -36,9 +36,9 @@
 /* Skeleton animation */
 .skeleton {
     background: linear-gradient(90deg,
-            hsl(220, 15%, 90%) 0%,
-            hsl(220, 15%, 95%) 50%,
-            hsl(220, 15%, 90%) 100%);
+            var(--skeleton-start) 0%,
+            var(--skeleton-mid) 50%,
+            var(--skeleton-start) 100%);
     background-size: 200% 100%;
     animation: loading 1.5s ease-in-out infinite;
     border-radius: var(--radius-sm);

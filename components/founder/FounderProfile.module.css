@@ -1,6 +1,6 @@
 .profile {
     min-height: 100vh;
-    background: linear-gradient(180deg, hsl(240, 10%, 98%) 0%, hsl(240, 10%, 93%) 100%);
+    background: var(--color-bg);
 }
 
 .feed {
@@ -14,7 +14,7 @@
 
 /* Info Card - Name, Headline, Bio */
 .infoCard {
-    background: white;
+    background: var(--color-surface);
     border-radius: var(--radius-lg);
     padding: var(--space-lg);
     box-shadow: var(--shadow-sm);
@@ -42,7 +42,7 @@
     height: 104px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid #fff;
+    border: 2px solid var(--color-surface);
     box-shadow: var(--shadow-sm);
     flex-shrink: 0;
 }
@@ -55,7 +55,7 @@
     font-size: 0.8rem;
     font-weight: 700;
     color: var(--color-text);
-    background: #fff;
+    background: var(--color-surface);
 }
 
 .name {
@@ -81,7 +81,7 @@
 }
 
 .quickInfo span {
-    background: hsl(220, 20%, 95%);
+    background: var(--color-surface-muted);
     padding: 0.25rem 0.75rem;
     border-radius: 999px;
 }
@@ -95,7 +95,7 @@
 
 /* Video Card */
 .videoCard {
-    background: white;
+    background: var(--color-surface);
     border-radius: var(--radius-lg);
     padding: var(--space-md);
     box-shadow: var(--shadow-sm);
@@ -112,7 +112,7 @@
 
 /* Section Cards */
 .section {
-    background: white;
+    background: var(--color-surface);
     border-radius: var(--radius-lg);
     padding: var(--space-lg);
     box-shadow: var(--shadow-sm);
@@ -144,7 +144,7 @@
 
 .addCompanyButton {
     background: var(--color-primary);
-    color: white;
+    color: var(--color-text-inverse);
 }
 
 .controls {
@@ -187,8 +187,8 @@
 
 /* Investor Section */
 .investorSection {
-    background: linear-gradient(135deg, hsl(214, 78%, 97%), hsl(186, 62%, 96%));
-    border: 1px solid #bfd2e9;
+    background: linear-gradient(135deg, var(--color-surface-subtle), var(--color-surface-muted));
+    border: 1px solid var(--color-border-strong);
 }
 
 /* Mobile-first: already optimized for mobile */

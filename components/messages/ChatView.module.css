@@ -34,7 +34,7 @@
 }
 
 .backButton:hover {
-    background: #eef1f6;
+    background: var(--color-surface-muted);
 }
 
 .headerInfo {
@@ -74,7 +74,7 @@
 .messageOwn {
     align-self: flex-end;
     background: var(--color-primary);
-    color: white;
+    color: var(--color-text-inverse);
     border-bottom-right-radius: 8px;
 }
 
@@ -94,7 +94,7 @@
 
 .messageTime {
     font-size: 0.7rem;
-    color: #98a2b3;
+    color: var(--color-text-muted);
     margin-top: 0.25rem;
     text-align: right;
 }
@@ -124,12 +124,12 @@
 }
 
 .input:focus {
-    border-color: #98a2b3;
+    border-color: var(--color-text-muted);
     box-shadow: 0 0 0 3px rgba(16, 24, 40, 0.08);
 }
 
 .input::placeholder {
-    color: #98a2b3;
+    color: var(--color-text-muted);
 }
 
 .sendButton {
@@ -174,9 +174,9 @@
     width: min(100%, 920px);
     margin: 0 auto 0.5rem;
     padding: 0.75rem 1rem;
-    background: #fef3f2;
-    border: 1px solid #fecdca;
+    background: var(--color-danger-bg);
+    border: 1px solid var(--color-danger-border);
     border-radius: 12px;
-    color: #b42318;
+    color: var(--color-danger);
     text-align: center;
 }

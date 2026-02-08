@@ -182,8 +182,8 @@ export default function InvestorOnboardingWizard() {
                                 <button
                                     onClick={() => setFormData(prev => ({ ...prev, profileImage: '' }))}
                                     style={{
-                                        background: '#ef4444',
-                                        color: 'white',
+                                        background: 'var(--color-danger)',
+                                        color: 'var(--color-text-inverse)',
                                         border: 'none',
                                         padding: '6px 12px',
                                         borderRadius: '6px',

@@ -32,7 +32,7 @@
     font-size: 0.75rem;
     font-weight: 500;
     color: var(--color-primary);
-    background: hsl(220, 90%, 95%);
+    background: var(--color-info-bg);
     padding: 0.25rem 0.5rem;
     border-radius: var(--radius-sm);
 }

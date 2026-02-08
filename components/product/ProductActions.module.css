@@ -21,7 +21,7 @@
 
 .likeButton {
     background: #f43f5e;
-    color: white;
+    color: var(--color-text-inverse);
 }
 
 .likeButton:hover:not(:disabled) {
@@ -31,14 +31,14 @@
 }
 
 .likeButton.liked {
-    background: #fff1f2;
-    border: 1px solid #fda4af;
+    background: var(--color-danger-bg);
+    border: 1px solid var(--color-danger-border);
     color: #f43f5e;
 }
 
 .messageButton {
     background: var(--color-primary);
-    color: white;
+    color: var(--color-text-inverse);
 }
 
 .messageButton:hover:not(:disabled) {
@@ -48,7 +48,7 @@
 }
 .commitButton {
     background: #10a37f;
-    color: white;
+    color: var(--color-text-inverse);
 }
 
 .commitButton:hover:not(:disabled) {
@@ -74,7 +74,7 @@
 }
 
 .error {
-    color: #ef4444;
+    color: var(--color-danger);
     text-align: center;
     font-size: 0.9rem;
 }

@@ -31,7 +31,7 @@
     padding: 14px;
     font-size: 16px;
     font-weight: 500;
-    color: white;
+    color: var(--color-text-inverse);
     background-color: var(--color-primary);
     border: none;
     border-radius: 8px;
@@ -47,16 +47,16 @@
 }
 
 .submitButton:disabled {
-    background-color: #d0d5dd;
+    background-color: var(--color-disabled-bg);
     cursor: not-allowed;
 }
 
 .error {
-    color: #ef4444;
+    color: var(--color-danger);
     font-size: 14px;
     text-align: center;
-    background-color: #fef2f2;
-    border: 1px solid #fee2e2;
+    background-color: var(--color-danger-bg);
+    border: 1px solid var(--color-danger-border);
     padding: 10px;
     border-radius: 6px;
 }
@@ -81,7 +81,7 @@
 .spinner {
     width: 20px;
     height: 20px;
-    border: 2px solid #ffffff;
+    border: 2px solid var(--color-text-inverse);
     border-top-color: transparent;
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
@@ -96,7 +96,7 @@
 /* User Type Toggle */
 .userTypeToggle {
     display: flex;
-    background: #eceff5;
+    background: var(--color-surface-muted);
     padding: 4px;
     border-radius: 8px;
     margin-bottom: 8px;

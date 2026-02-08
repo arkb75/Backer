@@ -1,6 +1,6 @@
 .profile {
     min-height: 100vh;
-    background: linear-gradient(180deg, hsl(240, 10%, 98%) 0%, hsl(240, 10%, 93%) 100%);
+    background: var(--color-bg);
 }
 
 .feed {
@@ -46,7 +46,7 @@
     font-size: 0.75rem;
     font-weight: 600;
     letter-spacing: 0.02em;
-    color: white;
+    color: var(--color-text-inverse);
     background: hsla(220, 20%, 8%, 0.78);
 }
 
@@ -70,7 +70,7 @@
 
 .placeholderTitle {
     margin: 0;
-    color: white;
+    color: var(--color-text-inverse);
     font-size: 1rem;
     font-weight: 600;
 }
@@ -82,7 +82,7 @@
 }
 
 .mediaActions {
-    background: white;
+    background: var(--color-surface);
     border-top: 1px solid var(--color-border);
     padding: 10px 14px;
     display: flex;
@@ -99,13 +99,13 @@
 }
 
 .removeMediaButton {
-    color: hsl(0, 75%, 45%);
+    color: var(--color-danger);
     font-size: 0.8125rem;
     font-weight: 600;
 }
 
 .header {
-    background: white;
+    background: var(--color-surface);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
     padding: var(--space-lg);
@@ -156,7 +156,7 @@
     padding: 10px;
     color: var(--color-text-secondary);
     font-size: 0.8125rem;
-    background: hsl(220, 15%, 98%);
+    background: var(--color-surface-subtle);
 }
 
 .logoUploadArea:hover .logoPlaceholder,
@@ -200,7 +200,7 @@
     width: 100%;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
-    background: white;
+    background: var(--color-surface);
     color: var(--color-text);
     font-size: 0.9375rem;
     padding: 11px 12px;
@@ -228,7 +228,7 @@
 }
 
 .section {
-    background: white;
+    background: var(--color-surface);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
     padding: var(--space-lg);
@@ -253,11 +253,11 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    border: 1px dashed hsl(220, 20%, 76%);
+    border: 1px dashed var(--color-border-strong);
     border-radius: 999px;
     padding: 8px 12px;
-    background: hsl(220, 20%, 98%);
-    color: hsl(220, 20%, 30%);
+    background: var(--color-surface-subtle);
+    color: var(--color-text-secondary);
     font-size: 0.875rem;
     font-weight: 600;
 }
@@ -279,7 +279,7 @@
     display: grid;
     place-items: center;
     background: var(--color-primary);
-    color: white;
+    color: var(--color-text-inverse);
     font-weight: 700;
     line-height: 1;
 }
@@ -297,7 +297,7 @@
     padding: 12px;
     font-size: 0.875rem;
     color: var(--color-text-secondary);
-    background: hsl(220, 20%, 98%);
+    background: var(--color-surface-subtle);
 }
 
 .customSectionList {
@@ -311,7 +311,7 @@
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     padding: 14px;
-    background: hsl(220, 20%, 99%);
+    background: var(--color-surface-subtle);
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -335,7 +335,7 @@
 
 .removeSectionButton {
     font-size: 0.8125rem;
-    color: hsl(0, 72%, 38%);
+    color: var(--color-danger);
     font-weight: 600;
 }
 
@@ -366,7 +366,7 @@
 .customImageWrapper {
     position: relative;
     border: 1px solid transparent;
-    background: hsl(220, 15%, 96%);
+    background: var(--color-surface-muted);
 }
 
 .customImage {
@@ -375,7 +375,7 @@
 
 .customImagePlaceholder {
     border: 1px dashed var(--color-border);
-    background: white;
+    background: var(--color-surface);
     color: var(--color-text-secondary);
     display: grid;
     place-items: center;
@@ -391,9 +391,9 @@
 
 .errorBanner {
     border-radius: var(--radius-md);
-    background: hsl(0, 100%, 97%);
-    border: 1px solid hsl(0, 75%, 86%);
-    color: hsl(0, 72%, 36%);
+    background: var(--color-danger-bg);
+    border: 1px solid var(--color-danger-border);
+    color: var(--color-danger);
     padding: 10px 12px;
     font-size: 0.875rem;
 }
@@ -416,17 +416,17 @@
 
 .secondaryButton {
     border: 1px solid var(--color-border);
-    background: white;
+    background: var(--color-surface);
     color: var(--color-text);
 }
 
 .secondaryButton:hover:not(:disabled) {
-    border-color: hsl(220, 15%, 78%);
+    border-color: var(--color-border-strong);
 }
 
 .primaryButton {
     background: var(--color-primary);
-    color: white;
+    color: var(--color-text-inverse);
 }
 
 .primaryButton:hover:not(:disabled) {

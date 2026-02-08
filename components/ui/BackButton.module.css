@@ -5,7 +5,7 @@
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--color-overlay-surface);
     border: none;
     box-shadow: var(--shadow-md);
     display: flex;
@@ -19,7 +19,7 @@
 }
 
 .backButton:hover {
-    background: white;
+    background: var(--color-surface);
     transform: scale(1.05);
     box-shadow: var(--shadow-lg);
 }

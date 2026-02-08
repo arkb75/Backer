@@ -53,14 +53,14 @@ export default function PortfolioInput({ companies, onChange }: PortfolioInputPr
                                 justifyContent: 'space-between',
                                 alignItems: 'center',
                                 padding: '12px',
-                                border: '1px solid #e5e5e5',
+                                border: '1px solid var(--color-border)',
                                 borderRadius: '8px',
-                                background: 'white'
+                                background: 'var(--color-surface)'
                             }}
                         >
                             <div>
                                 <p style={{ fontWeight: '600', marginBottom: '4px' }}>{company.name}</p>
-                                <p style={{ fontSize: '14px', color: '#666' }}>{formatStage(company.stage)}</p>
+                                <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)' }}>{formatStage(company.stage)}</p>
                             </div>
                             <button
                                 type="button"
@@ -68,7 +68,7 @@ export default function PortfolioInput({ companies, onChange }: PortfolioInputPr
                                 style={{
                                     background: 'none',
                                     border: 'none',
-                                    color: '#999',
+                                    color: 'var(--color-text-muted)',
                                     cursor: 'pointer',
                                     fontSize: '20px'
                                 }}
@@ -82,7 +82,7 @@ export default function PortfolioInput({ companies, onChange }: PortfolioInputPr
 
             {/* Add Form */}
             {showForm ? (
-                <div style={{ border: '1px solid #e5e5e5', borderRadius: '8px', padding: '16px', marginBottom: '12px' }}>
+                <div style={{ border: '1px solid var(--color-border)', borderRadius: '8px', padding: '16px', marginBottom: '12px' }}>
                     <div className={styles.inputGroup}>
                         <label className={styles.label}>Company Name</label>
                         <input
@@ -120,8 +120,8 @@ export default function PortfolioInput({ companies, onChange }: PortfolioInputPr
                             disabled={!currentCompany.name.trim()}
                             style={{
                                 padding: '8px 16px',
-                                background: '#000',
-                                color: 'white',
+                                background: 'var(--color-primary)',
+                                color: 'var(--color-text-inverse)',
                                 border: 'none',
                                 borderRadius: '6px',
                                 cursor: currentCompany.name.trim() ? 'pointer' : 'not-allowed',
@@ -138,8 +138,8 @@ export default function PortfolioInput({ companies, onChange }: PortfolioInputPr
                             }}
                             style={{
                                 padding: '8px 16px',
-                                background: '#f4f4f5',
-                                color: '#333',
+                                background: 'var(--color-surface-muted)',
+                                color: 'var(--color-text)',
                                 border: 'none',
                                 borderRadius: '6px',
                                 cursor: 'pointer'
@@ -161,7 +161,7 @@ export default function PortfolioInput({ companies, onChange }: PortfolioInputPr
                 )
             )}
 
-            <p style={{ fontSize: '14px', color: '#666', marginTop: '8px' }}>
+            <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', marginTop: '8px' }}>
                 Add companies you&apos;ve invested in to build credibility ({companies.length}/10)
             </p>
         </div>

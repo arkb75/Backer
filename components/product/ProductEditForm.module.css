@@ -60,7 +60,7 @@
     width: 100%;
     border: 1px solid var(--color-border);
     border-radius: 10px;
-    background: #fff;
+    background: var(--color-surface);
     color: var(--color-text);
     font-size: 0.95rem;
     padding: 10px 12px;
@@ -92,7 +92,7 @@
     justify-content: center;
     border: 1px solid var(--color-border);
     border-radius: 10px;
-    background: #fff;
+    background: var(--color-surface);
     color: var(--color-text);
     font-size: 0.875rem;
     font-weight: 600;
@@ -157,7 +157,7 @@
     font-size: 0.82rem;
     font-weight: 700;
     color: var(--color-text);
-    background: #fff;
+    background: var(--color-surface);
 }
 
 .sectionList {
@@ -171,7 +171,7 @@
     padding: 12px;
     display: grid;
     gap: 10px;
-    background: #fff;
+    background: var(--color-surface);
 }
 
 .sectionTop {
@@ -181,13 +181,13 @@
 }
 
 .removeButton {
-    border: 1px solid #fda29b;
+    border: 1px solid var(--color-danger-border);
     border-radius: 8px;
     padding: 6px 10px;
     font-size: 0.8rem;
     font-weight: 700;
-    color: #b42318;
-    background: #fff5f4;
+    color: var(--color-danger);
+    background: var(--color-danger-bg);
 }
 
 .actions {
@@ -213,18 +213,18 @@
 
 .secondary {
     border-color: var(--color-border);
-    background: #fff;
+    background: var(--color-surface);
     color: var(--color-text);
 }
 
 .primary {
     background: var(--color-primary);
-    color: #fff;
+    color: var(--color-text-inverse);
 }
 
 .danger {
-    background: #b42318;
-    color: #fff;
+    background: var(--color-danger);
+    color: var(--color-text-inverse);
 }
 
 .button:disabled {
@@ -233,18 +233,18 @@
 }
 
 .error {
-    color: #b42318;
-    background: #fef3f2;
-    border: 1px solid #fecdca;
+    color: var(--color-danger);
+    background: var(--color-danger-bg);
+    border: 1px solid var(--color-danger-border);
     border-radius: 10px;
     font-size: 0.875rem;
     padding: 10px 12px;
 }
 
 .success {
-    color: #027a48;
-    background: #ecfdf3;
-    border: 1px solid #a6f4c5;
+    color: var(--color-success);
+    background: var(--color-success-bg);
+    border: 1px solid var(--color-success-border);
     border-radius: 10px;
     font-size: 0.875rem;
     padding: 10px 12px;

@@ -32,7 +32,7 @@
     align-items: center;
     justify-content: center;
     font-size: 1.5rem;
-    color: white;
+    color: var(--color-text-inverse);
 }
 
 .gradient {
@@ -73,7 +73,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
+    color: var(--color-text-inverse);
     border: none;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -174,7 +174,7 @@
     margin: 0;
     font-size: 1rem;
     font-weight: 700;
-    color: #fff;
+    color: var(--color-text-inverse);
 }
 
 .modalSubtitle {
@@ -199,7 +199,7 @@
     width: 100%;
     border: 1px solid rgba(255, 255, 255, 0.28);
     background: rgba(255, 255, 255, 0.08);
-    color: #fff;
+    color: var(--color-text-inverse);
     border-radius: 0.6rem;
     padding: 0.62rem 0.72rem;
     font-size: 0.95rem;
@@ -244,7 +244,7 @@
 
 .modalSubmit {
     background: #10b981;
-    color: #fff;
+    color: var(--color-text-inverse);
 }
 
 .modalSubmit:disabled,
@@ -266,7 +266,7 @@
 .name {
     font-size: 1.5rem;
     font-weight: 700;
-    color: white;
+    color: var(--color-text-inverse);
     margin: 0 0 0.25rem 0;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
@@ -311,7 +311,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
+    color: var(--color-text-inverse);
     margin-left: -0.5rem;
 }
 
@@ -328,7 +328,7 @@
 .founderNames {
     font-size: 0.75rem;
     font-weight: 600;
-    color: white;
+    color: var(--color-text-inverse);
     margin: 0;
 }
 
