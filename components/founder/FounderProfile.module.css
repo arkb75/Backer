@@ -87,6 +87,33 @@
     margin: 0 0 var(--space-md) 0;
 }
 
+.controls {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 100;
+    display: flex;
+    gap: 12px;
+}
+
+.controlButton {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    background: rgba(0, 0, 0, 0.05);
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.controlButton:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
 .productGrid {
     display: flex;
     flex-direction: column;
