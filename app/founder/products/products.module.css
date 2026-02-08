@@ -48,6 +48,34 @@
     gap: 10px;
 }
 
+.logoRow {
+    display: flex;
+    align-items: center;
+}
+
+.logo,
+.logoFallback {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    flex-shrink: 0;
+}
+
+.logo {
+    object-fit: cover;
+    border: 1px solid var(--color-border);
+}
+
+.logoFallback {
+    display: grid;
+    place-items: center;
+    background: #e2e8f0;
+    color: #334155;
+    font-weight: 800;
+    font-size: 1.05rem;
+    border: 1px solid #cbd5e1;
+}
+
 .cardHeader {
     display: flex;
     align-items: center;

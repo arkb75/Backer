@@ -62,6 +62,19 @@ export default async function FounderProductsPage() {
                     <div className={styles.grid}>
                         {items.map(({ relation, product }) => (
                             <article key={relation.id} className={styles.card}>
+                                <div className={styles.logoRow}>
+                                    {product.logoUrl ? (
+                                        <img
+                                            src={product.logoUrl}
+                                            alt={`${product.name} logo`}
+                                            className={styles.logo}
+                                        />
+                                    ) : (
+                                        <div className={styles.logoFallback}>
+                                            {product.name.trim().charAt(0).toUpperCase() || "P"}
+                                        </div>
+                                    )}
+                                </div>
                                 <div className={styles.cardHeader}>
                                     <h2 className={styles.cardTitle}>{product.name}</h2>
                                     {relation.isPrimary && <span className={styles.primaryBadge}>Primary</span>}
