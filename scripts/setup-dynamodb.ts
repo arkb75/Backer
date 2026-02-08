@@ -88,6 +88,15 @@ const tables: TableDefinition[] = [
             { name: "conversationId-index", partitionKey: "conversationId" },
         ],
     },
+    {
+        envName: "DYNAMODB_TABLE_INVESTMENTS",
+        fallbackName: "backer-dev-investments",
+        gsi: [
+            { name: "investorId-index", partitionKey: "investorId" },
+            { name: "productId-index", partitionKey: "productId" },
+            { name: "founderId-index", partitionKey: "founderId" },
+        ],
+    },
 ]
 
 const client = new DynamoDBClient({

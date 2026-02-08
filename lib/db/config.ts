@@ -14,22 +14,44 @@ export const DYNAMO_TABLES = {
     investors: readEnv("DYNAMODB_TABLE_INVESTORS", "backer-dev-investors"),
     investorInterests: readEnv("DYNAMODB_TABLE_INVESTOR_INTERESTS", "backer-dev-investor-interests"),
     conversations: readEnv("DYNAMODB_TABLE_CONVERSATIONS", "backer-dev-conversations"),
-    messages: readEnv("DYNAMODB_TABLE_MESSAGES", "backer-dev-messages"),
+    messages: process.env.DYNAMODB_TABLE_MESSAGES || "backer-dev-messages",
+    investments: process.env.DYNAMODB_TABLE_INVESTMENTS || "backer-dev-investments",
 } as const
 
 export const DYNAMO_INDEXES = {
-    usersByEmail: "email-index",
-    foundersByUserId: "userId-index",
-    founderProductsByFounderId: "founderId-index",
-    founderProductsByProductId: "productId-index",
-    founderInvitesByInviteeEmail: "inviteeEmail-index",
-    founderInvitesByInviterFounderId: "inviterFounderId-index",
-    founderInvitesByProductId: "productId-index",
-    investorsByUserId: "userId-index",
-    investorInterestsByFounderId: "founderId-index",
-    investorInterestsByProductId: "productId-index",
-    investorInterestsByInvestorId: "investorId-index",
-    conversationsByInvestorId: "investorId-index",
-    conversationsByFounderId: "founderId-index",
-    messagesByConversationId: "conversationId-index",
+    users: {
+        byEmail: "email-index",
+    },
+    founders: {
+        byUserId: "userId-index",
+    },
+    founderProducts: {
+        byFounderId: "founderId-index",
+        byProductId: "productId-index",
+    },
+    investors: {
+        byUserId: "userId-index",
+    },
+    investorInterests: {
+        byFounderId: "founderId-index",
+        byProductId: "productId-index",
+        byInvestorId: "investorId-index",
+    },
+    conversations: {
+        byInvestorId: "investorId-index",
+        byFounderId: "founderId-index",
+    },
+    messages: {
+        byConversationId: "conversationId-index",
+    },
+    investments: {
+        byInvestorId: "investorId-index",
+        byProductId: "productId-index",
+        byFounderId: "founderId-index",
+    },
+    founderInvites: {
+        byInviteeEmail: "inviteeEmail-index",
+        byInviterFounderId: "inviterFounderId-index",
+        byProductId: "productId-index",
+    },
 } as const

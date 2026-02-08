@@ -173,6 +173,19 @@ export interface MessageRecord {
     createdAt: string
 }
 
+export interface InvestmentRecord {
+    id: string
+    investorId: string
+    founderId: string
+    productId: string
+    amount: number
+    status: InvestmentStatus
+    createdAt: string
+    updatedAt: string
+}
+
+export type InvestmentStatus = "PENDING" | "COMMITTED" | "WITHDRAWN"
+
 export interface FounderInviteRecord {
     id: string
     productId: string

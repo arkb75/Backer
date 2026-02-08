@@ -46,7 +46,6 @@
     background: var(--color-primary-hover);
     box-shadow: 0 8px 20px rgba(16, 24, 40, 0.28);
 }
-
 .commitButton {
     background: #10a37f;
     color: white;
