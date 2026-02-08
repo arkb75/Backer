@@ -1,6 +1,7 @@
 import { InvestorWithRelations } from '@/lib/types'
 import styles from './InvestorProfile.module.css'
 import PortfolioGrid from './PortfolioGrid'
+import { LogoutButton } from './LogoutButton'
 import {
     SocialLinks,
     SocialLink,
@@ -108,6 +109,9 @@ export default function InvestorProfile({ investor }: InvestorProfileProps) {
                         <TagList tags={interestTags} maxDisplay={12} variant="gradient" />
                     </div>
                 )}
+
+                {/* Logout Button */}
+                <LogoutButton />
             </div>
         </div>
     )
