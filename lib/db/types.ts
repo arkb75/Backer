@@ -150,6 +150,26 @@ export interface InvestorInterestRecord {
     createdAt: string
 }
 
+export type SenderType = "INVESTOR" | "FOUNDER"
+
+export interface ConversationRecord {
+    id: string
+    investorId: string
+    founderId: string
+    productId: string
+    lastMessageAt: string
+    createdAt: string
+}
+
+export interface MessageRecord {
+    id: string
+    conversationId: string
+    senderId: string
+    senderType: SenderType
+    content: string
+    createdAt: string
+}
+
 export interface FounderInviteRecord {
     id: string
     productId: string

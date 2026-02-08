@@ -5,6 +5,7 @@ import type { ProductRecord, FounderProductRecord, FounderRecord, FounderPhotoRe
 import styles from './ProductProfile.module.css'
 import { BackButton, VideoPlayer, StatsGrid, StatItem } from '@/components/ui'
 import TeamCard from './TeamCard'
+import ProductActions from './ProductActions'
 
 type ProductWithRelations = ProductRecord & {
     founders: (FounderProductRecord & {
@@ -28,6 +29,9 @@ interface ProductProfileProps {
     productId: string
     initialLiked: boolean
     isInvestor: boolean
+    founderId?: string | null
+    hasLiked?: boolean
+    hasCommitted?: boolean
 }
 
 export default function ProductProfile({
@@ -36,6 +40,9 @@ export default function ProductProfile({
     productId,
     initialLiked,
     isInvestor,
+    founderId,
+    hasLiked = false,
+    hasCommitted = false,
 }: ProductProfileProps) {
     const [isLiked, setIsLiked] = useState(initialLiked)
     const [likeCount, setLikeCount] = useState(stats.interestedCount)
@@ -168,9 +175,15 @@ export default function ProductProfile({
                 )}
 
                 {/* Investor Actions */}
-                {isInvestor && (
+                {isInvestor && founderId && (
                     <div className={`${styles.section} ${styles.investorActions}`}>
                         <h2 className={styles.sectionTitle}>Express Interest</h2>
+                        <ProductActions
+                            productId={product.id}
+                            founderId={founderId}
+                            isLiked={hasLiked}
+                            isCommitted={hasCommitted}
+                        />
                         <div className={styles.actionButtons}>
                             <button
                                 onClick={handleLike}
@@ -193,3 +206,4 @@ export default function ProductProfile({
         </div>
     )
 }
+

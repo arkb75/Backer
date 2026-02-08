@@ -6,6 +6,8 @@ import {
     getProductById,
     listFounderProductsByProductId,
     listInvestorInterestsByProductId,
+    getInvestorByUserId,
+    getInvestorInterestByInvestorAndProduct,
 } from '@/lib/db/repository'
 import type { FounderRecord, FounderPhotoRecord, FounderProductRecord, ProductRecord } from '@/lib/db/types'
 import { getServerSession } from 'next-auth'
@@ -67,16 +69,24 @@ export default async function ProductPage({ params }: PageProps) {
 
     const session = await getServerSession(authOptions)
     const isInvestor = session?.user?.userType === 'INVESTOR'
-    const viewerInvestor = isInvestor && session?.user?.id
-        ? await getInvestorByUserId(session.user.id)
-        : null
-    const hasLiked = viewerInvestor
-        ? investorInterests.some(
-            (interest) =>
-                interest.interestType === 'LIKED' &&
-                interest.investorId === viewerInvestor.id
-        )
-        : false
+
+    // Get primary founder for messaging
+    const primaryFounderRelation = foundersWithRelations.find((f) => f.isPrimary) || foundersWithRelations[0]
+    const primaryFounderId = primaryFounderRelation?.founderId || null
+
+    // Check if current investor has already liked this product
+    let hasLiked = false
+    let hasCommitted = false
+    if (isInvestor && session?.user?.id) {
+        const investor = await getInvestorByUserId(session.user.id)
+        if (investor) {
+            const existingInterest = await getInvestorInterestByInvestorAndProduct(investor.id, product.id)
+            if (existingInterest) {
+                hasLiked = existingInterest.interestType === 'LIKED'
+                hasCommitted = existingInterest.interestType === 'COMMITTED'
+            }
+        }
+    }
 
     return (
         <main>
@@ -86,7 +96,11 @@ export default async function ProductPage({ params }: PageProps) {
                 productId={productWithRelations.id}
                 initialLiked={hasLiked}
                 isInvestor={isInvestor}
+                founderId={primaryFounderId}
+                hasLiked={hasLiked}
+                hasCommitted={hasCommitted}
             />
         </main>
     )
 }
+
