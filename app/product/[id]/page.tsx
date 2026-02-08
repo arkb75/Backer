@@ -2,6 +2,7 @@ import ProductProfile from '@/components/product/ProductProfile'
 import { notFound } from 'next/navigation'
 import {
     getFoundersByIds,
+    getInvestorByUserId,
     getProductById,
     listFounderProductsByProductId,
     listInvestorInterestsByProductId,
@@ -66,27 +67,25 @@ export default async function ProductPage({ params }: PageProps) {
 
     const session = await getServerSession(authOptions)
     const isInvestor = session?.user?.userType === 'INVESTOR'
-
-    const handleLike = async () => {
-        'use server'
-        // TODO: Implement like functionality
-        console.log('Like product:', id)
-    }
-
-    const handleCommit = async () => {
-        'use server'
-        // TODO: Implement commit functionality
-        console.log('Commit to product:', id)
-    }
+    const viewerInvestor = isInvestor && session?.user?.id
+        ? await getInvestorByUserId(session.user.id)
+        : null
+    const hasLiked = viewerInvestor
+        ? investorInterests.some(
+            (interest) =>
+                interest.interestType === 'LIKED' &&
+                interest.investorId === viewerInvestor.id
+        )
+        : false
 
     return (
         <main>
             <ProductProfile
                 product={productWithRelations}
                 stats={stats}
+                productId={productWithRelations.id}
+                initialLiked={hasLiked}
                 isInvestor={isInvestor}
-                onLike={handleLike}
-                onCommit={handleCommit}
             />
         </main>
     )

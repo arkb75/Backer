@@ -165,6 +165,20 @@
     color: white;
 }
 
+.likeButton:disabled,
+.likeButtonDisabled {
+    background: hsl(220, 18%, 92%);
+    color: hsl(220, 10%, 46%);
+    border-color: hsl(220, 16%, 78%);
+    cursor: not-allowed;
+}
+
+.likeButton:disabled:hover,
+.likeButtonDisabled:hover {
+    background: hsl(220, 18%, 92%);
+    color: hsl(220, 10%, 46%);
+}
+
 .commitButton {
     background: var(--color-primary);
     color: white;

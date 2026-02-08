@@ -5,8 +5,8 @@ import {
     getInvestorByUserId,
     getProductById,
     getProductLikeState,
+    likeProduct,
     listFounderProductsByProductId,
-    toggleProductLike,
 } from "@/lib/db/repository"
 
 interface RouteContext {
@@ -65,7 +65,7 @@ export async function POST(_request: Request, context: RouteContext) {
         const founderRelations = await listFounderProductsByProductId(productId)
         const primaryRelation = founderRelations.find((relation) => relation.isPrimary) || founderRelations[0]
 
-        const state = await toggleProductLike({
+        const state = await likeProduct({
             productId,
             investorId: investor.id,
             founderId: primaryRelation?.founderId || null,
