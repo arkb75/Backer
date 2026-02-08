@@ -9,44 +9,12 @@
     gap: 8px;
     padding: 8px;
     border-radius: 16px;
-    background: linear-gradient(140deg, rgba(255, 255, 255, 0.9), rgba(247, 250, 255, 0.8));
-    border: 1px solid rgba(16, 24, 40, 0.1);
-    box-shadow:
-        0 16px 36px rgba(16, 24, 40, 0.16),
-        inset 0 1px 0 rgba(255, 255, 255, 0.45);
-    backdrop-filter: blur(18px) saturate(1.15);
-    -webkit-backdrop-filter: blur(18px) saturate(1.15);
-    view-transition-name: founder-tab-nav;
-    isolation: isolate;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(16, 24, 40, 0.12);
+    box-shadow: 0 16px 36px rgba(16, 24, 40, 0.16);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     z-index: 80;
-}
-
-.activePill {
-    position: absolute;
-    top: 8px;
-    left: 8px;
-    width: calc((100% - 32px) / 3);
-    height: 42px;
-    border-radius: 12px;
-    background: linear-gradient(165deg, #1f2937 0%, #0f172a 60%, #020617 100%);
-    box-shadow:
-        0 8px 16px rgba(2, 6, 23, 0.34),
-        inset 0 1px 0 rgba(255, 255, 255, 0.16);
-    transition:
-        left 420ms cubic-bezier(0.22, 1, 0.36, 1),
-        width 420ms cubic-bezier(0.22, 1, 0.36, 1),
-        box-shadow 280ms ease;
-    will-change: left, width;
-    pointer-events: none;
-    z-index: 0;
-}
-
-.activePill::after {
-    content: "";
-    position: absolute;
-    inset: 1px;
-    border-radius: 11px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0) 65%);
 }
 
 .link {
@@ -54,41 +22,24 @@
     align-items: center;
     justify-content: center;
     gap: 0.35rem;
-    position: relative;
-    z-index: 1;
     color: #475467;
     text-decoration: none;
     font-size: 0.875rem;
     font-weight: 700;
     border-radius: 10px;
     height: 42px;
-    transition: color 0.28s ease, transform 0.22s ease;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    position: relative;
 }
 
 .link:hover {
     color: #1d2939;
-    transform: translateY(-1px);
-}
-
-.link:active {
-    transform: translateY(0) scale(0.98);
+    background: rgba(16, 24, 40, 0.06);
 }
 
 .active {
+    background: #101828;
     color: #ffffff;
-    animation: tabPulse 420ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-@keyframes tabPulse {
-    0% {
-        transform: scale(0.95);
-    }
-    55% {
-        transform: scale(1.03);
-    }
-    100% {
-        transform: scale(1);
-    }
 }
 
 .badge {
@@ -107,27 +58,4 @@
     justify-content: center;
     padding: 0 4px;
     border: 2px solid rgba(255, 255, 255, 0.92);
-    z-index: 2;
-    transition: transform 0.24s ease, background-color 0.24s ease;
-}
-
-.active .badge {
-    transform: translateY(-1px);
-    background: #fb7185;
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .activePill,
-    .link,
-    .active,
-    .badge {
-        transition: none;
-        animation: none;
-    }
-
-    .link:hover,
-    .link:active,
-    .active .badge {
-        transform: none;
-    }
 }
