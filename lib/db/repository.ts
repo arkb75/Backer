@@ -1,6 +1,7 @@
 import { randomUUID } from "crypto"
 import {
     BatchGetCommand,
+    DeleteCommand,
     GetCommand,
     PutCommand,
     QueryCommand,
@@ -563,6 +564,73 @@ export async function listInvestorInterestsByProductId(productId: string): Promi
     }))
 
     return (response.Items || []) as InvestorInterestRecord[]
+}
+
+export async function getProductLikeState(input: {
+    productId: string
+    investorId?: string | null
+}): Promise<{ likeCount: number; liked: boolean }> {
+    const interests = await listInvestorInterestsByProductId(input.productId)
+    const likes = interests.filter((interest) => interest.interestType === "LIKED")
+
+    return {
+        likeCount: likes.length,
+        liked: input.investorId
+            ? likes.some((interest) => interest.investorId === input.investorId)
+            : false,
+    }
+}
+
+export async function toggleProductLike(input: {
+    productId: string
+    investorId: string
+    founderId?: string | null
+}): Promise<{ likeCount: number; liked: boolean }> {
+    const existingInterests = await listInvestorInterestsByProductId(input.productId)
+    const existingLikes = existingInterests.filter(
+        (interest) =>
+            interest.interestType === "LIKED" &&
+            interest.investorId === input.investorId
+    )
+
+    if (existingLikes.length > 0) {
+        await Promise.all(
+            existingLikes.map((interest) =>
+                dynamo.send(new DeleteCommand({
+                    TableName: DYNAMO_TABLES.investorInterests,
+                    Key: { id: interest.id },
+                }))
+            )
+        )
+        return getProductLikeState({
+            productId: input.productId,
+            investorId: input.investorId,
+        })
+    }
+
+    const interest: InvestorInterestRecord = {
+        id: randomUUID(),
+        investorId: input.investorId,
+        founderId: input.founderId || null,
+        productId: input.productId,
+        interestType: "LIKED",
+        amountCommitted: null,
+        createdAt: nowIso(),
+    }
+
+    await dynamo.send(new PutCommand({
+        TableName: DYNAMO_TABLES.investorInterests,
+        Item: interest,
+        ConditionExpression: "attribute_not_exists(#id)",
+        ExpressionAttributeNames: {
+            "#id": "id",
+        },
+    }))
+
+    return getProductLikeState({
+        productId: input.productId,
+        investorId: input.investorId,
+    })
 }
 
 export function byIdMap<T extends { id: string }>(items: T[]): Map<string, T> {

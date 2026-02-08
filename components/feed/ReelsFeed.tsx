@@ -7,6 +7,7 @@ import styles from './ReelsFeed.module.css'
 
 export interface FeedItem {
     id: string
+    productId: string
     targetUrl: string
     name: string
     tagline: string
