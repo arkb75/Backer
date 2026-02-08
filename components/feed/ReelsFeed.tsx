@@ -7,6 +7,7 @@ import styles from './ReelsFeed.module.css'
 
 export interface FeedItem {
     id: string
+    targetUrl: string
     name: string
     tagline: string
     description: string | null
@@ -66,23 +67,23 @@ export function ReelsFeed({ items }: ReelsFeedProps) {
             setCurrentIndex(currentIndex - 1)
         }
 
-        // Horizontal swipe right - go to product detail
+        // Horizontal swipe right - go to detail
         if (swipeDirection === 'right') {
-            router.push(`/product/${currentItem.id}`)
+            router.push(currentItem.targetUrl)
         }
 
         setTouchStart(0)
         setTouchEnd(0)
         setSwipeDirection(null)
-    }, [touchStart, touchEnd, currentIndex, items.length, swipeDirection, currentItem?.id, router])
+    }, [touchStart, touchEnd, currentIndex, items.length, swipeDirection, currentItem?.targetUrl, router])
 
     const handleDoubleTap = () => {
         const now = Date.now()
         const DOUBLE_TAP_DELAY = 300
 
         if (now - lastTapRef.current < DOUBLE_TAP_DELAY) {
-            // Double tap - go to product detail
-            router.push(`/product/${currentItem.id}`)
+            // Double tap - go to detail
+            router.push(currentItem.targetUrl)
         }
         lastTapRef.current = now
     }
@@ -95,13 +96,13 @@ export function ReelsFeed({ items }: ReelsFeedProps) {
             } else if (e.key === 'ArrowDown' && currentIndex < items.length - 1) {
                 setCurrentIndex(currentIndex + 1)
             } else if (e.key === 'ArrowRight') {
-                router.push(`/product/${currentItem.id}`)
+                router.push(currentItem.targetUrl)
             }
         }
 
         window.addEventListener('keydown', handleKeyDown)
         return () => window.removeEventListener('keydown', handleKeyDown)
-    }, [currentIndex, items.length, currentItem?.id, router])
+    }, [currentIndex, items.length, currentItem?.targetUrl, router])
 
     if (!currentItem) {
         return null
@@ -126,7 +127,7 @@ export function ReelsFeed({ items }: ReelsFeedProps) {
             {/* Instructions overlay */}
             <div className={styles.instructions}>
                 <p>↑↓ Swipe to browse</p>
-                <p>→ Swipe right or double tap for details</p>
+                <p>→ Swipe right or double tap for founder details</p>
             </div>
         </div>
     )

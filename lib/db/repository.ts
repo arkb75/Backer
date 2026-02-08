@@ -195,6 +195,15 @@ export async function getFoundersByIds(ids: string[]): Promise<FounderRecord[]> 
     return founders.map(normalizeFounder)
 }
 
+export async function listFounders(): Promise<FounderRecord[]> {
+    const response = await dynamo.send(new ScanCommand({
+        TableName: DYNAMO_TABLES.founders,
+    }))
+
+    const items = (response.Items || []) as FounderRecord[]
+    return sortByCreatedAtDesc(items.map(normalizeFounder))
+}
+
 export async function getFounderByUserId(userId: string): Promise<FounderRecord | null> {
     const response = await dynamo.send(new QueryCommand({
         TableName: DYNAMO_TABLES.founders,

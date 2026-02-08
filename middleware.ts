@@ -21,6 +21,8 @@ export const config = {
     matcher: [
         "/onboarding/:path*",
         "/investor/onboarding/:path*",
+        "/investor/feed/:path*",
+        "/investor/messages/:path*",
         "/feed/:path*",
         // Add other protected routes here
     ],
