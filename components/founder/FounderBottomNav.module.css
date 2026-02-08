@@ -1,52 +1,61 @@
 .nav {
     position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    background: rgba(0, 0, 0, 0.95);
-    backdrop-filter: blur(10px);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 0.75rem 0;
-    z-index: 100;
+    left: 50%;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    transform: translateX(-50%);
+    width: min(460px, calc(100vw - 24px));
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    padding: 8px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(16, 24, 40, 0.12);
+    box-shadow: 0 16px 36px rgba(16, 24, 40, 0.16);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 80;
 }
 
 .link {
-    display: flex;
-    flex-direction: column;
+    display: inline-flex;
     align-items: center;
-    gap: 0.25rem;
-    color: rgba(255, 255, 255, 0.6);
+    justify-content: center;
+    gap: 0.35rem;
+    color: #475467;
     text-decoration: none;
-    font-size: 0.75rem;
-    padding: 0.25rem 1rem;
-    transition: color 0.2s;
+    font-size: 0.875rem;
+    font-weight: 700;
+    border-radius: 10px;
+    height: 42px;
+    transition: background-color 0.2s ease, color 0.2s ease;
     position: relative;
 }
 
 .link:hover {
-    color: rgba(255, 255, 255, 0.9);
+    color: #1d2939;
+    background: rgba(16, 24, 40, 0.06);
 }
 
 .active {
-    color: #667eea;
+    background: #101828;
+    color: #ffffff;
 }
 
 .badge {
     position: absolute;
-    top: -4px;
-    right: 4px;
+    top: -6px;
+    right: -2px;
     background: #f43f5e;
     color: white;
     font-size: 0.65rem;
-    font-weight: 600;
-    min-width: 18px;
-    height: 18px;
-    border-radius: 9px;
+    font-weight: 700;
+    min-width: 20px;
+    height: 20px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 0 4px;
+    border: 2px solid rgba(255, 255, 255, 0.92);
 }

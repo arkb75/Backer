@@ -22,7 +22,7 @@ export default async function StartCompanyPage() {
     const unreadMessagesCount = await countUnreadConversationsForFounder(founder.id)
 
     return (
-        <div style={{ minHeight: '100vh', background: '#f9fafe', paddingTop: '24px', paddingBottom: '120px' }}>
+        <div style={{ minHeight: '100vh', background: 'var(--color-bg)', paddingTop: '24px', paddingBottom: '120px' }}>
             <FounderControls />
             <CompanyWizard />
             <FounderBottomNav

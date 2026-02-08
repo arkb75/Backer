@@ -76,7 +76,7 @@ export default async function FounderPage({ params }: PageProps) {
         : 0
 
     return (
-        <div style={{ minHeight: "100vh", paddingBottom: isOwnProfile ? "96px" : "0", background: "black" }}>
+        <div style={{ minHeight: "100vh", paddingBottom: isOwnProfile ? "110px" : "0", background: "var(--color-bg)" }}>
             <FounderProfile
                 founder={founderWithRelations}
                 investorStats={investorStats}

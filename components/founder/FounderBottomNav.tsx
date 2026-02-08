@@ -9,9 +9,9 @@ interface FounderBottomNavProps {
     messageBadgeCount?: number
 }
 
-const tabs = (profileHref: string): Array<{ key: FounderNavTab; label: string; href: string; icon: string }> => [
-    { key: "profile", label: "Profile", href: profileHref, icon: "👤" },
-    { key: "messages", label: "Messages", href: "/founder/messages", icon: "💬" },
+const tabs = (profileHref: string): Array<{ key: FounderNavTab; label: string; href: string }> => [
+    { key: "profile", label: "Profile", href: profileHref },
+    { key: "messages", label: "Messages", href: "/founder/messages" },
 ]
 
 export default function FounderBottomNav({
@@ -27,8 +27,7 @@ export default function FounderBottomNav({
                     href={tab.href}
                     className={`${styles.link} ${activeTab === tab.key ? styles.active : ""}`}
                 >
-                    <span>{tab.icon}</span>
-                    {tab.label}
+                    <span>{tab.label}</span>
                     {tab.key === "messages" && messageBadgeCount > 0 && (
                         <span className={styles.badge}>
                             {messageBadgeCount > 99 ? "99+" : messageBadgeCount}

@@ -26,7 +26,7 @@ export default async function InvestorPage({ params }: PageProps) {
     const profileHref = viewerInvestor ? `/investor/${viewerInvestor.id}` : '/investor/onboarding'
 
     return (
-        <main style={{ paddingBottom: viewerInvestor ? '96px' : undefined }}>
+        <main style={{ paddingBottom: viewerInvestor ? '110px' : undefined, background: 'var(--color-bg)' }}>
             <InvestorProfile investor={investor as InvestorWithRelations} />
             {viewerInvestor && (
                 <InvestorBottomNav

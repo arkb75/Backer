@@ -26,7 +26,7 @@
 }
 
 .thesisCard {
-    background: linear-gradient(135deg, hsl(220, 80%, 65%), hsl(280, 60%, 65%));
+    background: linear-gradient(135deg, hsl(214, 82%, 45%), hsl(193, 78%, 38%));
     min-height: 200px;
     display: flex;
     flex-direction: column;

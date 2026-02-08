@@ -9,6 +9,7 @@ import {
 } from "@/lib/db/repository"
 import InvestorBottomNav from "@/components/investor/InvestorBottomNav"
 import ConversationList, { ConversationItem } from "@/components/messages/ConversationList"
+import pageStyles from "@/components/messages/MessagesPage.module.css"
 
 export const dynamic = 'force-dynamic'
 
@@ -55,11 +56,13 @@ export default async function InvestorMessagesPage() {
     })
 
     return (
-        <div style={{ minHeight: "100vh", paddingBottom: "96px", background: "black" }}>
-            <div style={{ padding: "1rem", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
-                <h1 style={{ color: "white", margin: 0, fontSize: "1.5rem" }}>Messages</h1>
+        <div className={pageStyles.page}>
+            <div className={pageStyles.headerWrap}>
+                <div className={pageStyles.headerCard}>
+                    <h1 className={pageStyles.title}>Messages</h1>
+                </div>
             </div>
-            <div style={{ height: "calc(100vh - 160px)" }}>
+            <div className={pageStyles.listViewport}>
                 <ConversationList
                     conversations={enrichedConversations}
                     userType="INVESTOR"

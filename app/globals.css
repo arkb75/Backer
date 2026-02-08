@@ -1,69 +1,62 @@
 :root {
-    /* Color Palette - Modern, Premium */
-    --color-primary: hsl(220, 90%, 56%);
-    --color-primary-hover: hsl(220, 90%, 48%);
-    --color-secondary: hsl(280, 70%, 60%);
-    --color-accent: hsl(160, 80%, 50%);
+    --color-primary: #101828;
+    --color-primary-hover: #1d2939;
+    --color-secondary: #344054;
+    --color-accent: #10a37f;
 
-    /* Neutrals */
-    --color-bg: hsl(220, 20%, 98%);
-    --color-surface: hsl(0, 0%, 100%);
-    --color-border: hsl(220, 15%, 90%);
-    --color-text: hsl(220, 20%, 10%);
-    --color-text-secondary: hsl(220, 10%, 50%);
+    --color-bg: #f3f5fb;
+    --color-surface: #ffffff;
+    --color-border: #d5dce8;
+    --color-text: #111827;
+    --color-text-secondary: #667085;
 
-    /* Spacing */
     --space-xs: 0.5rem;
     --space-sm: 1rem;
     --space-md: 1.5rem;
     --space-lg: 2rem;
     --space-xl: 3rem;
 
-    /* Border Radius */
-    --radius-sm: 0.5rem;
-    --radius-md: 0.75rem;
-    --radius-lg: 1rem;
+    --radius-sm: 0.625rem;
+    --radius-md: 0.875rem;
+    --radius-lg: 1.125rem;
     --radius-xl: 1.5rem;
 
-    /* Shadows */
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
-    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+    --shadow-sm: 0 2px 6px rgba(16, 24, 40, 0.06);
+    --shadow-md: 0 10px 20px rgba(16, 24, 40, 0.1);
+    --shadow-lg: 0 20px 45px rgba(16, 24, 40, 0.18);
 
-    /* Typography */
-    --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    --font-body: 'Manrope', 'Avenir Next', 'Segoe UI', sans-serif;
 }
 
 * {
     box-sizing: border-box;
-    padding: 0;
     margin: 0;
+    padding: 0;
 }
 
 html,
 body {
     max-width: 100vw;
     overflow-x: hidden;
-    background-color: var(--color-bg);
 }
 
 body {
+    min-height: 100vh;
     font-family: var(--font-body);
+    color: var(--color-text);
+    line-height: 1.55;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    color: var(--color-text);
-    line-height: 1.6;
+    background:
+        radial-gradient(1200px 520px at 8% -8%, rgba(16, 163, 127, 0.08), transparent 42%),
+        radial-gradient(900px 420px at 90% -14%, rgba(30, 64, 175, 0.08), transparent 42%),
+        linear-gradient(180deg, #f8f9fc 0%, #eff2f8 100%);
 }
 
 a {
     color: inherit;
     text-decoration: none;
-    transition: opacity 0.2s ease;
-}
-
-a:hover {
-    opacity: 0.8;
+    transition: color 0.2s ease;
 }
 
 h1,
@@ -73,7 +66,8 @@ h4,
 h5,
 h6 {
     line-height: 1.2;
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: -0.02em;
 }
 
 button {
@@ -81,15 +75,19 @@ button {
     cursor: pointer;
     border: none;
     background: none;
-    transition: all 0.2s ease;
 }
 
 input,
+select,
 textarea {
     font-family: inherit;
 }
 
-/* Utilities */
+input::placeholder,
+textarea::placeholder {
+    color: #98a2b3;
+}
+
 .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -101,4 +99,5 @@ textarea {
     border-radius: var(--radius-md);
     padding: var(--space-md);
     box-shadow: var(--shadow-sm);
+    border: 1px solid var(--color-border);
 }

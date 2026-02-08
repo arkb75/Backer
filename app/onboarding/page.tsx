@@ -30,7 +30,7 @@ export default async function OnboardingPage() {
     }
 
     return (
-        <div style={{ minHeight: '100vh', background: '#f9fafe', paddingTop: '40px' }}>
+        <div style={{ minHeight: '100vh', background: 'var(--color-bg)', paddingTop: '40px' }}>
             <FounderControls />
             {pendingInviteCount > 0 && (
                 <div style={{

@@ -4,7 +4,7 @@
     justify-content: center;
     gap: 0.5rem;
     padding: 0.875rem 1.75rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #101828 0%, #1f2937 100%);
     border: none;
     border-radius: 12px;
     color: white;
@@ -14,16 +14,16 @@
     transition: all 0.3s ease;
     margin: 2rem auto;
     max-width: fit-content;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 4px 12px rgba(16, 24, 40, 0.26);
 }
 
 .logoutButton:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    box-shadow: 0 6px 20px rgba(16, 24, 40, 0.34);
+    background: linear-gradient(135deg, #1f2937 0%, #101828 100%);
 }
 
 .logoutButton:active {
     transform: translateY(0);
-    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 2px 8px rgba(16, 24, 40, 0.24);
 }

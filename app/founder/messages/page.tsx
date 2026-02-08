@@ -11,6 +11,7 @@ import {
 } from "@/lib/db/repository"
 import FounderBottomNav from "@/components/founder/FounderBottomNav"
 import ConversationList, { ConversationItem } from "@/components/messages/ConversationList"
+import pageStyles from "@/components/messages/MessagesPage.module.css"
 
 export const dynamic = 'force-dynamic'
 
@@ -73,16 +74,18 @@ export default async function FounderMessagesPage() {
     const unreadMessagesCount = await countUnreadConversationsForFounder(founder.id)
 
     return (
-        <div style={{ minHeight: "100vh", paddingBottom: "96px", background: "black" }}>
-            <div style={{ padding: "1rem", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
-                <h1 style={{ color: "white", margin: 0, fontSize: "1.5rem" }}>Messages</h1>
-                {newInterestsCount > 0 && (
-                    <p style={{ color: "rgba(255,255,255,0.7)", margin: "0.5rem 0 0", fontSize: "0.9rem" }}>
-                        🎉 {newInterestsCount} new investor{newInterestsCount > 1 ? 's' : ''} interested in your product!
-                    </p>
-                )}
+        <div className={pageStyles.page}>
+            <div className={pageStyles.headerWrap}>
+                <div className={pageStyles.headerCard}>
+                    <h1 className={pageStyles.title}>Messages</h1>
+                    {newInterestsCount > 0 && (
+                        <p className={pageStyles.subtitle}>
+                            🎉 {newInterestsCount} new investor{newInterestsCount > 1 ? 's' : ''} interested in your product!
+                        </p>
+                    )}
+                </div>
             </div>
-            <div style={{ height: "calc(100vh - 180px)" }}>
+            <div className={pageStyles.listViewport}>
                 <ConversationList
                     conversations={enrichedConversations}
                     userType="FOUNDER"

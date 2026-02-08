@@ -15,44 +15,47 @@
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
-    border: none;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
 }
 
 .likeButton {
-    background: linear-gradient(135deg, #f43f5e 0%, #ec4899 100%);
+    background: #f43f5e;
     color: white;
 }
 
 .likeButton:hover:not(:disabled) {
-    transform: scale(1.02);
-    box-shadow: 0 4px 20px rgba(244, 63, 94, 0.4);
+    transform: translateY(-1px);
+    background: #e11d48;
+    box-shadow: 0 8px 20px rgba(190, 24, 93, 0.28);
 }
 
 .likeButton.liked {
-    background: rgba(244, 63, 94, 0.2);
-    border: 2px solid #f43f5e;
+    background: #fff1f2;
+    border: 1px solid #fda4af;
     color: #f43f5e;
 }
 
 .messageButton {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--color-primary);
     color: white;
 }
 
 .messageButton:hover:not(:disabled) {
-    transform: scale(1.02);
-    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+    transform: translateY(-1px);
+    background: var(--color-primary-hover);
+    box-shadow: 0 8px 20px rgba(16, 24, 40, 0.28);
 }
 
 .commitButton {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    background: #10a37f;
     color: white;
 }
 
 .commitButton:hover:not(:disabled) {
-    transform: scale(1.02);
-    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+    transform: translateY(-1px);
+    background: #0f8a6c;
+    box-shadow: 0 8px 20px rgba(16, 163, 127, 0.28);
 }
 
 .button:disabled {

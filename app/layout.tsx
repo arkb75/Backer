@@ -1,5 +1,12 @@
 import './globals.css'
 import type { Metadata } from 'next'
+import { Manrope } from 'next/font/google'
+
+const manrope = Manrope({
+    subsets: ['latin'],
+    variable: '--font-body',
+    display: 'swap',
+})
 
 export const metadata: Metadata = {
     title: 'Backer - Connect Founders with Investors',
@@ -13,7 +20,7 @@ export default function RootLayout({
 }) {
     return (
         <html lang="en">
-            <body>{children}</body>
+            <body className={manrope.variable}>{children}</body>
         </html>
     )
 }

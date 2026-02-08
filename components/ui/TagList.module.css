@@ -15,7 +15,7 @@
 }
 
 .gradient {
-    background: linear-gradient(135deg, hsl(220, 90%, 60%), hsl(280, 70%, 60%));
+    background: linear-gradient(135deg, hsl(214, 88%, 45%), hsl(193, 84%, 34%));
     color: white;
     border: none;
 }

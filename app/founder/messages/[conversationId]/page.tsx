@@ -12,6 +12,7 @@ import {
 } from "@/lib/db/repository"
 import FounderBottomNav from "@/components/founder/FounderBottomNav"
 import ChatView from "@/components/messages/ChatView"
+import pageStyles from "@/components/messages/MessagesPage.module.css"
 
 export const dynamic = 'force-dynamic'
 
@@ -66,8 +67,8 @@ export default async function FounderConversationPage({ params }: PageProps) {
     const profileHref = `/founder/${founder.id}`
 
     return (
-        <div style={{ minHeight: "100vh", paddingBottom: "96px", background: "black" }}>
-            <div style={{ height: "calc(100vh - 96px)" }}>
+        <div className={pageStyles.page}>
+            <div className={pageStyles.chatViewport}>
                 <ChatView
                     conversationId={conversationId}
                     messages={messages}

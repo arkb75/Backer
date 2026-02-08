@@ -77,15 +77,17 @@ export default function ConversationList({
                         className={styles.conversationItem}
                         onClick={() => router.push(`${basePath}/${conversation.id}`)}
                     >
-                        <div className={styles.avatar}>
+                        <div className={styles.avatarShell}>
                             {conversation.otherPartyAvatar ? (
                                 <img
                                     src={conversation.otherPartyAvatar}
                                     alt={conversation.otherPartyName || 'User'}
-                                    className={styles.avatar}
+                                    className={styles.avatarImage}
                                 />
                             ) : (
-                                getInitials(conversation.otherPartyName || 'U')
+                                <span className={styles.avatarInitials}>
+                                    {getInitials(conversation.otherPartyName || 'U')}
+                                </span>
                             )}
                         </div>
                         <div className={styles.content}>

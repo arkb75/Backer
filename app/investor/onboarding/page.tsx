@@ -18,7 +18,7 @@ export default async function InvestorOnboardingPage() {
     }
 
     return (
-        <div style={{ minHeight: '100vh', background: '#f9fafe', paddingTop: '40px' }}>
+        <div style={{ minHeight: '100vh', background: 'var(--color-bg)', paddingTop: '40px' }}>
             <InvestorOnboardingWizard />
         </div>
     )

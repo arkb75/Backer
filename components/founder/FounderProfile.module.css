@@ -105,7 +105,7 @@
 }
 
 .addCompanyButton {
-    background: #000;
+    background: var(--color-primary);
     color: white;
 }
 
@@ -149,8 +149,8 @@
 
 /* Investor Section */
 .investorSection {
-    background: linear-gradient(135deg, hsl(220, 90%, 98%), hsl(280, 70%, 98%));
-    border: 2px solid var(--color-primary);
+    background: linear-gradient(135deg, hsl(214, 78%, 97%), hsl(186, 62%, 96%));
+    border: 1px solid #bfd2e9;
 }
 
 /* Mobile-first: already optimized for mobile */
