@@ -6,12 +6,20 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import styles from './AuthForm.module.css'
 
-export default function LoginForm() {
+interface LoginFormProps {
+    lockedEmail?: string
+}
+
+export default function LoginForm({ lockedEmail }: LoginFormProps) {
     const router = useRouter()
-    const [email, setEmail] = useState('')
+    const [email, setEmail] = useState((lockedEmail || '').trim())
     const [password, setPassword] = useState('')
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
+    const emailLocked = Boolean(lockedEmail?.trim())
+    const registerHref = emailLocked
+        ? `/register?inviteEmail=${encodeURIComponent((lockedEmail || '').trim())}`
+        : "/register"
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -51,6 +59,7 @@ export default function LoginForm() {
                     placeholder="Email address"
                     required
                     className={styles.input}
+                    readOnly={emailLocked}
                 />
             </div>
 
@@ -75,7 +84,7 @@ export default function LoginForm() {
 
             <div className={styles.footer}>
                 Don't have an account?{' '}
-                <Link href="/register" className={styles.link}>
+                <Link href={registerHref} className={styles.link}>
                     Sign up
                 </Link>
             </div>

@@ -6,13 +6,24 @@ import Link from 'next/link'
 import { signIn } from 'next-auth/react'
 import styles from './AuthForm.module.css'
 
-export default function RegisterForm() {
+interface RegisterFormProps {
+    lockedEmail?: string
+}
+
+export default function RegisterForm({ lockedEmail }: RegisterFormProps) {
     const router = useRouter()
-    const [email, setEmail] = useState('')
+    const [email, setEmail] = useState((lockedEmail || '').trim())
     const [password, setPassword] = useState('')
     const [userType, setUserType] = useState<'FOUNDER' | 'INVESTOR'>('FOUNDER')
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
+    const emailLocked = Boolean(lockedEmail?.trim())
+    const loginHref = emailLocked
+        ? `/login?inviteEmail=${encodeURIComponent((lockedEmail || '').trim())}`
+        : "/login"
+    const loginAfterRegisterHref = emailLocked
+        ? `/login?registered=true&inviteEmail=${encodeURIComponent((lockedEmail || '').trim())}`
+        : "/login?registered=true"
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -43,7 +54,7 @@ export default function RegisterForm() {
                     return
                 }
 
-                router.push('/login?registered=true')
+                router.push(loginAfterRegisterHref)
             } else {
                 const data = await res.json()
                 setError(data.error || 'Registration failed')
@@ -84,6 +95,7 @@ export default function RegisterForm() {
                     placeholder="Email address"
                     required
                     className={styles.input}
+                    readOnly={emailLocked}
                 />
             </div>
 
@@ -109,7 +121,7 @@ export default function RegisterForm() {
 
             <div className={styles.footer}>
                 Already have an account?{' '}
-                <Link href="/login" className={styles.link}>
+                <Link href={loginHref} className={styles.link}>
                     Log in
                 </Link>
             </div>

@@ -41,7 +41,8 @@ export async function sendCofounderInviteEmail(input: {
         return { sent: false, reason: "Missing EMAIL_FROM_ADDRESS environment variable" }
     }
 
-    const actionUrl = `${appBaseUrl}${input.hasExistingAccount ? "/login" : "/register"}`
+    const invitePath = input.hasExistingAccount ? "/login" : "/register"
+    const actionUrl = `${appBaseUrl}${invitePath}?inviteEmail=${encodeURIComponent(input.toEmail)}`
     const subject = `${input.inviterFounderName} invited you to join ${input.productName}`
     const messageBlock = input.message?.trim()
         ? `\nMessage from ${input.inviterFounderName}: ${input.message.trim()}\n`
