@@ -8,6 +8,8 @@ export type InvestmentStage = "SEED" | "SERIES_A" | "SERIES_B" | "GROWTH"
 
 export type InterestType = "LIKED" | "COMMITTED"
 
+export type FounderInviteStatus = "PENDING" | "ACCEPTED" | "DECLINED" | "REVOKED"
+
 export interface UserRecord {
     id: string
     email: string
@@ -168,3 +170,18 @@ export interface MessageRecord {
     createdAt: string
 }
 
+export interface FounderInviteRecord {
+    id: string
+    productId: string
+    productName: string
+    inviterFounderId: string
+    inviterFounderName: string
+    inviteeEmail: string
+    inviteeUserId?: string | null
+    inviteeFounderId?: string | null
+    role: string
+    message?: string | null
+    status: FounderInviteStatus
+    createdAt: string
+    respondedAt?: string | null
+}

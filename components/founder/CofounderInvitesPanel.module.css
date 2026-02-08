@@ -1,0 +1,134 @@
+.panel {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 18px;
+    box-shadow: var(--shadow-sm);
+    display: grid;
+    gap: 14px;
+}
+
+.title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.hint {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+}
+
+.form {
+    display: grid;
+    gap: 10px;
+}
+
+.row {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.input,
+.select,
+.textarea {
+    width: 100%;
+    border: 1px solid #d0d5dd;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #101828;
+    font-size: 14px;
+    padding: 10px 12px;
+}
+
+.textarea {
+    resize: vertical;
+    min-height: 74px;
+}
+
+.button {
+    width: fit-content;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    background: #111827;
+    color: #ffffff;
+}
+
+.button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.error {
+    color: #b42318;
+    font-size: 13px;
+}
+
+.success {
+    color: #027a48;
+    font-size: 13px;
+}
+
+.inviteList {
+    display: grid;
+    gap: 10px;
+}
+
+.inviteCard {
+    border: 1px solid #e4e7ec;
+    border-radius: 10px;
+    padding: 10px;
+    display: grid;
+    gap: 8px;
+}
+
+.inviteMeta {
+    margin: 0;
+    font-size: 13px;
+    color: #475467;
+}
+
+.inviteActions {
+    display: flex;
+    gap: 8px;
+}
+
+.secondaryButton {
+    border: 1px solid #d0d5dd;
+    border-radius: 8px;
+    padding: 8px 10px;
+    background: #ffffff;
+    color: #344054;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.primaryButton {
+    border: none;
+    border-radius: 8px;
+    padding: 8px 10px;
+    background: #111827;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.secondaryButton:disabled,
+.primaryButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+    .row {
+        grid-template-columns: 1fr;
+    }
+}

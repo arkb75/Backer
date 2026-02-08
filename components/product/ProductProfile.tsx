@@ -1,3 +1,6 @@
+'use client'
+
+import { useState } from 'react'
 import type { ProductRecord, FounderProductRecord, FounderRecord, FounderPhotoRecord } from '@/lib/db/types'
 import styles from './ProductProfile.module.css'
 import { BackButton, VideoPlayer, StatsGrid, StatItem } from '@/components/ui'
@@ -23,6 +26,8 @@ interface ProductStats {
 interface ProductProfileProps {
     product: ProductWithRelations
     stats: ProductStats
+    productId: string
+    initialLiked: boolean
     isInvestor: boolean
     founderId?: string | null
     hasLiked?: boolean
@@ -32,11 +37,37 @@ interface ProductProfileProps {
 export default function ProductProfile({
     product,
     stats,
+    productId,
+    initialLiked,
     isInvestor,
     founderId,
     hasLiked = false,
     hasCommitted = false,
 }: ProductProfileProps) {
+    const [isLiked, setIsLiked] = useState(initialLiked)
+    const [likeCount, setLikeCount] = useState(stats.interestedCount)
+    const [likeLoading, setLikeLoading] = useState(false)
+
+    const handleLike = async () => {
+        if (likeLoading) return
+
+        setLikeLoading(true)
+        try {
+            const res = await fetch(`/api/product/${productId}/like`, {
+                method: 'POST',
+            })
+
+            if (!res.ok) return
+            const payload = await res.json() as { likeCount?: number; liked?: boolean }
+            if (typeof payload.likeCount === 'number') {
+                setLikeCount(payload.likeCount)
+            }
+            setIsLiked(Boolean(payload.liked))
+        } finally {
+            setLikeLoading(false)
+        }
+    }
+
     const formatStatus = (status: string): string => {
         const statusMap: Record<string, string> = {
             IDEA: 'Idea Stage',
@@ -51,7 +82,7 @@ export default function ProductProfile({
     const productStatsData: StatItem[] = [
         { value: `$${Math.floor((product.askAmount || 0) / 1000)}K`, label: 'Seeking' },
         { value: `$${Math.floor(product.amountRaised / 1000)}K`, label: 'Raised' },
-        { value: stats.interestedCount, label: 'Interested' },
+        { value: likeCount, label: 'Interested' },
     ]
 
     return (
@@ -153,6 +184,22 @@ export default function ProductProfile({
                             isLiked={hasLiked}
                             isCommitted={hasCommitted}
                         />
+                        <div className={styles.actionButtons}>
+                            <button
+                                onClick={handleLike}
+                                disabled={likeLoading}
+                                className={`${styles.button} ${styles.likeButton} ${isLiked ? styles.likeButtonActive : ''}`}
+                            >
+                                {likeLoading
+                                    ? 'Updating...'
+                                    : isLiked
+                                        ? '💔 Unlike This Startup'
+                                        : '❤️ Like This Startup'}
+                            </button>
+                            <button className={`${styles.button} ${styles.commitButton}`}>
+                                💰 Commit to Invest
+                            </button>
+                        </div>
                     </div>
                 )}
             </div>

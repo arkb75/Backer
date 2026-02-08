@@ -11,8 +11,10 @@ interface ReelCardProps {
 
 export function ReelCard({ item }: ReelCardProps) {
     const videoRef = useRef<HTMLVideoElement>(null)
+    const [likeCount, setLikeCount] = useState(0)
     const [isLiked, setIsLiked] = useState(false)
     const [isPaused, setIsPaused] = useState(false)
+    const [isLikeLoading, setIsLikeLoading] = useState(false)
 
     // Auto-play video when component mounts
     useEffect(() => {
@@ -24,6 +26,37 @@ export function ReelCard({ item }: ReelCardProps) {
             })
         }
     }, [item.id])
+
+    useEffect(() => {
+        let active = true
+
+        const loadLikeState = async () => {
+            try {
+                const res = await fetch(`/api/product/${item.productId}/like`, {
+                    method: 'GET',
+                    cache: 'no-store',
+                })
+
+                if (!res.ok) return
+                const data = await res.json() as { likeCount?: number; liked?: boolean }
+                if (!active) return
+
+                setLikeCount(typeof data.likeCount === 'number' ? data.likeCount : 0)
+                setIsLiked(Boolean(data.liked))
+            } catch (error) {
+                // Keep feed usable even if like API fails.
+                if (!active) return
+                setLikeCount(0)
+                setIsLiked(false)
+            }
+        }
+
+        void loadLikeState()
+
+        return () => {
+            active = false
+        }
+    }, [item.productId])
 
     const handleVideoClick = (e: React.MouseEvent) => {
         e.stopPropagation()
@@ -41,8 +74,26 @@ export function ReelCard({ item }: ReelCardProps) {
 
     const handleLikeClick = (e: React.MouseEvent) => {
         e.stopPropagation()
-        setIsLiked(!isLiked)
-        // TODO: Persist like to database
+        if (isLikeLoading) return
+
+        const toggleLike = async () => {
+            setIsLikeLoading(true)
+
+            try {
+                const res = await fetch(`/api/product/${item.productId}/like`, {
+                    method: 'POST',
+                })
+
+                if (!res.ok) return
+                const data = await res.json() as { likeCount?: number; liked?: boolean }
+                setLikeCount(typeof data.likeCount === 'number' ? data.likeCount : 0)
+                setIsLiked(Boolean(data.liked))
+            } finally {
+                setIsLikeLoading(false)
+            }
+        }
+
+        void toggleLike()
     }
 
     return (
@@ -71,12 +122,17 @@ export function ReelCard({ item }: ReelCardProps) {
 
             {/* Right side actions */}
             <div className={styles.actions}>
-                <button
-                    className={`${styles.actionButton} ${isLiked ? styles.liked : ''}`}
-                    onClick={handleLikeClick}
-                >
-                    <Heart className={styles.actionIcon} fill={isLiked ? 'currentColor' : 'none'} />
-                </button>
+                <div className={styles.actionItem}>
+                    <button
+                        className={`${styles.actionButton} ${isLiked ? styles.liked : ''}`}
+                        onClick={handleLikeClick}
+                        disabled={isLikeLoading}
+                        aria-label={isLiked ? 'Unlike startup' : 'Like startup'}
+                    >
+                        <Heart className={styles.actionIcon} fill={isLiked ? 'currentColor' : 'none'} />
+                    </button>
+                    <span className={styles.actionCount}>{likeCount}</span>
+                </div>
             </div>
 
             {/* Bottom info overlay */}

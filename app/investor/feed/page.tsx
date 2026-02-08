@@ -61,7 +61,8 @@ export default async function FeedPage() {
             }
 
             return [{
-                id: founder.id,
+                id: `${selectedProduct.id}:${founder.id}`,
+                productId: selectedProduct.id,
                 targetUrl: `/product/${selectedProduct.id}`,
                 name: selectedProduct.name || founder.name,
                 tagline: selectedProduct.tagline || founder.headline,

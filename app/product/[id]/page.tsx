@@ -2,6 +2,7 @@ import ProductProfile from '@/components/product/ProductProfile'
 import { notFound } from 'next/navigation'
 import {
     getFoundersByIds,
+    getInvestorByUserId,
     getProductById,
     listFounderProductsByProductId,
     listInvestorInterestsByProductId,
@@ -92,6 +93,8 @@ export default async function ProductPage({ params }: PageProps) {
             <ProductProfile
                 product={productWithRelations}
                 stats={stats}
+                productId={productWithRelations.id}
+                initialLiked={hasLiked}
                 isInvestor={isInvestor}
                 founderId={primaryFounderId}
                 hasLiked={hasLiked}
