@@ -3,12 +3,21 @@ import { redirect } from "next/navigation"
 import { authOptions } from "@/lib/auth"
 import AuthLayout from "@/components/auth/AuthLayout"
 import LoginForm from "@/components/auth/LoginForm"
+import { prisma } from "@/lib/prisma"
 
 export default async function Home() {
     const session = await getServerSession(authOptions)
 
     if (session) {
-        // If logged in, redirect to onboarding (or feed if already onboarded logic added later)
+        if (session.user?.id) {
+            const founder = await prisma.founder.findUnique({
+                where: { userId: session.user.id }
+            })
+            if (founder) {
+                redirect(`/founder/${founder.id}`)
+            }
+        }
+        // If logged in but no profile, go to onboarding
         redirect("/onboarding")
     }
 

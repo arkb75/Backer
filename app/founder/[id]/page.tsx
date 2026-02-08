@@ -2,6 +2,8 @@ import { prisma } from '@/lib/prisma'
 import { FounderWithRelations, InvestorStats } from '@/lib/types'
 import FounderProfile from '@/components/founder/FounderProfile'
 import { notFound } from 'next/navigation'
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 
 interface PageProps {
     params: Promise<{ id: string }>
@@ -49,9 +51,13 @@ export default async function FounderPage({ params }: PageProps) {
         ),
     }
 
-    // TODO: Replace with actual auth check
+    // Check if viewing own profile
+    const session = await getServerSession(authOptions)
+    const isOwnProfile = session?.user?.id === founder.userId
+
     // For now, we'll pass isInvestor as false - will be implemented with NextAuth
-    const isInvestor = false
+    // Or check session.user.userType === 'INVESTOR'
+    const isInvestor = session?.user?.userType === 'INVESTOR'
 
     return (
         <main>
@@ -59,6 +65,7 @@ export default async function FounderPage({ params }: PageProps) {
                 founder={founder as FounderWithRelations}
                 investorStats={investorStats}
                 isInvestor={isInvestor}
+                isOwnProfile={isOwnProfile}
             />
         </main>
     )

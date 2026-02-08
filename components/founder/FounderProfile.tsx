@@ -19,12 +19,14 @@ interface FounderProfileProps {
     founder: FounderWithRelations
     investorStats?: InvestorStats
     isInvestor: boolean
+    isOwnProfile?: boolean
 }
 
 export default function FounderProfile({
     founder,
     investorStats,
     isInvestor,
+    isOwnProfile = false,
 }: FounderProfileProps) {
     // Sort photos and prompts
     const sortedPhotos = [...founder.photos].sort((a, b) => a.order - b.order)
@@ -89,7 +91,7 @@ export default function FounderProfile({
 
     return (
         <div className={styles.profile}>
-            <BackButton />
+            {!isOwnProfile && <BackButton />}
             {/* Hinge-style vertical scroll */}
             <div className={styles.feed}>
                 {contentItems.map((item) => {
