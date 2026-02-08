@@ -1,8 +1,7 @@
 .container {
-    max-width: 600px;
-    /* Wider than auth card for more content */
-    margin: 40px auto;
-    padding: 40px;
+    width: min(100%, 860px);
+    margin: clamp(12px, 2.5vw, 36px) auto;
+    padding: clamp(16px, 2.8vw, 36px);
     background: white;
     border-radius: 16px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
@@ -14,7 +13,7 @@
 }
 
 .title {
-    font-size: 28px;
+    font-size: clamp(1.6rem, 2.6vw, 2rem);
     font-weight: 600;
     margin-bottom: 8px;
     color: #1a1a1a;
@@ -49,11 +48,16 @@
     display: none;
 }
 
+.hiddenInput {
+    display: none;
+}
+
 .buttonGroup {
     display: flex;
     justify-content: space-between;
     margin-top: 32px;
     gap: 16px;
+    flex-wrap: wrap;
 }
 
 .button {
@@ -64,6 +68,11 @@
     border: none;
     font-size: 16px;
     transition: all 0.2s;
+    min-width: 120px;
+}
+
+.buttonSpacer {
+    min-width: 120px;
 }
 
 .backButton {
@@ -153,7 +162,7 @@
 /* Photo Grid */
 .photoGrid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     gap: 16px;
     margin-bottom: 24px;
 }
@@ -168,7 +177,6 @@
 
 .videoPlayer {
     width: 100%;
-    max-width: 400px;
     border-radius: 8px;
     background: #000;
 }
@@ -227,6 +235,10 @@
     font-weight: 500;
 }
 
+.addPhotoPlus {
+    font-size: 24px;
+}
+
 .removePhoto {
     position: absolute;
     top: 8px;
@@ -264,6 +276,13 @@
     box-shadow: 0 4px 12px rgba(16, 163, 127, 0.1);
 }
 
+.promptHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+}
+
 .promptSelect {
     width: 100%;
     padding: 10px;
@@ -295,6 +314,26 @@
     outline: none;
 }
 
+.promptRemove {
+    background: none;
+    border: none;
+    color: #999;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.promptHint {
+    font-size: 14px;
+    color: #666;
+    margin-top: 8px;
+}
+
+.photoHint {
+    font-size: 14px;
+    margin-bottom: 20px;
+    color: #666;
+}
+
 .addPromptButton {
     background: white;
     border: 1px dashed #e5e5e5;
@@ -311,4 +350,36 @@
     border-color: #10a37f;
     color: #10a37f;
     background: #f0fdf4;
+}
+
+@media (max-width: 720px) {
+    .container {
+        width: min(100%, 640px);
+        margin: 12px auto;
+        padding: 18px;
+    }
+
+    .buttonGroup {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .button {
+        width: 100%;
+    }
+
+    .buttonSpacer {
+        display: none;
+    }
+}
+
+@media (max-width: 520px) {
+    .photoGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .progress {
+        margin-bottom: 24px;
+    }
 }

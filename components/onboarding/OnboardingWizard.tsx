@@ -219,7 +219,7 @@ export default function OnboardingWizard() {
                         Back
                     </button>
                 ) : (
-                    <div></div>
+                    <div className={styles.buttonSpacer}></div>
                 )}
 
                 {step < 3 ? (

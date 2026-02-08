@@ -4,12 +4,12 @@
 }
 
 .feed {
-    max-width: 420px;
+    width: min(100%, 840px);
     margin: 0 auto;
     display: flex;
     flex-direction: column;
     gap: var(--space-md);
-    padding: var(--space-md);
+    padding: clamp(12px, 2.5vw, 28px);
 }
 
 /* Info Card - Name, Headline, Bio */
@@ -87,6 +87,28 @@
     margin: 0 0 var(--space-md) 0;
 }
 
+.sectionTitleTight {
+    margin: 0;
+}
+
+.productsHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.addCompanyLink {
+    text-decoration: none;
+}
+
+.addCompanyButton {
+    background: #000;
+    color: white;
+}
+
 .controls {
     position: fixed;
     top: 16px;
@@ -115,9 +137,14 @@
 }
 
 .productGrid {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: var(--space-sm);
+}
+
+.emptyProductsHint {
+    margin-top: 8px;
+    font-size: 14px;
 }
 
 /* Investor Section */
@@ -129,6 +156,18 @@
 /* Mobile-first: already optimized for mobile */
 @media (min-width: 768px) {
     .feed {
-        padding: var(--space-xl);
+        width: min(100%, 900px);
+    }
+}
+
+@media (max-width: 560px) {
+    .controls {
+        top: 10px;
+        right: 10px;
+    }
+
+    .controlButton {
+        padding: 8px 12px;
+        font-size: 13px;
     }
 }

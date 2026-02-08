@@ -1,7 +1,6 @@
 .videoWrapper {
     position: relative;
     width: 100%;
-    max-width: 600px;
     border-radius: var(--radius-lg);
     overflow: hidden;
     box-shadow: var(--shadow-md);

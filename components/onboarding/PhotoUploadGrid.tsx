@@ -60,7 +60,7 @@ export default function PhotoUploadGrid({ photos, onChange }: PhotoUploadGridPro
                 ref={fileInputRef}
                 onChange={handleFileChange}
                 accept="image/*"
-                style={{ display: 'none' }}
+                className={styles.hiddenInput}
             />
 
             <div className={styles.photoGrid}>
@@ -91,7 +91,7 @@ export default function PhotoUploadGrid({ photos, onChange }: PhotoUploadGridPro
                                     {isUploading && index === photos.length ? (
                                         <span className={styles.spinner}>...</span>
                                     ) : (
-                                        <span style={{ fontSize: '24px' }}>+</span>
+                                        <span className={styles.addPhotoPlus}>+</span>
                                     )}
                                 </div>
                             )}
@@ -99,7 +99,7 @@ export default function PhotoUploadGrid({ photos, onChange }: PhotoUploadGridPro
                     )
                 })}
             </div>
-            <p className={styles.subtitle} style={{ fontSize: '14px', marginBottom: '20px', color: '#666' }}>
+            <p className={`${styles.subtitle} ${styles.photoHint}`}>
                 Add at least 3 photos to show your personality.
             </p>
         </>

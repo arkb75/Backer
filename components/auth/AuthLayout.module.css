@@ -5,13 +5,13 @@
     justify-content: center;
     background-color: #f9fafe;
     /* Very subtle cool gray/blue */
-    padding: 20px;
+    padding: clamp(12px, 2.5vw, 28px);
 }
 
 .card {
     width: 100%;
-    max-width: 400px;
-    padding: 40px;
+    max-width: 520px;
+    padding: clamp(20px, 3.5vw, 44px);
     background: white;
     border-radius: 12px;
     /* Slightly more rounded */
@@ -33,7 +33,7 @@
 }
 
 .title {
-    font-size: 30px;
+    font-size: clamp(1.8rem, 3.4vw, 2.1rem);
     font-weight: 600;
     color: #1a1a1a;
     margin-bottom: 8px;

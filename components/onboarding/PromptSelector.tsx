@@ -47,7 +47,7 @@ export default function PromptSelector({ prompts, onChange }: PromptSelectorProp
         <div className={styles.promptsContainer}>
             {prompts.map((item, index) => (
                 <div key={index} className={styles.promptCard}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div className={styles.promptHeader}>
                         <select
                             value={item.prompt}
                             onChange={(e) => handlePromptChange(index, 'prompt', e.target.value)}
@@ -59,7 +59,7 @@ export default function PromptSelector({ prompts, onChange }: PromptSelectorProp
                         </select>
                         <button
                             onClick={() => removePrompt(index)}
-                            style={{ background: 'none', border: 'none', color: '#999', cursor: 'pointer', fontSize: '18px' }}
+                            className={styles.promptRemove}
                         >
                             ×
                         </button>
@@ -80,7 +80,7 @@ export default function PromptSelector({ prompts, onChange }: PromptSelectorProp
                 </button>
             )}
 
-            <p style={{ fontSize: '14px', color: '#666', marginTop: '8px' }}>
+            <p className={styles.promptHint}>
                 Select prompts that help investors understand how you think.
             </p>
         </div>

@@ -140,11 +140,11 @@ export default function FounderProfile({
                 {/* Products Section */}
                 {(founder.products.length > 0 || isOwnProfile) && (
                     <div className={styles.section}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                            <h2 className={styles.sectionTitle} style={{ margin: 0 }}>🚀 Products</h2>
+                        <div className={styles.productsHeader}>
+                            <h2 className={`${styles.sectionTitle} ${styles.sectionTitleTight}`}>🚀 Products</h2>
                             {isOwnProfile && (
-                                <a href="/start-company" style={{ textDecoration: 'none' }}>
-                                    <button className={styles.controlButton} style={{ background: '#000', color: 'white' }}>
+                                <a href="/start-company" className={styles.addCompanyLink}>
+                                    <button className={`${styles.controlButton} ${styles.addCompanyButton}`}>
                                         + Add Company
                                     </button>
                                 </a>
@@ -166,8 +166,8 @@ export default function FounderProfile({
                             <div style={{ textAlign: 'center', padding: '20px', color: '#666', background: '#f9f9f9', borderRadius: '8px' }}>
                                 <p>No companies listed yet.</p>
                                 {isOwnProfile && (
-                                    <p style={{ marginTop: '8px', fontSize: '14px' }}>
-                                        Click "Add Company" to showcase your startup!
+                                    <p className={styles.emptyProductsHint}>
+                                        Click &quot;Add Company&quot; to showcase your startup!
                                     </p>
                                 )}
                             </div>
