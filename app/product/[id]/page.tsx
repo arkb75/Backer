@@ -6,7 +6,6 @@ import {
     getProductById,
     listFounderProductsByProductId,
     listInvestorInterestsByProductId,
-    getInvestorByUserId,
     getInvestorInterestByInvestorAndProduct,
 } from '@/lib/db/repository'
 import type { FounderRecord, FounderPhotoRecord, FounderProductRecord, ProductRecord } from '@/lib/db/types'
