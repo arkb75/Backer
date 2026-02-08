@@ -155,13 +155,49 @@ export default function OnboardingWizard() {
 
                     <div className={styles.inputGroup} style={{ marginTop: '32px' }}>
                         <label className={styles.label}>Video Intro (Optional)</label>
-                        <input
-                            name="videoUrl"
-                            value={formData.videoUrl}
-                            onChange={handleInputChange}
-                            className={styles.input}
-                            placeholder="https://youtube.com/..."
-                        />
+
+                        {!formData.videoUrl ? (
+                            <div className={styles.fileUploadWrapper}>
+                                <input
+                                    type="file"
+                                    accept="video/*"
+                                    onChange={async (e) => {
+                                        const file = e.target.files?.[0]
+                                        if (!file) return
+
+                                        // Simple local state for video upload loading if needed, 
+                                        // but we can reuse main loading or add a specific one.
+                                        // For now, let's just use a local var or assumes fast enough/optimistic?
+                                        // Better to show loading.
+                                        const btn = e.target
+                                        const prevText = btn.parentElement?.innerText
+
+                                        try {
+                                            const body = new FormData()
+                                            body.append("file", file)
+                                            const res = await fetch("/api/upload", { method: "POST", body })
+                                            if (!res.ok) throw new Error("Upload failed")
+                                            const data = await res.json()
+                                            setFormData(prev => ({ ...prev, videoUrl: data.url }))
+                                        } catch (err) {
+                                            alert("Video upload failed")
+                                        }
+                                    }}
+                                    className={styles.fileInput}
+                                />
+                                <p className={styles.hint}>Upload a short video introducing yourself.</p>
+                            </div>
+                        ) : (
+                            <div className={styles.videoPreview}>
+                                <video src={formData.videoUrl} controls className={styles.videoPlayer} />
+                                <button
+                                    className={styles.removeVideo}
+                                    onClick={() => setFormData(prev => ({ ...prev, videoUrl: '' }))}
+                                >
+                                    Remove Video
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}

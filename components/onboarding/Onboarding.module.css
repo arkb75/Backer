@@ -158,6 +158,31 @@
     margin-bottom: 24px;
 }
 
+.videoPreview {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.videoPlayer {
+    width: 100%;
+    max-width: 400px;
+    border-radius: 8px;
+    background: #000;
+}
+
+.removeVideo {
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
 .photoSlot {
     aspect-ratio: 9 / 16;
     /* Portrait ratio like Hinge */
