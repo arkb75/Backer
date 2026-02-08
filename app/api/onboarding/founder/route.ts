@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth"
-import { createFounderOnboarding } from "@/lib/db/repository"
+import {
+    autoAcceptPendingFounderInvites,
+    createFounderOnboarding,
+    getUserById,
+} from "@/lib/db/repository"
 import type { FounderType } from "@/lib/db/types"
 
 export async function POST(req: Request) {
@@ -60,7 +64,19 @@ export async function POST(req: Request) {
             prompts: Array.isArray(prompts) ? prompts : [],
         })
 
-        return NextResponse.json({ id: founder.id })
+        const user = await getUserById(session.user.id)
+        const acceptedInvites = user
+            ? await autoAcceptPendingFounderInvites({
+                inviteeEmail: user.email,
+                inviteeUserId: user.id,
+                inviteeFounderId: founder.id,
+            })
+            : []
+
+        return NextResponse.json({
+            id: founder.id,
+            acceptedInviteCount: acceptedInvites.length,
+        })
     } catch (error: any) {
         console.error("Onboarding error:", error)
         return NextResponse.json(

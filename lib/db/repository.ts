@@ -7,11 +7,14 @@ import {
     QueryCommand,
     ScanCommand,
     TransactWriteCommand,
+    UpdateCommand,
 } from "@aws-sdk/lib-dynamodb"
 import { dynamo } from "@/lib/db/client"
 import { DYNAMO_INDEXES, DYNAMO_TABLES } from "@/lib/db/config"
 import type {
     FounderPhotoRecord,
+    FounderInviteRecord,
+    FounderInviteStatus,
     FounderProductRecord,
     FounderPromptRecord,
     FounderRecord,
@@ -72,6 +75,16 @@ const normalizeProduct = (record: ProductRecord): ProductRecord => ({
     ...record,
     status: record.status || "IDEA",
     amountRaised: record.amountRaised ?? 0,
+})
+
+const normalizeFounderInvite = (record: FounderInviteRecord): FounderInviteRecord => ({
+    ...record,
+    role: record.role || "Co-Founder",
+    message: record.message || null,
+    status: (record.status || "PENDING") as FounderInviteStatus,
+    inviteeUserId: record.inviteeUserId || null,
+    inviteeFounderId: record.inviteeFounderId || null,
+    respondedAt: record.respondedAt || null,
 })
 
 const getSingleById = async <T>(tableName: string, id: string): Promise<T | null> => {
@@ -564,6 +577,251 @@ export async function listInvestorInterestsByProductId(productId: string): Promi
     }))
 
     return (response.Items || []) as InvestorInterestRecord[]
+}
+
+export async function getFounderInviteById(id: string): Promise<FounderInviteRecord | null> {
+    const invite = await getSingleById<FounderInviteRecord>(DYNAMO_TABLES.founderInvites, id)
+    return invite ? normalizeFounderInvite(invite) : null
+}
+
+export async function listFounderInvitesByInviteeEmail(email: string): Promise<FounderInviteRecord[]> {
+    const normalizedEmail = normalizeEmail(email)
+
+    try {
+        const response = await dynamo.send(new QueryCommand({
+            TableName: DYNAMO_TABLES.founderInvites,
+            IndexName: DYNAMO_INDEXES.founderInvitesByInviteeEmail,
+            KeyConditionExpression: "#inviteeEmail = :inviteeEmail",
+            ExpressionAttributeNames: {
+                "#inviteeEmail": "inviteeEmail",
+            },
+            ExpressionAttributeValues: {
+                ":inviteeEmail": normalizedEmail,
+            },
+        }))
+
+        const items = (response.Items || []) as FounderInviteRecord[]
+        return sortByCreatedAtDesc(items.map(normalizeFounderInvite))
+    } catch (error) {
+        console.warn("[DYNAMO_FOUNDER_INVITES_BY_EMAIL_FALLBACK]", error)
+    }
+
+    const fallback = await dynamo.send(new ScanCommand({
+        TableName: DYNAMO_TABLES.founderInvites,
+        FilterExpression: "#inviteeEmail = :inviteeEmail",
+        ExpressionAttributeNames: {
+            "#inviteeEmail": "inviteeEmail",
+        },
+        ExpressionAttributeValues: {
+            ":inviteeEmail": normalizedEmail,
+        },
+    }))
+
+    const fallbackItems = (fallback.Items || []) as FounderInviteRecord[]
+    return sortByCreatedAtDesc(fallbackItems.map(normalizeFounderInvite))
+}
+
+export async function listPendingFounderInvitesByInviteeEmail(email: string): Promise<FounderInviteRecord[]> {
+    const invites = await listFounderInvitesByInviteeEmail(email)
+    return invites.filter((invite) => invite.status === "PENDING")
+}
+
+export async function listFounderInvitesByInviterFounderId(inviterFounderId: string): Promise<FounderInviteRecord[]> {
+    const response = await dynamo.send(new QueryCommand({
+        TableName: DYNAMO_TABLES.founderInvites,
+        IndexName: DYNAMO_INDEXES.founderInvitesByInviterFounderId,
+        KeyConditionExpression: "#inviterFounderId = :inviterFounderId",
+        ExpressionAttributeNames: {
+            "#inviterFounderId": "inviterFounderId",
+        },
+        ExpressionAttributeValues: {
+            ":inviterFounderId": inviterFounderId,
+        },
+    }))
+
+    const items = (response.Items || []) as FounderInviteRecord[]
+    return sortByCreatedAtDesc(items.map(normalizeFounderInvite))
+}
+
+export async function createFounderInvite(input: {
+    productId: string
+    productName: string
+    inviterFounderId: string
+    inviterFounderName: string
+    inviteeEmail: string
+    role?: string | null
+    message?: string | null
+}): Promise<FounderInviteRecord> {
+    const inviteeEmail = normalizeEmail(input.inviteeEmail)
+    const existing = await listPendingFounderInvitesByInviteeEmail(inviteeEmail)
+    if (existing.some((invite) => invite.productId === input.productId)) {
+        throw new Error("An active invite already exists for this email and company")
+    }
+
+    const invite: FounderInviteRecord = {
+        id: randomUUID(),
+        productId: input.productId,
+        productName: input.productName,
+        inviterFounderId: input.inviterFounderId,
+        inviterFounderName: input.inviterFounderName,
+        inviteeEmail,
+        inviteeUserId: null,
+        inviteeFounderId: null,
+        role: input.role?.trim() || "Co-Founder",
+        message: input.message?.trim() || null,
+        status: "PENDING",
+        createdAt: nowIso(),
+        respondedAt: null,
+    }
+
+    await dynamo.send(new PutCommand({
+        TableName: DYNAMO_TABLES.founderInvites,
+        Item: invite,
+        ConditionExpression: "attribute_not_exists(#id)",
+        ExpressionAttributeNames: {
+            "#id": "id",
+        },
+    }))
+
+    return invite
+}
+
+const updateFounderInviteStatus = async (input: {
+    inviteId: string
+    status: FounderInviteStatus
+    inviteeUserId?: string | null
+    inviteeFounderId?: string | null
+}): Promise<FounderInviteRecord> => {
+    const result = await dynamo.send(new UpdateCommand({
+        TableName: DYNAMO_TABLES.founderInvites,
+        Key: { id: input.inviteId },
+        UpdateExpression: "SET #status = :status, #respondedAt = :respondedAt, #inviteeUserId = :inviteeUserId, #inviteeFounderId = :inviteeFounderId",
+        ExpressionAttributeNames: {
+            "#status": "status",
+            "#respondedAt": "respondedAt",
+            "#inviteeUserId": "inviteeUserId",
+            "#inviteeFounderId": "inviteeFounderId",
+        },
+        ExpressionAttributeValues: {
+            ":status": input.status,
+            ":respondedAt": nowIso(),
+            ":inviteeUserId": input.inviteeUserId || null,
+            ":inviteeFounderId": input.inviteeFounderId || null,
+        },
+        ReturnValues: "ALL_NEW",
+    }))
+
+    const updated = result.Attributes as FounderInviteRecord | undefined
+    if (!updated) {
+        throw new Error("Failed to update invite")
+    }
+    return normalizeFounderInvite(updated)
+}
+
+export async function acceptFounderInvite(input: {
+    inviteId: string
+    inviteeUserId: string
+    inviteeFounderId: string
+    inviteeEmail: string
+}): Promise<FounderInviteRecord> {
+    const invite = await getFounderInviteById(input.inviteId)
+    if (!invite) {
+        throw new Error("Invite not found")
+    }
+    if (normalizeEmail(invite.inviteeEmail) !== normalizeEmail(input.inviteeEmail)) {
+        throw new Error("Invite email mismatch")
+    }
+    if (invite.status === "ACCEPTED") {
+        return invite
+    }
+    if (invite.status !== "PENDING") {
+        throw new Error("Invite is no longer pending")
+    }
+
+    const memberships = await listFounderProductsByFounderId(input.inviteeFounderId)
+    const alreadyJoined = memberships.some((membership) => membership.productId === invite.productId)
+    if (!alreadyJoined) {
+        const founderProduct: FounderProductRecord = {
+            id: randomUUID(),
+            founderId: input.inviteeFounderId,
+            productId: invite.productId,
+            role: invite.role || "Co-Founder",
+            isPrimary: false,
+            createdAt: nowIso(),
+        }
+
+        await dynamo.send(new PutCommand({
+            TableName: DYNAMO_TABLES.founderProducts,
+            Item: founderProduct,
+            ConditionExpression: "attribute_not_exists(#id)",
+            ExpressionAttributeNames: {
+                "#id": "id",
+            },
+        }))
+    }
+
+    return updateFounderInviteStatus({
+        inviteId: invite.id,
+        status: "ACCEPTED",
+        inviteeUserId: input.inviteeUserId,
+        inviteeFounderId: input.inviteeFounderId,
+    })
+}
+
+export async function declineFounderInvite(input: {
+    inviteId: string
+    inviteeUserId?: string | null
+    inviteeFounderId?: string | null
+    inviteeEmail: string
+}): Promise<FounderInviteRecord> {
+    const invite = await getFounderInviteById(input.inviteId)
+    if (!invite) {
+        throw new Error("Invite not found")
+    }
+    if (normalizeEmail(invite.inviteeEmail) !== normalizeEmail(input.inviteeEmail)) {
+        throw new Error("Invite email mismatch")
+    }
+    if (invite.status === "DECLINED") {
+        return invite
+    }
+    if (invite.status !== "PENDING") {
+        throw new Error("Invite is no longer pending")
+    }
+
+    return updateFounderInviteStatus({
+        inviteId: invite.id,
+        status: "DECLINED",
+        inviteeUserId: input.inviteeUserId || null,
+        inviteeFounderId: input.inviteeFounderId || null,
+    })
+}
+
+export async function autoAcceptPendingFounderInvites(input: {
+    inviteeEmail: string
+    inviteeUserId: string
+    inviteeFounderId: string
+}): Promise<FounderInviteRecord[]> {
+    const pendingInvites = await listPendingFounderInvitesByInviteeEmail(input.inviteeEmail)
+    const accepted: FounderInviteRecord[] = []
+
+    for (const invite of pendingInvites) {
+        try {
+            const result = await acceptFounderInvite({
+                inviteId: invite.id,
+                inviteeUserId: input.inviteeUserId,
+                inviteeFounderId: input.inviteeFounderId,
+                inviteeEmail: input.inviteeEmail,
+            })
+            accepted.push(result)
+        } catch (error) {
+            console.error("[AUTO_ACCEPT_FOUNDER_INVITE_ERROR]", {
+                inviteId: invite.id,
+                error,
+            })
+        }
+    }
+
+    return accepted
 }
 
 export async function getProductLikeState(input: {

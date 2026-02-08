@@ -2,6 +2,7 @@ import { FounderWithRelations, InvestorStats } from '@/lib/types'
 import ProductCard from './ProductCard'
 import styles from './FounderProfile.module.css'
 import FounderControls from './FounderControls'
+import CofounderInvitesPanel from './CofounderInvitesPanel'
 import {
     BackButton,
     SocialLinks,
@@ -55,6 +56,10 @@ export default function FounderProfile({
             { value: investorStats.committedCount, label: 'Committed' },
         ]
         : []
+    const productOptions = founder.products.map((founderProduct) => ({
+        id: founderProduct.product.id,
+        name: founderProduct.product.name,
+    }))
 
     // Interleave photos with prompts (Hinge-style)
     const contentItems: { type: 'photo' | 'prompt' | 'video' | 'info'; data: unknown; key: string }[] = []
@@ -136,6 +141,10 @@ export default function FounderProfile({
 
                     return null
                 })}
+
+                {isOwnProfile && (
+                    <CofounderInvitesPanel products={productOptions} />
+                )}
 
                 {/* Products Section */}
                 {(founder.products.length > 0 || isOwnProfile) && (

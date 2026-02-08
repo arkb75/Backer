@@ -52,6 +52,15 @@ const tables: TableDefinition[] = [
         ],
     },
     {
+        envName: "DYNAMODB_TABLE_FOUNDER_INVITES",
+        fallbackName: "backer-dev-founder-invites",
+        gsi: [
+            { name: "inviteeEmail-index", partitionKey: "inviteeEmail" },
+            { name: "inviterFounderId-index", partitionKey: "inviterFounderId" },
+            { name: "productId-index", partitionKey: "productId" },
+        ],
+    },
+    {
         envName: "DYNAMODB_TABLE_INVESTORS",
         fallbackName: "backer-dev-investors",
         gsi: [{ name: "userId-index", partitionKey: "userId" }],
