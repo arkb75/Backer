@@ -10,14 +10,32 @@ export default async function Home() {
 
     if (session) {
         if (session.user?.id) {
-            const founder = await prisma.founder.findUnique({
-                where: { userId: session.user.id }
+            const user = await prisma.user.findUnique({
+                where: { id: session.user.id },
+                include: {
+                    founder: true,
+                    investor: true
+                }
             })
-            if (founder) {
-                redirect(`/founder/${founder.id}`)
+
+            if (user) {
+                // Check if user has completed their profile based on type
+                if (user.userType === 'FOUNDER') {
+                    if (user.founder) {
+                        redirect(`/founder/${user.founder.id}`)
+                    } else {
+                        redirect("/onboarding")
+                    }
+                } else if (user.userType === 'INVESTOR') {
+                    if (user.investor) {
+                        redirect(`/investor/${user.investor.id}`)
+                    } else {
+                        redirect("/investor/onboarding")
+                    }
+                }
             }
         }
-        // If logged in but no profile, go to onboarding
+        // Fallback: if logged in but something went wrong, go to onboarding
         redirect("/onboarding")
     }
 

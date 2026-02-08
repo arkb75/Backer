@@ -28,7 +28,8 @@ export default function LoginForm() {
             if (result?.error) {
                 setError('Invalid email or password')
             } else {
-                router.push('/onboarding') // Default redirect, middleware/page will handle specifics based on role
+                // Redirect to home page, which will handle routing based on user type and profile status
+                router.push('/')
                 router.refresh()
             }
         } catch (err) {
