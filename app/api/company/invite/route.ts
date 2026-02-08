@@ -8,6 +8,7 @@ import {
     getUserByEmail,
     getUserById,
     listFounderProductsByFounderId,
+    listPendingFounderInvitesByInviteeEmail,
 } from "@/lib/db/repository"
 import { sendCofounderInviteEmail } from "@/lib/email"
 
@@ -63,7 +64,9 @@ export async function POST(req: Request) {
         }
 
         const existingUser = await getUserByEmail(inviteeEmailRaw)
-        const invite = await createFounderInvite({
+        const pendingInvites = await listPendingFounderInvitesByInviteeEmail(inviteeEmailRaw)
+        const existingPendingInvite = pendingInvites.find((invite) => invite.productId === product.id)
+        const invite = existingPendingInvite ?? await createFounderInvite({
             productId: product.id,
             productName: product.name,
             inviterFounderId: founder.id,
@@ -72,6 +75,7 @@ export async function POST(req: Request) {
             role,
             message: message || null,
         })
+        const alreadyPending = Boolean(existingPendingInvite)
 
         const emailResult = await sendCofounderInviteEmail({
             toEmail: inviteeEmailRaw,
@@ -84,13 +88,20 @@ export async function POST(req: Request) {
 
         return NextResponse.json({
             invite,
+            alreadyPending,
             hasExistingAccount: Boolean(existingUser),
             emailSent: emailResult.sent,
             emailReason: emailResult.reason || null,
         })
     } catch (error: unknown) {
-        console.error("[COMPANY_INVITE_ERROR]", error)
         const message = error instanceof Error ? error.message : "Failed to send invite"
+        if (message === "An active invite already exists for this email and company") {
+            return NextResponse.json({
+                error: message,
+                code: "INVITE_ALREADY_PENDING",
+            }, { status: 409 })
+        }
+        console.error("[COMPANY_INVITE_ERROR]", error)
         return NextResponse.json({ error: message }, { status: 500 })
     }
 }

@@ -8,19 +8,21 @@ const readEnv = (name: string): string | undefined => {
 }
 
 const region = readEnv("AWS_REGION") || readEnv("AWS_DEFAULT_REGION") || "us-east-2"
+const profile = readEnv("AWS_PROFILE")
 const accessKeyId = readEnv("AWS_ACCESS_KEY_ID")
 const secretAccessKey = readEnv("AWS_SECRET_ACCESS_KEY")
 const sessionToken = readEnv("AWS_SESSION_TOKEN")
 const fromAddress = readEnv("EMAIL_FROM_ADDRESS")
 const appBaseUrl = (readEnv("APP_BASE_URL") || readEnv("NEXTAUTH_URL") || "http://localhost:3000").replace(/\/+$/, "")
+const hasStaticCredentials = Boolean(!profile && accessKeyId && secretAccessKey)
 
 const sesClient = new SESClient({
     region,
-    ...(accessKeyId && secretAccessKey
+    ...(hasStaticCredentials
         ? {
             credentials: {
-                accessKeyId,
-                secretAccessKey,
+                accessKeyId: accessKeyId as string,
+                secretAccessKey: secretAccessKey as string,
                 ...(sessionToken ? { sessionToken } : {}),
             },
         }

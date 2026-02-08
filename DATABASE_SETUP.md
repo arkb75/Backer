@@ -46,6 +46,8 @@ If you use profiles, set:
 AWS_PROFILE="root"
 ```
 
+Use either `AWS_PROFILE` or static keys (`AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY`), not both.
+
 ## 4. Optional: Invite Emails (SES)
 
 To send co-founder invite emails, configure:

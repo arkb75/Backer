@@ -64,20 +64,24 @@ const endpoint = readEnv("AWS_S3_ENDPOINT")
 const publicBaseUrl = readEnv("AWS_S3_PUBLIC_URL")
 const uploadPrefix = readEnv("AWS_S3_UPLOAD_PREFIX") || DEFAULT_UPLOAD_PREFIX
 const forcePathStyle = readEnv("AWS_S3_FORCE_PATH_STYLE") === "true"
+const profile = readEnv("AWS_PROFILE")
 
 const accessKeyId = readEnv("AWS_ACCESS_KEY_ID")
 const secretAccessKey = readEnv("AWS_SECRET_ACCESS_KEY")
+const sessionToken = readEnv("AWS_SESSION_TOKEN")
+const hasStaticCredentials = Boolean(!profile && accessKeyId && secretAccessKey)
 
 const s3Client = bucket && region
     ? new S3Client({
         region,
         endpoint,
         forcePathStyle,
-        ...(accessKeyId && secretAccessKey
+        ...(hasStaticCredentials
             ? {
                 credentials: {
-                    accessKeyId,
-                    secretAccessKey,
+                    accessKeyId: accessKeyId as string,
+                    secretAccessKey: secretAccessKey as string,
+                    ...(sessionToken ? { sessionToken } : {}),
                 },
             }
             : {}),
@@ -87,7 +91,7 @@ const s3Client = bucket && region
 const validateUploadConfig = (): string | null => {
     if (!bucket) return "Missing AWS_S3_BUCKET environment variable"
     if (!region) return "Missing AWS_REGION environment variable"
-    if ((accessKeyId && !secretAccessKey) || (!accessKeyId && secretAccessKey)) {
+    if (!profile && ((accessKeyId && !secretAccessKey) || (!accessKeyId && secretAccessKey))) {
         return "AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY must be provided together"
     }
     if (!s3Client) return "S3 client is not configured"

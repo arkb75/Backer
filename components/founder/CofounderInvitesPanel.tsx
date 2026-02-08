@@ -101,7 +101,10 @@ export default function CofounderInvitesPanel({ products }: CofounderInvitesPane
 
             const payload = await res.json().catch(() => null) as {
                 error?: string
+                code?: string
                 emailSent?: boolean
+                emailReason?: string | null
+                alreadyPending?: boolean
             } | null
 
             if (!res.ok) {
@@ -109,9 +112,15 @@ export default function CofounderInvitesPanel({ products }: CofounderInvitesPane
                 return
             }
 
-            setSuccess(payload?.emailSent
-                ? "Invite sent. Email delivered and in-app notification created."
-                : "Invite saved. In-app notification created, but email could not be delivered.")
+            if (payload?.alreadyPending) {
+                setSuccess(payload?.emailSent
+                    ? "Invite already pending. Reminder email sent."
+                    : `Invite already pending. Email was not delivered${payload?.emailReason ? `: ${payload.emailReason}` : "."}`)
+            } else {
+                setSuccess(payload?.emailSent
+                    ? "Invite sent. Email delivered and in-app notification created."
+                    : `Invite saved. In-app notification created, but email could not be delivered${payload?.emailReason ? `: ${payload.emailReason}` : "."}`)
+            }
             setEmail("")
             setMessage("")
             await loadInvites()
