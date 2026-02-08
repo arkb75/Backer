@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { redirect, notFound } from "next/navigation"
 import {
+    countUnreadConversationsForFounder,
     getFounderByUserId,
     getConversationById,
     listMessagesByConversationId,
@@ -65,6 +66,7 @@ export default async function FounderConversationPage({ params }: PageProps) {
     const canSend = hasInterest || investorHasMessaged
 
     const profileHref = `/founder/${founder.id}`
+    const unreadMessagesCount = await countUnreadConversationsForFounder(founder.id)
 
     return (
         <div className={pageStyles.page}>
@@ -85,7 +87,11 @@ export default async function FounderConversationPage({ params }: PageProps) {
                     }
                 />
             </div>
-            <FounderBottomNav activeTab="messages" profileHref={profileHref} />
+            <FounderBottomNav
+                activeTab="messages"
+                profileHref={profileHref}
+                messageBadgeCount={unreadMessagesCount}
+            />
         </div>
     )
 }

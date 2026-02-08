@@ -2,7 +2,6 @@ import CompanyWizard from "@/components/company/CompanyWizard"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
-import FounderControls from "@/components/founder/FounderControls"
 import FounderBottomNav from "@/components/founder/FounderBottomNav"
 import { countUnreadConversationsForFounder, getFounderByUserId } from "@/lib/db/repository"
 
@@ -23,9 +22,9 @@ export default async function StartCompanyPage() {
 
     return (
         <div style={{ minHeight: '100vh', background: 'var(--color-bg)', paddingTop: '24px', paddingBottom: '120px' }}>
-            <FounderControls />
             <CompanyWizard />
             <FounderBottomNav
+                activeTab="products"
                 profileHref={`/founder/${founder.id}`}
                 messageBadgeCount={unreadMessagesCount}
             />

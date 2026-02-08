@@ -24,10 +24,14 @@ export default async function InvestorPage({ params }: PageProps) {
         ? await getInvestorByUserId(session.user.id)
         : null
     const profileHref = viewerInvestor ? `/investor/${viewerInvestor.id}` : '/investor/onboarding'
+    const isOwnProfile = viewerInvestor?.id === investor.id
 
     return (
         <main style={{ paddingBottom: viewerInvestor ? '110px' : undefined, background: 'var(--color-bg)' }}>
-            <InvestorProfile investor={investor as InvestorWithRelations} />
+            <InvestorProfile
+                investor={investor as InvestorWithRelations}
+                isOwnProfile={isOwnProfile}
+            />
             {viewerInvestor && (
                 <InvestorBottomNav
                     activeTab="profile"

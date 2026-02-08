@@ -1,7 +1,7 @@
 import Link from "next/link"
 import styles from "./FounderBottomNav.module.css"
 
-type FounderNavTab = "profile" | "messages"
+type FounderNavTab = "profile" | "products" | "messages"
 
 interface FounderBottomNavProps {
     activeTab?: FounderNavTab
@@ -11,6 +11,7 @@ interface FounderBottomNavProps {
 
 const tabs = (profileHref: string): Array<{ key: FounderNavTab; label: string; href: string }> => [
     { key: "profile", label: "Profile", href: profileHref },
+    { key: "products", label: "Products", href: "/founder/products" },
     { key: "messages", label: "Messages", href: "/founder/messages" },
 ]
 

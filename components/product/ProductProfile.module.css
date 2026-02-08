@@ -125,6 +125,20 @@
     margin: 0;
 }
 
+.sectionImage {
+    width: 100%;
+    margin-top: 12px;
+    border-radius: 12px;
+    object-fit: cover;
+    border: 1px solid var(--color-border);
+}
+
+.sectionCaption {
+    margin: 10px 0 0;
+    font-size: 0.82rem;
+    color: var(--color-text-secondary);
+}
+
 /* Team Grid */
 .teamGrid {
     display: grid;
@@ -136,6 +150,48 @@
 .investorActions {
     background: linear-gradient(135deg, hsl(214, 78%, 97%), hsl(186, 62%, 96%));
     border: 1px solid #bfd2e9;
+}
+
+.ownerActions {
+    border: 1px solid #d0d5dd;
+}
+
+.ownerActionRow {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.ownerEditButton,
+.ownerDeleteButton {
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.ownerEditButton {
+    background: var(--color-primary);
+    color: #fff;
+    text-decoration: none;
+}
+
+.ownerDeleteButton {
+    border: 1px solid #fda29b;
+    background: #fef3f2;
+    color: #b42318;
+}
+
+.ownerDeleteButton:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+.ownerError {
+    margin: 10px 0 0;
+    color: #b42318;
+    font-size: 0.85rem;
 }
 
 .actionButtons {
@@ -206,6 +262,10 @@
 
 @media (max-width: 640px) {
     .headerContent {
+        grid-template-columns: 1fr;
+    }
+
+    .ownerActionRow {
         grid-template-columns: 1fr;
     }
 }

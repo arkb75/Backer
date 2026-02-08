@@ -2,6 +2,7 @@ import { InvestorWithRelations } from '@/lib/types'
 import styles from './InvestorProfile.module.css'
 import PortfolioGrid from './PortfolioGrid'
 import { LogoutButton } from './LogoutButton'
+import Link from 'next/link'
 import {
     SocialLinks,
     SocialLink,
@@ -11,9 +12,10 @@ import {
 
 interface InvestorProfileProps {
     investor: InvestorWithRelations
+    isOwnProfile?: boolean
 }
 
-export default function InvestorProfile({ investor }: InvestorProfileProps) {
+export default function InvestorProfile({ investor, isOwnProfile = false }: InvestorProfileProps) {
     const socialLinks: SocialLink[] = [
         ...(investor.linkedinUrl ? [{ type: 'linkedin' as const, url: investor.linkedinUrl }] : []),
         ...(investor.twitterUrl ? [{ type: 'twitter' as const, url: investor.twitterUrl }] : []),
@@ -59,6 +61,13 @@ export default function InvestorProfile({ investor }: InvestorProfileProps) {
                     if (item.type === 'info') {
                         return (
                             <div key={item.key} className={styles.infoCard}>
+                                {isOwnProfile && (
+                                    <div className={styles.infoActions}>
+                                        <Link href="/investor/edit" className={styles.editLink}>
+                                            Edit Profile
+                                        </Link>
+                                    </div>
+                                )}
                                 <h1 className={styles.name}>{investor.name}</h1>
                                 {investor.firmName && (
                                     <p className={styles.firm}>
@@ -110,8 +119,7 @@ export default function InvestorProfile({ investor }: InvestorProfileProps) {
                     </div>
                 )}
 
-                {/* Logout Button */}
-                <LogoutButton />
+                {isOwnProfile && <LogoutButton />}
             </div>
         </div>
     )

@@ -27,6 +27,7 @@ interface CustomSection {
 }
 
 type UploadType = 'logo' | 'video'
+const UPLOAD_TIMEOUT_MS = 45_000
 
 const INITIAL_FORM_DATA: CompanyData = {
     name: '',
@@ -95,10 +96,24 @@ export default function CompanyWizard() {
         const body = new FormData()
         body.append('file', file)
 
-        const res = await fetch('/api/upload', {
-            method: 'POST',
-            body,
-        })
+        const controller = new AbortController()
+        const timeout = setTimeout(() => controller.abort(), UPLOAD_TIMEOUT_MS)
+
+        let res: Response
+        try {
+            res = await fetch('/api/upload', {
+                method: 'POST',
+                body,
+                signal: controller.signal,
+            })
+        } catch (error) {
+            if (error instanceof DOMException && error.name === 'AbortError') {
+                throw new Error('Upload timed out. Please try again.')
+            }
+            throw error
+        } finally {
+            clearTimeout(timeout)
+        }
 
         if (!res.ok) {
             throw new Error(await getErrorMessage(res))
@@ -183,6 +198,11 @@ export default function CompanyWizard() {
     }
 
     const handleSubmit = async () => {
+        if (uploadingMedia) {
+            setErrorMessage('Please wait for uploads to finish before creating the company.')
+            return
+        }
+
         if (!formData.name.trim()) {
             setErrorMessage('Company name is required')
             return
@@ -558,7 +578,7 @@ export default function CompanyWizard() {
                     <button
                         type="button"
                         onClick={handleSubmit}
-                        disabled={loading || uploadingMedia}
+                        disabled={loading}
                         className={`${styles.actionButton} ${styles.primaryButton}`}
                     >
                         {loading ? 'Creating...' : 'Create Company'}

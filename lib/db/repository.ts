@@ -324,6 +324,77 @@ export async function createFounderOnboarding(input: {
     return founder
 }
 
+export async function updateFounderProfile(input: {
+    founderId: string
+    name: string
+    headline: string
+    location: string
+    bio: string
+    founderType: FounderType
+    videoUrl?: string | null
+    yearsExperience?: number | null
+    linkedinUrl?: string | null
+    twitterUrl?: string | null
+    websiteUrl?: string | null
+    photos: string[]
+    prompts: Array<{ prompt: string; answer: string }>
+}): Promise<FounderRecord> {
+    const founder = await getFounderById(input.founderId)
+    if (!founder) {
+        throw new Error("Founder not found")
+    }
+
+    const timestamp = nowIso()
+
+    const photos: FounderPhotoRecord[] = input.photos
+        .filter((url) => typeof url === "string" && url.trim().length > 0)
+        .map((url, index) => ({
+            id: randomUUID(),
+            url: url.trim(),
+            order: index,
+            caption: null,
+            createdAt: timestamp,
+        }))
+
+    const prompts: FounderPromptRecord[] = input.prompts
+        .filter((item) => item.prompt?.trim() && item.answer?.trim())
+        .map((item, index) => ({
+            id: randomUUID(),
+            prompt: item.prompt.trim(),
+            answer: item.answer.trim(),
+            order: index,
+            createdAt: timestamp,
+        }))
+
+    const updatedFounder: FounderRecord = {
+        ...founder,
+        name: input.name.trim(),
+        headline: input.headline.trim(),
+        location: input.location.trim(),
+        bio: input.bio.trim(),
+        founderType: input.founderType,
+        videoUrl: input.videoUrl?.trim() || null,
+        yearsExperience: input.yearsExperience ?? null,
+        linkedinUrl: input.linkedinUrl?.trim() || null,
+        twitterUrl: input.twitterUrl?.trim() || null,
+        websiteUrl: input.websiteUrl?.trim() || null,
+        photos,
+        prompts,
+        updatedAt: timestamp,
+    }
+
+    await dynamo.send(new PutCommand({
+        TableName: DYNAMO_TABLES.founders,
+        Item: updatedFounder,
+        ConditionExpression: "attribute_exists(#id)",
+        ExpressionAttributeNames: {
+            "#id": "id",
+        },
+    }))
+
+    return normalizeFounder(updatedFounder)
+}
+
 export async function getInvestorById(id: string): Promise<InvestorRecord | null> {
     const investor = await getSingleById<InvestorRecord>(DYNAMO_TABLES.investors, id)
     return investor ? normalizeInvestor(investor) : null
@@ -425,6 +496,84 @@ export async function createInvestorOnboarding(input: {
     }))
 
     return investor
+}
+
+export async function updateInvestorProfile(input: {
+    investorId: string
+    name: string
+    firmName?: string | null
+    title?: string | null
+    location?: string | null
+    bio?: string | null
+    profileImage?: string | null
+    investmentStagePreference?: InvestmentStage | null
+    linkedinUrl?: string | null
+    twitterUrl?: string | null
+    websiteUrl?: string | null
+    interestTags: string[]
+    portfolio: Array<{
+        name: string
+        logoUrl?: string | null
+        stage: InvestmentStage
+        isExited?: boolean
+        exitYear?: number | null
+    }>
+}): Promise<InvestorRecord> {
+    const investor = await getInvestorById(input.investorId)
+    if (!investor) {
+        throw new Error("Investor not found")
+    }
+
+    const timestamp = nowIso()
+
+    const portfolio: PortfolioCompanyRecord[] = input.portfolio
+        .filter((company) => company.name?.trim())
+        .map((company, index) => ({
+            id: randomUUID(),
+            name: company.name.trim(),
+            logoUrl: company.logoUrl?.trim() || null,
+            stage: company.stage,
+            isExited: Boolean(company.isExited),
+            exitYear: company.exitYear || null,
+            order: index,
+            createdAt: timestamp,
+        }))
+
+    const interestTags: InvestorInterestTagRecord[] = input.interestTags
+        .filter((tag) => tag?.trim())
+        .map((tag) => ({
+            id: randomUUID(),
+            name: tag.trim(),
+            createdAt: timestamp,
+        }))
+
+    const updatedInvestor: InvestorRecord = {
+        ...investor,
+        name: input.name.trim(),
+        firmName: input.firmName?.trim() || null,
+        title: input.title?.trim() || null,
+        location: input.location?.trim() || null,
+        bio: input.bio?.trim() || null,
+        profileImage: input.profileImage?.trim() || null,
+        investmentStagePreference: input.investmentStagePreference || investor.investmentStagePreference || "SEED",
+        linkedinUrl: input.linkedinUrl?.trim() || null,
+        twitterUrl: input.twitterUrl?.trim() || null,
+        websiteUrl: input.websiteUrl?.trim() || null,
+        portfolio,
+        interestTags,
+        updatedAt: timestamp,
+    }
+
+    await dynamo.send(new PutCommand({
+        TableName: DYNAMO_TABLES.investors,
+        Item: updatedInvestor,
+        ConditionExpression: "attribute_exists(#id)",
+        ExpressionAttributeNames: {
+            "#id": "id",
+        },
+    }))
+
+    return normalizeInvestor(updatedInvestor)
 }
 
 export async function getProductById(id: string): Promise<ProductRecord | null> {
@@ -530,6 +679,55 @@ export async function createCompanyForFounder(input: {
     }))
 
     return { product, founderProduct }
+}
+
+export async function updateProductById(input: {
+    productId: string
+    name: string
+    tagline: string
+    description?: string | null
+    problem?: string | null
+    solution?: string | null
+    websiteUrl?: string | null
+    stage?: string | null
+    askAmount?: number | null
+    videoUrl?: string | null
+    logoUrl?: string | null
+    status?: ProductStatus
+    customSections?: ProductRecord["customSections"]
+}): Promise<ProductRecord> {
+    const product = await getProductById(input.productId)
+    if (!product) {
+        throw new Error("Product not found")
+    }
+
+    const updatedProduct: ProductRecord = {
+        ...product,
+        name: input.name.trim(),
+        tagline: input.tagline.trim(),
+        description: input.description || null,
+        problem: input.problem || null,
+        solution: input.solution || null,
+        websiteUrl: input.websiteUrl || null,
+        stage: input.stage || null,
+        askAmount: input.askAmount ?? null,
+        videoUrl: input.videoUrl || null,
+        logoUrl: input.logoUrl || null,
+        status: input.status || product.status,
+        customSections: input.customSections || [],
+        updatedAt: nowIso(),
+    }
+
+    await dynamo.send(new PutCommand({
+        TableName: DYNAMO_TABLES.products,
+        Item: updatedProduct,
+        ConditionExpression: "attribute_exists(#id)",
+        ExpressionAttributeNames: {
+            "#id": "id",
+        },
+    }))
+
+    return normalizeProduct(updatedProduct)
 }
 
 export async function listFounderProductsByFounderId(founderId: string): Promise<FounderProductRecord[]> {
@@ -660,6 +858,41 @@ export async function listFounderInvitesByInviterFounderId(inviterFounderId: str
 
     const items = (response.Items || []) as FounderInviteRecord[]
     return sortByCreatedAtDesc(items.map(normalizeFounderInvite))
+}
+
+export async function listFounderInvitesByProductId(productId: string): Promise<FounderInviteRecord[]> {
+    try {
+        const response = await dynamo.send(new QueryCommand({
+            TableName: DYNAMO_TABLES.founderInvites,
+            IndexName: DYNAMO_INDEXES.founderInvitesByProductId,
+            KeyConditionExpression: "#productId = :productId",
+            ExpressionAttributeNames: {
+                "#productId": "productId",
+            },
+            ExpressionAttributeValues: {
+                ":productId": productId,
+            },
+        }))
+
+        const items = (response.Items || []) as FounderInviteRecord[]
+        return sortByCreatedAtDesc(items.map(normalizeFounderInvite))
+    } catch (error) {
+        console.warn("[DYNAMO_FOUNDER_INVITES_BY_PRODUCT_ID_FALLBACK]", error)
+    }
+
+    const fallback = await dynamo.send(new ScanCommand({
+        TableName: DYNAMO_TABLES.founderInvites,
+        FilterExpression: "#productId = :productId",
+        ExpressionAttributeNames: {
+            "#productId": "productId",
+        },
+        ExpressionAttributeValues: {
+            ":productId": productId,
+        },
+    }))
+
+    const fallbackItems = (fallback.Items || []) as FounderInviteRecord[]
+    return sortByCreatedAtDesc(fallbackItems.map(normalizeFounderInvite))
 }
 
 export async function createFounderInvite(input: {
@@ -841,6 +1074,104 @@ export async function autoAcceptPendingFounderInvites(input: {
     }
 
     return accepted
+}
+
+export async function deleteProductAndRelations(productId: string): Promise<void> {
+    const product = await getProductById(productId)
+    if (!product) {
+        return
+    }
+
+    const founderRelations = await listFounderProductsByProductId(productId)
+    const founderIds = Array.from(new Set(founderRelations.map((relation) => relation.founderId)))
+
+    const [interests, invites] = await Promise.all([
+        listInvestorInterestsByProductId(productId),
+        listFounderInvitesByProductId(productId),
+    ])
+
+    const conversations: ConversationRecord[] = []
+    let lastEvaluatedKey: Record<string, unknown> | undefined
+
+    do {
+        const response = await dynamo.send(new ScanCommand({
+            TableName: DYNAMO_TABLES.conversations,
+            FilterExpression: "#productId = :productId",
+            ExpressionAttributeNames: {
+                "#productId": "productId",
+            },
+            ExpressionAttributeValues: {
+                ":productId": productId,
+            },
+            ExclusiveStartKey: lastEvaluatedKey,
+        }))
+
+        conversations.push(...((response.Items || []) as ConversationRecord[]))
+        lastEvaluatedKey = response.LastEvaluatedKey as Record<string, unknown> | undefined
+    } while (lastEvaluatedKey)
+
+    for (const conversation of conversations) {
+        const messages = await listMessagesByConversationId(conversation.id)
+        await Promise.all(
+            messages.map((message) =>
+                dynamo.send(new DeleteCommand({
+                    TableName: DYNAMO_TABLES.messages,
+                    Key: { id: message.id },
+                }))
+            )
+        )
+    }
+
+    await Promise.all([
+        ...founderRelations.map((relation) =>
+            dynamo.send(new DeleteCommand({
+                TableName: DYNAMO_TABLES.founderProducts,
+                Key: { id: relation.id },
+            }))
+        ),
+        ...interests.map((interest) =>
+            dynamo.send(new DeleteCommand({
+                TableName: DYNAMO_TABLES.investorInterests,
+                Key: { id: interest.id },
+            }))
+        ),
+        ...invites.map((invite) =>
+            dynamo.send(new DeleteCommand({
+                TableName: DYNAMO_TABLES.founderInvites,
+                Key: { id: invite.id },
+            }))
+        ),
+        ...conversations.map((conversation) =>
+            dynamo.send(new DeleteCommand({
+                TableName: DYNAMO_TABLES.conversations,
+                Key: { id: conversation.id },
+            }))
+        ),
+        dynamo.send(new DeleteCommand({
+            TableName: DYNAMO_TABLES.products,
+            Key: { id: productId },
+        })),
+    ])
+
+    for (const founderId of founderIds) {
+        const memberships = await listFounderProductsByFounderId(founderId)
+        if (memberships.length === 0 || memberships.some((membership) => membership.isPrimary)) {
+            continue
+        }
+
+        const nextPrimary = memberships[0]
+        await dynamo.send(new UpdateCommand({
+            TableName: DYNAMO_TABLES.founderProducts,
+            Key: { id: nextPrimary.id },
+            UpdateExpression: "SET #isPrimary = :true",
+            ExpressionAttributeNames: {
+                "#isPrimary": "isPrimary",
+            },
+            ExpressionAttributeValues: {
+                ":true": true,
+            },
+        }))
+    }
 }
 
 export async function getProductLikeState(input: {

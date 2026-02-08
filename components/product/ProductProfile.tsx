@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import type { ProductRecord, FounderProductRecord, FounderRecord, FounderPhotoRecord } from '@/lib/db/types'
 import styles from './ProductProfile.module.css'
 import { BackButton, VideoPlayer, StatsGrid, StatItem } from '@/components/ui'
@@ -43,7 +45,10 @@ export default function ProductProfile({
     hasLiked = false,
     hasCommitted = false,
 }: ProductProfileProps) {
+    const router = useRouter()
     const [likeCount, setLikeCount] = useState(stats.interestedCount)
+    const [deleting, setDeleting] = useState(false)
+    const [ownerActionError, setOwnerActionError] = useState<string | null>(null)
 
     const formatStatus = (status: string): string => {
         const statusMap: Record<string, string> = {
@@ -61,6 +66,29 @@ export default function ProductProfile({
         { value: `$${Math.floor(product.amountRaised / 1000)}K`, label: 'Raised' },
         { value: likeCount, label: 'Interested' },
     ]
+
+    const handleDeleteProduct = async () => {
+        if (deleting) return
+
+        const confirmed = window.confirm("Delete this product? This will remove related invites, interests, and product conversations.")
+        if (!confirmed) return
+
+        setDeleting(true)
+        setOwnerActionError(null)
+        try {
+            const res = await fetch(`/api/product/${product.id}`, { method: "DELETE" })
+            const payload = await res.json().catch(() => null) as { error?: string } | null
+            if (!res.ok) {
+                throw new Error(payload?.error || "Failed to delete product")
+            }
+
+            router.push("/founder/products")
+            router.refresh()
+        } catch (error) {
+            setOwnerActionError(error instanceof Error ? error.message : "Failed to delete product")
+            setDeleting(false)
+        }
+    }
 
     return (
         <div className={styles.profile}>
@@ -130,6 +158,23 @@ export default function ProductProfile({
                     </div>
                 )}
 
+                {Array.isArray(product.customSections) && product.customSections.length > 0 && (
+                    product.customSections.map((section, index) => (
+                        <div className={styles.section} key={`${index}-${section.title || "section"}`}>
+                            {section.title && <h2 className={styles.sectionTitle}>{section.title}</h2>}
+                            {section.body && <p className={styles.text}>{section.body}</p>}
+                            {section.imageUrl && (
+                                <img
+                                    src={section.imageUrl}
+                                    alt={section.caption || section.title || `Section ${index + 1}`}
+                                    className={styles.sectionImage}
+                                />
+                            )}
+                            {section.caption && <p className={styles.sectionCaption}>{section.caption}</p>}
+                        </div>
+                    ))
+                )}
+
                 {/* Team */}
                 {product.founders.length > 0 && (
                     <div className={styles.section}>
@@ -148,6 +193,26 @@ export default function ProductProfile({
                                 )
                             })}
                         </div>
+                    </div>
+                )}
+
+                {isFounderOwner && (
+                    <div className={`${styles.section} ${styles.ownerActions}`}>
+                        <h2 className={styles.sectionTitle}>Manage Product</h2>
+                        <div className={styles.ownerActionRow}>
+                            <Link href={`/product/${product.id}/edit`} className={styles.ownerEditButton}>
+                                Edit Product
+                            </Link>
+                            <button
+                                type="button"
+                                className={styles.ownerDeleteButton}
+                                onClick={() => { void handleDeleteProduct() }}
+                                disabled={deleting}
+                            >
+                                {deleting ? "Deleting..." : "Delete Product"}
+                            </button>
+                        </div>
+                        {ownerActionError && <p className={styles.ownerError}>{ownerActionError}</p>}
                     </div>
                 )}
 

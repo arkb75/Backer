@@ -28,7 +28,7 @@ export default async function Home() {
                 } else if (user.userType === 'INVESTOR') {
                     const investor = await getInvestorByUserId(user.id)
                     if (investor) {
-                        redirect(`/investor/${investor.id}`)
+                        redirect("/investor/feed")
                     } else {
                         redirect("/investor/onboarding")
                     }

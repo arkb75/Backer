@@ -1,0 +1,134 @@
+.page {
+    min-height: 100vh;
+    background: var(--color-bg);
+    padding: 20px 14px 120px;
+}
+
+.content {
+    width: min(100%, 920px);
+    margin: 0 auto;
+    display: grid;
+    gap: 14px;
+}
+
+.header {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: clamp(16px, 3vw, 24px);
+    box-shadow: var(--shadow-sm);
+    display: grid;
+    gap: 8px;
+}
+
+.title {
+    margin: 0;
+    font-size: clamp(1.35rem, 3vw, 1.9rem);
+    color: var(--color-text);
+}
+
+.subtitle {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: 0.92rem;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 12px;
+}
+
+.card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    display: grid;
+    gap: 10px;
+}
+
+.cardHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.cardTitle {
+    margin: 0;
+    font-size: 1.05rem;
+    color: var(--color-text);
+}
+
+.cardTagline {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.meta {
+    margin: 0;
+    color: #475467;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.primaryBadge {
+    border-radius: 999px;
+    padding: 0.2rem 0.6rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #1d4ed8;
+    background: #dbeafe;
+}
+
+.actions {
+    display: flex;
+    gap: 8px;
+}
+
+.addButton,
+.primaryButton,
+.secondaryButton {
+    text-decoration: none;
+    border-radius: 10px;
+    padding: 9px 12px;
+    font-size: 0.87rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.addButton,
+.primaryButton {
+    background: var(--color-primary);
+    color: #fff;
+}
+
+.secondaryButton {
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    background: #fff;
+}
+
+.empty {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 18px;
+    display: grid;
+    gap: 10px;
+    justify-items: start;
+}
+
+.empty p {
+    margin: 0;
+    color: var(--color-text-secondary);
+}
+
+@media (max-width: 640px) {
+    .actions {
+        flex-direction: column;
+    }
+}

@@ -2,11 +2,11 @@ import { FounderWithRelations, InvestorStats } from '@/lib/types'
 import ProductCard from './ProductCard'
 import styles from './FounderProfile.module.css'
 import { LogoutButton } from '@/components/investor/LogoutButton'
+import Link from 'next/link'
 import {
     BackButton,
     SocialLinks,
     SocialLink,
-    TagList,
     StatsGrid,
     StatItem,
     ExperienceList,
@@ -116,6 +116,13 @@ export default function FounderProfile({
                     if (item.type === 'info') {
                         return (
                             <div key={item.key} className={styles.infoCard}>
+                                {isOwnProfile && (
+                                    <div className={styles.infoActions}>
+                                        <Link href="/founder/edit" className={styles.editLink}>
+                                            Edit Profile
+                                        </Link>
+                                    </div>
+                                )}
                                 <h1 className={styles.name}>{founder.name}</h1>
                                 <p className={styles.headline}>{founder.headline}</p>
 
@@ -136,40 +143,19 @@ export default function FounderProfile({
                 })}
 
                 {/* Products Section */}
-                {(founder.products.length > 0 || isOwnProfile) && (
+                {!isOwnProfile && founder.products.length > 0 && (
                     <div className={styles.section}>
-                        <div className={styles.productsHeader}>
-                            <h2 className={`${styles.sectionTitle} ${styles.sectionTitleTight}`}>🚀 Products</h2>
-                            {isOwnProfile && (
-                                <a href="/start-company" className={styles.addCompanyLink}>
-                                    <button className={`${styles.controlButton} ${styles.addCompanyButton}`}>
-                                        + Add Company
-                                    </button>
-                                </a>
-                            )}
+                        <h2 className={`${styles.sectionTitle} ${styles.sectionTitleTight}`}>🚀 Products</h2>
+                        <div className={styles.productGrid}>
+                            {founder.products.map((fp) => (
+                                <ProductCard
+                                    key={fp.id}
+                                    product={fp.product}
+                                    role={fp.role}
+                                    isPrimary={fp.isPrimary}
+                                />
+                            ))}
                         </div>
-
-                        {founder.products.length > 0 ? (
-                            <div className={styles.productGrid}>
-                                {founder.products.map((fp) => (
-                                    <ProductCard
-                                        key={fp.id}
-                                        product={fp.product}
-                                        role={fp.role}
-                                        isPrimary={fp.isPrimary}
-                                    />
-                                ))}
-                            </div>
-                        ) : (
-                            <div style={{ textAlign: 'center', padding: '20px', color: '#666', background: '#f9f9f9', borderRadius: '8px' }}>
-                                <p>No companies listed yet.</p>
-                                {isOwnProfile && (
-                                    <p className={styles.emptyProductsHint}>
-                                        Click &quot;Add Company&quot; to showcase your startup!
-                                    </p>
-                                )}
-                            </div>
-                        )}
                     </div>
                 )}
 
