@@ -176,18 +176,40 @@ model Skill {
 // ============================================
 
 model Investor {
-  id            String    @id @default(uuid())
-  userId        String    @unique
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                        String                  @id @default(uuid())
+  userId                    String                  @unique
+  user                      User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-  name          String    @db.VarChar(100)
-  firmName      String?   @db.VarChar(100)
+  // Basic Info
+  name                      String                  @db.VarChar(100)
+  firmName                  String?                 @db.VarChar(100)
+  title                     String?                 @db.VarChar(80)
+  bio                       String?                 @db.VarChar(500)
+  profileImage              String?
+  location                  String?                 @db.VarChar(50)
   
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  // Investment Preferences
+  investmentStagePreference InvestmentStage?        @default(SEED)
+  
+  // Social Links
+  linkedinUrl               String?
+  twitterUrl                String?
+  websiteUrl                String?
+  
+  createdAt                 DateTime                @default(now())
+  updatedAt                 DateTime                @updatedAt
   
   // Relations
-  interests     InvestorInterest[]
+  interests                 InvestorInterest[]
+  portfolio                 PortfolioCompany[]
+  interestTags              InvestorInterestTag[]
+}
+
+enum InvestmentStage {
+  SEED
+  SERIES_A
+  SERIES_B
+  GROWTH
 }
 
 // ============================================
@@ -254,4 +276,41 @@ model FounderPrompt {
   founder     Founder  @relation(fields: [founderId], references: [id], onDelete: Cascade)
   
   @@index([founderId])
+}
+
+// ============================================
+// Investor Portfolio
+// ============================================
+
+model PortfolioCompany {
+  id          String   @id @default(uuid())
+  investorId  String
+  name        String   @db.VarChar(100)
+  logoUrl     String?
+  stage       InvestmentStage
+  isExited    Boolean  @default(false)
+  exitYear    Int?
+  order       Int      @default(0)
+  
+  createdAt   DateTime @default(now())
+  
+  investor    Investor @relation(fields: [investorId], references: [id], onDelete: Cascade)
+  
+  @@index([investorId])
+}
+
+// ============================================
+// Investor Interest Tags (Industries)
+// ============================================
+
+model InvestorInterestTag {
+  id          String   @id @default(uuid())
+  investorId  String
+  name        String   @db.VarChar(50)
+  
+  createdAt   DateTime @default(now())
+  
+  investor    Investor @relation(fields: [investorId], references: [id], onDelete: Cascade)
+  
+  @@index([investorId])
 }

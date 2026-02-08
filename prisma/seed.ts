@@ -145,8 +145,16 @@ async function main() {
     const investor = await prisma.investor.create({
         data: {
             userId: investorUser.id,
-            name: 'Alex Investor',
+            name: 'Alex Rivera',
             firmName: 'Future Fund VC',
+            title: 'Managing Partner',
+            bio: 'I invest in bold founders building the future of work, education, and healthcare. 15+ years backing seed-stage startups. Former founder (exited to Google). I believe in betting on people, not just ideas.',
+            profileImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800',
+            location: 'San Francisco, CA',
+            investmentStagePreference: 'SEED',
+            linkedinUrl: 'https://linkedin.com/in/alexrivera',
+            twitterUrl: 'https://twitter.com/alexrivera',
+            websiteUrl: 'https://futurefundvc.com',
         },
     })
 
@@ -164,6 +172,76 @@ async function main() {
                 productId: product1.id,
                 interestType: InterestType.LIKED,
             },
+        ],
+    })
+
+    // Add portfolio companies
+    await prisma.portfolioCompany.createMany({
+        data: [
+            {
+                investorId: investor.id,
+                name: 'Zoom (Seed)',
+                logoUrl: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=200',
+                stage: 'SEED',
+                isExited: true,
+                exitYear: 2019,
+                order: 0,
+            },
+            {
+                investorId: investor.id,
+                name: 'Notion',
+                logoUrl: 'https://images.unsplash.com/photo-1633265486064-086b219458ec?w=200',
+                stage: 'SERIES_A',
+                isExited: false,
+                order: 1,
+            },
+            {
+                investorId: investor.id,
+                name: 'Figma',
+                logoUrl: 'https://images.unsplash.com/photo-1618761714954-0b8cd0026356?w=200',
+                stage: 'SEED',
+                isExited: true,
+                exitYear: 2022,
+                order: 2,
+            },
+            {
+                investorId: investor.id,
+                name: 'Linear',
+                logoUrl: 'https://images.unsplash.com/photo-1619410283995-43d9134e7656?w=200',
+                stage: 'SERIES_A',
+                isExited: false,
+                order: 3,
+            },
+            {
+                investorId: investor.id,
+                name: 'Airtable',
+                logoUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=200',
+                stage: 'SEED',
+                isExited: false,
+                order: 4,
+            },
+            {
+                investorId: investor.id,
+                name: 'Superhuman',
+                logoUrl: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?w=200',
+                stage: 'SEED',
+                isExited: false,
+                order: 5,
+            },
+        ],
+    })
+
+    // Add industry interest tags
+    await prisma.investorInterestTag.createMany({
+        data: [
+            { investorId: investor.id, name: 'SaaS' },
+            { investorId: investor.id, name: 'EdTech' },
+            { investorId: investor.id, name: 'HealthTech' },
+            { investorId: investor.id, name: 'Future of Work' },
+            { investorId: investor.id, name: 'AI/ML' },
+            { investorId: investor.id, name: 'Developer Tools' },
+            { investorId: investor.id, name: 'B2B' },
+            { investorId: investor.id, name: 'Productivity' },
         ],
     })
 
@@ -224,6 +302,8 @@ async function main() {
     console.log('✅ Seed complete!')
     console.log(`\n📝 Test founder: ${founder.name} (ID: ${founder.id})`)
     console.log(`🔗 Visit: http://localhost:3000/founder/${founder.id}`)
+    console.log(`\n💼 Test investor: ${investor.name} (ID: ${investor.id})`)
+    console.log(`🔗 Visit: http://localhost:3000/investor/${investor.id}`)
 }
 
 main()
