@@ -20,6 +20,7 @@ export default withAuth(
 export const config = {
     matcher: [
         "/onboarding/:path*",
+        "/investor/onboarding/:path*",
         "/feed/:path*",
         // Add other protected routes here
     ],
