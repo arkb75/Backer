@@ -1,0 +1,152 @@
+.container {
+    min-height: 100vh;
+    background: var(--color-bg);
+}
+
+.feed {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: var(--space-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.card {
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.photoCard {
+    aspect-ratio: 4/5;
+    padding: 0;
+    overflow: hidden;
+}
+
+.thesisCard {
+    background: linear-gradient(135deg, hsl(220, 80%, 65%), hsl(280, 60%, 65%));
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+/* Skeleton animation */
+.skeleton {
+    background: linear-gradient(90deg,
+            hsl(220, 15%, 90%) 0%,
+            hsl(220, 15%, 95%) 50%,
+            hsl(220, 15%, 90%) 100%);
+    background-size: 200% 100%;
+    animation: loading 1.5s ease-in-out infinite;
+    border-radius: var(--radius-sm);
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Skeleton variants */
+.skeleton.title {
+    height: 2rem;
+    width: 70%;
+    margin-bottom: var(--space-xs);
+}
+
+.skeleton.subtitle {
+    height: 1.25rem;
+    width: 50%;
+    margin-bottom: var(--space-sm);
+}
+
+.skeleton.sectionTitle {
+    height: 1.5rem;
+    width: 40%;
+    margin-bottom: var(--space-md);
+}
+
+.skeleton.label {
+    height: 0.875rem;
+    width: 30%;
+    background: rgba(255, 255, 255, 0.4);
+}
+
+.skeleton.text {
+    height: 1rem;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.skeleton.textShort {
+    height: 1rem;
+    width: 60%;
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.skeleton.tag {
+    height: 1.75rem;
+    width: 6rem;
+    border-radius: var(--radius-sm);
+}
+
+.skeleton.logo {
+    width: 60px;
+    height: 60px;
+    border-radius: var(--radius-sm);
+}
+
+.skeleton.companyName {
+    height: 0.875rem;
+    width: 80%;
+}
+
+.skeleton.stage {
+    height: 0.75rem;
+    width: 50%;
+}
+
+/* Quick info */
+.quickInfo {
+    display: flex;
+    gap: var(--space-sm);
+    margin-top: var(--space-xs);
+}
+
+/* Portfolio grid */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: var(--space-md);
+}
+
+.portfolioCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+    .feed {
+        padding: var(--space-sm);
+        gap: var(--space-sm);
+    }
+
+    .card {
+        padding: var(--space-md);
+    }
+
+    .grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-sm);
+    }
+}
