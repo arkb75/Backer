@@ -4,12 +4,14 @@ import {
     listFounderProductsByFounderId,
     listFounders,
     getInvestorByUserId,
+    listInvestorInterests,
 } from '@/lib/db/repository'
 import type { ProductRecord } from '@/lib/db/types'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import InvestorBottomNav from '@/components/investor/InvestorBottomNav'
+import { rankFeedItems } from '@/lib/feed/ranking'
 
 export const dynamic = 'force-dynamic'
 
@@ -78,8 +80,38 @@ export default async function FeedPage() {
             }]
         })
 
+    const allInterests = viewerInvestor
+        ? await listInvestorInterests()
+        : []
+
+    if (viewerInvestor && allInterests.length > 0) {
+        const historyProductIds = new Set(
+            allInterests
+                .filter((interest) =>
+                    interest.investorId === viewerInvestor.id &&
+                    Boolean(interest.productId) &&
+                    (interest.interestType === 'LIKED' || interest.interestType === 'COMMITTED')
+                )
+                .map((interest) => interest.productId as string)
+        )
+        const missingHistoryProductIds = Array.from(historyProductIds).filter((id) => !productsById.has(id))
+        if (missingHistoryProductIds.length > 0) {
+            const missingHistoryProducts = await getProductsByIds(missingHistoryProductIds)
+            for (const product of missingHistoryProducts) {
+                productsById.set(product.id, product)
+            }
+        }
+    }
+
+    const rankedFeedItems = rankFeedItems({
+        items: feedItems,
+        viewerInvestor,
+        allInterests,
+        productsById,
+    })
+
     // If no pitch videos, show empty state
-    if (feedItems.length === 0) {
+    if (rankedFeedItems.length === 0) {
         return (
             <div style={{ minHeight: '100vh', paddingBottom: '96px', background: 'black' }}>
                 <div style={{
@@ -104,7 +136,7 @@ export default async function FeedPage() {
 
     return (
         <>
-            <ReelsFeed items={feedItems} />
+            <ReelsFeed items={rankedFeedItems} />
             <InvestorBottomNav activeTab="feed" profileHref={profileHref} />
         </>
     )

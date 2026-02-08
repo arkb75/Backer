@@ -798,6 +798,23 @@ export async function listInvestorInterestsByProductId(productId: string): Promi
     return (response.Items || []) as InvestorInterestRecord[]
 }
 
+export async function listInvestorInterests(): Promise<InvestorInterestRecord[]> {
+    const interests: InvestorInterestRecord[] = []
+    let lastEvaluatedKey: Record<string, unknown> | undefined
+
+    do {
+        const response = await dynamo.send(new ScanCommand({
+            TableName: DYNAMO_TABLES.investorInterests,
+            ExclusiveStartKey: lastEvaluatedKey,
+        }))
+
+        interests.push(...((response.Items || []) as InvestorInterestRecord[]))
+        lastEvaluatedKey = response.LastEvaluatedKey as Record<string, unknown> | undefined
+    } while (lastEvaluatedKey)
+
+    return interests
+}
+
 export async function getFounderInviteById(id: string): Promise<FounderInviteRecord | null> {
     const invite = await getSingleById<FounderInviteRecord>(DYNAMO_TABLES.founderInvites, id)
     return invite ? normalizeFounderInvite(invite) : null
