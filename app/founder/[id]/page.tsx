@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation'
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import {
+    countUnreadConversationsForFounder,
     getFounderById,
     getProductsByIds,
     listFounderProductsByFounderId,
@@ -70,8 +71,9 @@ export default async function FounderPage({ params }: PageProps) {
     // Or check session.user.userType === 'INVESTOR'
     const isInvestor = session?.user?.userType === 'INVESTOR'
 
-    // Count new interests for badge
-    const newInterestsCount = investorInterests.length
+    const unreadMessagesCount = isOwnProfile
+        ? await countUnreadConversationsForFounder(founder.id)
+        : 0
 
     return (
         <div style={{ minHeight: "100vh", paddingBottom: isOwnProfile ? "96px" : "0", background: "black" }}>
@@ -85,7 +87,7 @@ export default async function FounderPage({ params }: PageProps) {
                 <FounderBottomNav
                     activeTab="profile"
                     profileHref={`/founder/${founder.id}`}
-                    messageBadgeCount={newInterestsCount}
+                    messageBadgeCount={unreadMessagesCount}
                 />
             )}
         </div>

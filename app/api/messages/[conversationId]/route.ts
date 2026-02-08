@@ -6,6 +6,7 @@ import {
     getFounderByUserId,
     getInvestorByUserId,
     listMessagesByConversationId,
+    markConversationRead,
 } from "@/lib/db/repository"
 
 interface RouteParams {
@@ -42,6 +43,13 @@ export async function GET(req: Request, { params }: RouteParams) {
 
         if (!hasAccess) {
             return NextResponse.json({ error: "Access denied" }, { status: 403 })
+        }
+
+        if (userType === "INVESTOR" || userType === "FOUNDER") {
+            await markConversationRead({
+                conversationId,
+                userType,
+            })
         }
 
         const messages = await listMessagesByConversationId(conversationId)

@@ -8,6 +8,7 @@ import {
     getInvestorById,
     getProductById,
     hasInvestorInterestInFounder,
+    markConversationRead,
 } from "@/lib/db/repository"
 import FounderBottomNav from "@/components/founder/FounderBottomNav"
 import ChatView from "@/components/messages/ChatView"
@@ -44,6 +45,11 @@ export default async function FounderConversationPage({ params }: PageProps) {
     if (conversation.founderId !== founder.id) {
         redirect("/founder/messages")
     }
+
+    await markConversationRead({
+        conversationId,
+        userType: "FOUNDER",
+    })
 
     // Get messages and enrichment data
     const [messages, investor, product] = await Promise.all([

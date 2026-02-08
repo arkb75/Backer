@@ -158,6 +158,9 @@ export interface ConversationRecord {
     founderId: string
     productId: string
     lastMessageAt: string
+    lastMessageSenderType?: SenderType | null
+    founderLastReadAt?: string | null
+    investorLastReadAt?: string | null
     createdAt: string
 }
 

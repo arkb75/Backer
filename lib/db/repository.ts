@@ -50,6 +50,13 @@ const sortByCreatedAtDesc = <T extends { createdAt?: string }>(items: T[]): T[] 
         return right - left
     })
 
+const sortConversationsByLastMessageAtDesc = (items: ConversationRecord[]): ConversationRecord[] =>
+    [...items].sort((a, b) => {
+        const left = a.lastMessageAt ? Date.parse(a.lastMessageAt) : 0
+        const right = b.lastMessageAt ? Date.parse(b.lastMessageAt) : 0
+        return right - left
+    })
+
 const chunk = <T>(items: T[], size: number): T[][] => {
     const batches: T[][] = []
     for (let i = 0; i < items.length; i += size) {
@@ -88,6 +95,15 @@ const normalizeFounderInvite = (record: FounderInviteRecord): FounderInviteRecor
     inviteeUserId: record.inviteeUserId || null,
     inviteeFounderId: record.inviteeFounderId || null,
     respondedAt: record.respondedAt || null,
+})
+
+const normalizeConversation = (record: ConversationRecord): ConversationRecord => ({
+    ...record,
+    lastMessageSenderType: record.lastMessageSenderType || null,
+    // Older conversations won't have read-tracking fields; default them to "already read"
+    // so historical threads do not show phantom unread badges.
+    founderLastReadAt: record.founderLastReadAt || record.lastMessageAt || record.createdAt || null,
+    investorLastReadAt: record.investorLastReadAt || record.lastMessageAt || record.createdAt || null,
 })
 
 const getSingleById = async <T>(tableName: string, id: string): Promise<T | null> => {
@@ -915,6 +931,9 @@ export async function createConversation(input: {
         founderId: input.founderId,
         productId: input.productId,
         lastMessageAt: timestamp,
+        lastMessageSenderType: null,
+        founderLastReadAt: timestamp,
+        investorLastReadAt: timestamp,
         createdAt: timestamp,
     }
 
@@ -931,7 +950,8 @@ export async function createConversation(input: {
 }
 
 export async function getConversationById(id: string): Promise<ConversationRecord | null> {
-    return getSingleById<ConversationRecord>(DYNAMO_TABLES.conversations, id)
+    const conversation = await getSingleById<ConversationRecord>(DYNAMO_TABLES.conversations, id)
+    return conversation ? normalizeConversation(conversation) : null
 }
 
 export async function getConversationByParticipants(input: {
@@ -958,7 +978,8 @@ export async function getConversationByParticipants(input: {
         Limit: 1,
     }))
 
-    return (response.Items?.[0] as ConversationRecord | undefined) || null
+    const conversation = (response.Items?.[0] as ConversationRecord | undefined) || null
+    return conversation ? normalizeConversation(conversation) : null
 }
 
 export async function listConversationsByInvestorId(investorId: string): Promise<ConversationRecord[]> {
@@ -974,7 +995,8 @@ export async function listConversationsByInvestorId(investorId: string): Promise
         },
     }))
 
-    return sortByCreatedAtDesc((response.Items || []) as ConversationRecord[])
+    const conversations = (response.Items || []) as ConversationRecord[]
+    return sortConversationsByLastMessageAtDesc(conversations.map(normalizeConversation))
 }
 
 export async function listConversationsByFounderId(founderId: string): Promise<ConversationRecord[]> {
@@ -990,7 +1012,8 @@ export async function listConversationsByFounderId(founderId: string): Promise<C
         },
     }))
 
-    return sortByCreatedAtDesc((response.Items || []) as ConversationRecord[])
+    const conversations = (response.Items || []) as ConversationRecord[]
+    return sortConversationsByLastMessageAtDesc(conversations.map(normalizeConversation))
 }
 
 export async function createMessage(input: {
@@ -1010,7 +1033,17 @@ export async function createMessage(input: {
         createdAt: timestamp,
     }
 
-    // Update conversation's lastMessageAt and create message in transaction
+    const senderReadAtField =
+        input.senderType === "FOUNDER"
+            ? "founderLastReadAt"
+            : "investorLastReadAt"
+    const recipientReadAtField =
+        input.senderType === "FOUNDER"
+            ? "investorLastReadAt"
+            : "founderLastReadAt"
+    const unreadFallbackTimestamp = "1970-01-01T00:00:00.000Z"
+
+    // Update conversation's message metadata and create message in transaction
     await dynamo.send(new TransactWriteCommand({
         TransactItems: [
             {
@@ -1027,12 +1060,17 @@ export async function createMessage(input: {
                 Update: {
                     TableName: DYNAMO_TABLES.conversations,
                     Key: { id: input.conversationId },
-                    UpdateExpression: "SET #lastMessageAt = :timestamp",
+                    UpdateExpression: "SET #lastMessageAt = :timestamp, #lastMessageSenderType = :senderType, #senderReadAt = :timestamp, #recipientReadAt = if_not_exists(#recipientReadAt, :unreadFallbackTimestamp)",
                     ExpressionAttributeNames: {
                         "#lastMessageAt": "lastMessageAt",
+                        "#lastMessageSenderType": "lastMessageSenderType",
+                        "#senderReadAt": senderReadAtField,
+                        "#recipientReadAt": recipientReadAtField,
                     },
                     ExpressionAttributeValues: {
                         ":timestamp": timestamp,
+                        ":senderType": input.senderType,
+                        ":unreadFallbackTimestamp": unreadFallbackTimestamp,
                     },
                 },
             },
@@ -1062,6 +1100,90 @@ export async function listMessagesByConversationId(conversationId: string): Prom
         const right = b.createdAt ? Date.parse(b.createdAt) : 0
         return left - right
     })
+}
+
+export async function markConversationRead(input: {
+    conversationId: string
+    userType: SenderType
+}): Promise<ConversationRecord> {
+    const readAtField =
+        input.userType === "FOUNDER"
+            ? "founderLastReadAt"
+            : "investorLastReadAt"
+    const timestamp = nowIso()
+
+    const response = await dynamo.send(new UpdateCommand({
+        TableName: DYNAMO_TABLES.conversations,
+        Key: { id: input.conversationId },
+        UpdateExpression: "SET #readAtField = :timestamp",
+        ExpressionAttributeNames: {
+            "#readAtField": readAtField,
+        },
+        ExpressionAttributeValues: {
+            ":timestamp": timestamp,
+        },
+        ReturnValues: "ALL_NEW",
+    }))
+
+    const updated = response.Attributes as ConversationRecord | undefined
+    if (!updated) {
+        throw new Error("Failed to mark conversation as read")
+    }
+    return normalizeConversation(updated)
+}
+
+const getLatestMessageSenderType = async (conversationId: string): Promise<SenderType | null> => {
+    const messages = await listMessagesByConversationId(conversationId)
+    const latestMessage = messages[messages.length - 1]
+    return latestMessage?.senderType || null
+}
+
+const isUnreadByFounder = async (conversation: ConversationRecord): Promise<boolean> => {
+    const senderType = conversation.lastMessageSenderType || await getLatestMessageSenderType(conversation.id)
+    if (senderType !== "INVESTOR") {
+        return false
+    }
+
+    const lastMessageAtMs = conversation.lastMessageAt ? Date.parse(conversation.lastMessageAt) : 0
+    const founderLastReadAtMs = conversation.founderLastReadAt ? Date.parse(conversation.founderLastReadAt) : 0
+    return lastMessageAtMs > founderLastReadAtMs
+}
+
+const isUnreadByInvestor = async (conversation: ConversationRecord): Promise<boolean> => {
+    const senderType = conversation.lastMessageSenderType || await getLatestMessageSenderType(conversation.id)
+    if (senderType !== "FOUNDER") {
+        return false
+    }
+
+    const lastMessageAtMs = conversation.lastMessageAt ? Date.parse(conversation.lastMessageAt) : 0
+    const investorLastReadAtMs = conversation.investorLastReadAt ? Date.parse(conversation.investorLastReadAt) : 0
+    return lastMessageAtMs > investorLastReadAtMs
+}
+
+export async function countUnreadConversationsForFounder(founderId: string): Promise<number> {
+    const conversations = await listConversationsByFounderId(founderId)
+    let unreadCount = 0
+
+    for (const conversation of conversations) {
+        if (await isUnreadByFounder(conversation)) {
+            unreadCount += 1
+        }
+    }
+
+    return unreadCount
+}
+
+export async function countUnreadConversationsForInvestor(investorId: string): Promise<number> {
+    const conversations = await listConversationsByInvestorId(investorId)
+    let unreadCount = 0
+
+    for (const conversation of conversations) {
+        if (await isUnreadByInvestor(conversation)) {
+            unreadCount += 1
+        }
+    }
+
+    return unreadCount
 }
 
 export async function createInvestorInterest(input: {
