@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation"
 import {
     useCallback,
     useEffect,
+    useLayoutEffect,
     useRef,
     useState,
     type CSSProperties,
@@ -44,6 +45,8 @@ export default function FounderBottomNav({
     const resolvedActiveTab = activeTab ?? getActiveTabFromPath(pathname)
     const [optimisticTab, setOptimisticTab] = useState<FounderNavTab>(resolvedActiveTab)
     const timeoutRef = useRef<number | null>(null)
+    const tabRefs = useRef<Partial<Record<FounderNavTab, HTMLAnchorElement | null>>>({})
+    const [indicatorStyle, setIndicatorStyle] = useState<CSSProperties | undefined>(undefined)
     const navTabs = tabs(profileHref)
 
     useEffect(() => {
@@ -57,6 +60,26 @@ export default function FounderBottomNav({
             }
         }
     }, [])
+
+    const updateIndicator = useCallback((tabKey: FounderNavTab) => {
+        const activeLink = tabRefs.current[tabKey]
+        if (!activeLink) return
+
+        setIndicatorStyle({
+            left: activeLink.offsetLeft,
+            width: activeLink.offsetWidth,
+        })
+    }, [])
+
+    useLayoutEffect(() => {
+        updateIndicator(optimisticTab)
+    }, [optimisticTab, updateIndicator])
+
+    useEffect(() => {
+        const handleResize = () => updateIndicator(optimisticTab)
+        window.addEventListener("resize", handleResize)
+        return () => window.removeEventListener("resize", handleResize)
+    }, [optimisticTab, updateIndicator])
 
     const handleTabClick = useCallback(
         (
@@ -90,20 +113,20 @@ export default function FounderBottomNav({
         [pathname, router]
     )
 
-    const activeIndex = navTabs.findIndex((tab) => tab.key === optimisticTab)
-    const activeIndexVar = String(activeIndex < 0 ? 0 : activeIndex)
-
     return (
         <nav className={styles.nav} aria-label="Founder navigation">
             <span
                 aria-hidden
                 className={styles.activePill}
-                style={{ "--tab-index": activeIndexVar } as CSSProperties}
+                style={indicatorStyle}
             />
             {navTabs.map((tab) => (
                 <Link
                     key={tab.key}
                     href={tab.href}
+                    ref={(element) => {
+                        tabRefs.current[tab.key] = element
+                    }}
                     className={`${styles.link} ${optimisticTab === tab.key ? styles.active : ""}`}
                     onClick={(event) => handleTabClick(event, tab)}
                     aria-current={optimisticTab === tab.key ? "page" : undefined}
