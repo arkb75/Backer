@@ -79,13 +79,14 @@ export default function InvestorBottomNav({ activeTab, profileHref }: InvestorBo
     )
 
     const activeIndex = navTabs.findIndex((tab) => tab.key === optimisticTab)
+    const activeIndexVar = String(activeIndex < 0 ? 0 : activeIndex)
 
     return (
         <nav className={styles.nav} aria-label="Investor navigation">
             <span
                 aria-hidden
                 className={styles.activePill}
-                style={{ "--tab-index": activeIndex < 0 ? 0 : activeIndex } as CSSProperties}
+                style={{ "--tab-index": activeIndexVar } as CSSProperties}
             />
             {navTabs.map((tab) => (
                 <Link
