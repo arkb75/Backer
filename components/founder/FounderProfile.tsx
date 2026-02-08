@@ -138,19 +138,40 @@ export default function FounderProfile({
                 })}
 
                 {/* Products Section */}
-                {founder.products.length > 0 && (
+                {(founder.products.length > 0 || isOwnProfile) && (
                     <div className={styles.section}>
-                        <h2 className={styles.sectionTitle}>🚀 Products</h2>
-                        <div className={styles.productGrid}>
-                            {founder.products.map((fp) => (
-                                <ProductCard
-                                    key={fp.id}
-                                    product={fp.product}
-                                    role={fp.role}
-                                    isPrimary={fp.isPrimary}
-                                />
-                            ))}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                            <h2 className={styles.sectionTitle} style={{ margin: 0 }}>🚀 Products</h2>
+                            {isOwnProfile && (
+                                <a href="/start-company" style={{ textDecoration: 'none' }}>
+                                    <button className={styles.controlButton} style={{ background: '#000', color: 'white' }}>
+                                        + Add Company
+                                    </button>
+                                </a>
+                            )}
                         </div>
+
+                        {founder.products.length > 0 ? (
+                            <div className={styles.productGrid}>
+                                {founder.products.map((fp) => (
+                                    <ProductCard
+                                        key={fp.id}
+                                        product={fp.product}
+                                        role={fp.role}
+                                        isPrimary={fp.isPrimary}
+                                    />
+                                ))}
+                            </div>
+                        ) : (
+                            <div style={{ textAlign: 'center', padding: '20px', color: '#666', background: '#f9f9f9', borderRadius: '8px' }}>
+                                <p>No companies listed yet.</p>
+                                {isOwnProfile && (
+                                    <p style={{ marginTop: '8px', fontSize: '14px' }}>
+                                        Click "Add Company" to showcase your startup!
+                                    </p>
+                                )}
+                            </div>
+                        )}
                     </div>
                 )}
 

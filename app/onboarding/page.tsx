@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
+import FounderControls from "@/components/founder/FounderControls"
 
 export default async function OnboardingPage() {
     const session = await getServerSession(authOptions)
@@ -21,6 +22,7 @@ export default async function OnboardingPage() {
 
     return (
         <div style={{ minHeight: '100vh', background: '#f9fafe', paddingTop: '40px' }}>
+            <FounderControls />
             <OnboardingWizard />
         </div>
     )
