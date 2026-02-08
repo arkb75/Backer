@@ -74,7 +74,7 @@ export function ReelCard({ item }: ReelCardProps) {
 
     const handleLikeClick = (e: React.MouseEvent) => {
         e.stopPropagation()
-        if (isLikeLoading || isLiked) return
+        if (isLikeLoading) return
 
         const toggleLike = async () => {
             setIsLikeLoading(true)
@@ -126,8 +126,8 @@ export function ReelCard({ item }: ReelCardProps) {
                     <button
                         className={`${styles.actionButton} ${isLiked ? styles.liked : ''}`}
                         onClick={handleLikeClick}
-                        disabled={isLikeLoading || isLiked}
-                        aria-label={isLiked ? 'Startup already liked' : 'Like startup'}
+                        disabled={isLikeLoading}
+                        aria-label={isLiked ? 'Unlike startup' : 'Like startup'}
                     >
                         <Heart className={styles.actionIcon} fill={isLiked ? 'currentColor' : 'none'} />
                     </button>

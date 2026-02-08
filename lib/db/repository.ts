@@ -1,6 +1,7 @@
 import { randomUUID } from "crypto"
 import {
     BatchGetCommand,
+    DeleteCommand,
     GetCommand,
     PutCommand,
     QueryCommand,
@@ -580,7 +581,7 @@ export async function getProductLikeState(input: {
     }
 }
 
-export async function likeProduct(input: {
+export async function toggleProductLike(input: {
     productId: string
     investorId: string
     founderId?: string | null
@@ -593,6 +594,14 @@ export async function likeProduct(input: {
     )
 
     if (existingLikes.length > 0) {
+        await Promise.all(
+            existingLikes.map((interest) =>
+                dynamo.send(new DeleteCommand({
+                    TableName: DYNAMO_TABLES.investorInterests,
+                    Key: { id: interest.id },
+                }))
+            )
+        )
         return getProductLikeState({
             productId: input.productId,
             investorId: input.investorId,

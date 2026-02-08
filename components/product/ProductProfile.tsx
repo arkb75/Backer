@@ -42,7 +42,7 @@ export default function ProductProfile({
     const [likeLoading, setLikeLoading] = useState(false)
 
     const handleLike = async () => {
-        if (isLiked || likeLoading) return
+        if (likeLoading) return
 
         setLikeLoading(true)
         try {
@@ -174,10 +174,14 @@ export default function ProductProfile({
                         <div className={styles.actionButtons}>
                             <button
                                 onClick={handleLike}
-                                disabled={isLiked || likeLoading}
-                                className={`${styles.button} ${styles.likeButton} ${isLiked ? styles.likeButtonDisabled : ''}`}
+                                disabled={likeLoading}
+                                className={`${styles.button} ${styles.likeButton} ${isLiked ? styles.likeButtonActive : ''}`}
                             >
-                                {isLiked ? '❤️ Already Liked' : (likeLoading ? 'Liking...' : '❤️ Like This Startup')}
+                                {likeLoading
+                                    ? 'Updating...'
+                                    : isLiked
+                                        ? '💔 Unlike This Startup'
+                                        : '❤️ Like This Startup'}
                             </button>
                             <button className={`${styles.button} ${styles.commitButton}`}>
                                 💰 Commit to Invest
