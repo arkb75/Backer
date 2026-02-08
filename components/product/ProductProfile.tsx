@@ -26,8 +26,6 @@ interface ProductStats {
 interface ProductProfileProps {
     product: ProductWithRelations
     stats: ProductStats
-    productId: string
-    initialLiked: boolean
     isInvestor: boolean
     founderId?: string | null
     hasLiked?: boolean
@@ -37,36 +35,12 @@ interface ProductProfileProps {
 export default function ProductProfile({
     product,
     stats,
-    productId,
-    initialLiked,
     isInvestor,
     founderId,
     hasLiked = false,
     hasCommitted = false,
 }: ProductProfileProps) {
-    const [isLiked, setIsLiked] = useState(initialLiked)
     const [likeCount, setLikeCount] = useState(stats.interestedCount)
-    const [likeLoading, setLikeLoading] = useState(false)
-
-    const handleLike = async () => {
-        if (likeLoading) return
-
-        setLikeLoading(true)
-        try {
-            const res = await fetch(`/api/product/${productId}/like`, {
-                method: 'POST',
-            })
-
-            if (!res.ok) return
-            const payload = await res.json() as { likeCount?: number; liked?: boolean }
-            if (typeof payload.likeCount === 'number') {
-                setLikeCount(payload.likeCount)
-            }
-            setIsLiked(Boolean(payload.liked))
-        } finally {
-            setLikeLoading(false)
-        }
-    }
 
     const formatStatus = (status: string): string => {
         const statusMap: Record<string, string> = {
@@ -183,27 +157,13 @@ export default function ProductProfile({
                             founderId={founderId}
                             isLiked={hasLiked}
                             isCommitted={hasCommitted}
+                            onLikeStateChange={({ likeCount: nextLikeCount }) => {
+                                setLikeCount(nextLikeCount)
+                            }}
                         />
-                        <div className={styles.actionButtons}>
-                            <button
-                                onClick={handleLike}
-                                disabled={likeLoading}
-                                className={`${styles.button} ${styles.likeButton} ${isLiked ? styles.likeButtonActive : ''}`}
-                            >
-                                {likeLoading
-                                    ? 'Updating...'
-                                    : isLiked
-                                        ? '💔 Unlike This Startup'
-                                        : '❤️ Like This Startup'}
-                            </button>
-                            <button className={`${styles.button} ${styles.commitButton}`}>
-                                💰 Commit to Invest
-                            </button>
-                        </div>
                     </div>
                 )}
             </div>
         </div>
     )
 }
-

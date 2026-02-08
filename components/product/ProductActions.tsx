@@ -9,6 +9,7 @@ interface ProductActionsProps {
     founderId: string
     isLiked?: boolean
     isCommitted?: boolean
+    onLikeStateChange?: (state: { liked: boolean; likeCount: number }) => void
 }
 
 export default function ProductActions({
@@ -16,6 +17,7 @@ export default function ProductActions({
     founderId,
     isLiked = false,
     isCommitted = false,
+    onLikeStateChange,
 }: ProductActionsProps) {
     const router = useRouter()
     const [liked, setLiked] = useState(isLiked || isCommitted)
@@ -24,19 +26,15 @@ export default function ProductActions({
     const [success, setSuccess] = useState<string | null>(null)
 
     const handleLike = async () => {
-        if (liked || loading) return
+        if (loading) return
 
         setLoading(true)
         setError(null)
+        setSuccess(null)
 
         try {
-            const response = await fetch('/api/interest/like', {
+            const response = await fetch(`/api/product/${productId}/like`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    productId,
-                    interestType: 'LIKED',
-                }),
             })
 
             const data = await response.json()
@@ -45,8 +43,18 @@ export default function ProductActions({
                 throw new Error(data.error || 'Failed to like product')
             }
 
-            setLiked(true)
-            setSuccess('You liked this startup! The founder can now message you.')
+            const nextLiked = Boolean(data.liked)
+            const nextLikeCount = typeof data.likeCount === 'number' ? data.likeCount : 0
+            setLiked(nextLiked)
+            onLikeStateChange?.({
+                liked: nextLiked,
+                likeCount: nextLikeCount,
+            })
+            setSuccess(
+                nextLiked
+                    ? 'You liked this startup! The founder can now message you.'
+                    : 'You removed your like.'
+            )
         } catch (err: any) {
             setError(err.message)
         } finally {
@@ -88,10 +96,10 @@ export default function ProductActions({
             <button
                 className={`${styles.button} ${styles.likeButton} ${liked ? styles.liked : ''}`}
                 onClick={handleLike}
-                disabled={liked || loading}
+                disabled={loading}
             >
                 <span className={styles.icon}>{liked ? '💖' : '❤️'}</span>
-                {liked ? 'Liked!' : 'Like This Startup'}
+                {loading ? 'Updating...' : liked ? 'Unlike This Startup' : 'Like This Startup'}
             </button>
 
             <button
