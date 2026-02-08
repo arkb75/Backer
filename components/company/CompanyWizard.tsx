@@ -18,6 +18,14 @@ interface CompanyData {
     videoUrl: string
 }
 
+interface CustomSection {
+    id: string
+    title: string
+    body: string
+    imageUrl: string
+    caption: string
+}
+
 type UploadType = 'logo' | 'video'
 
 const INITIAL_FORM_DATA: CompanyData = {
@@ -32,6 +40,24 @@ const INITIAL_FORM_DATA: CompanyData = {
     logoUrl: '',
     videoUrl: '',
 }
+
+const createCustomSectionId = (): string =>
+    `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
+
+const sanitizeCustomSections = (sections: CustomSection[]) =>
+    sections
+        .map((section) => ({
+            title: section.title.trim(),
+            body: section.body.trim(),
+            imageUrl: section.imageUrl,
+            caption: section.caption.trim(),
+        }))
+        .filter((section) => (
+            section.title ||
+            section.body ||
+            section.imageUrl ||
+            section.caption
+        ))
 
 const getErrorMessage = async (res: Response): Promise<string> => {
     const contentType = res.headers.get('content-type') || ''
@@ -55,6 +81,8 @@ export default function CompanyWizard() {
     })
     const [errorMessage, setErrorMessage] = useState('')
     const [formData, setFormData] = useState<CompanyData>(INITIAL_FORM_DATA)
+    const [customSections, setCustomSections] = useState<CustomSection[]>([])
+    const [uploadingSectionId, setUploadingSectionId] = useState<string | null>(null)
 
     const handleInputChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -63,41 +91,96 @@ export default function CompanyWizard() {
         setFormData((prev) => ({ ...prev, [name]: value }))
     }
 
+    const uploadFile = async (file: File): Promise<string> => {
+        const body = new FormData()
+        body.append('file', file)
+
+        const res = await fetch('/api/upload', {
+            method: 'POST',
+            body,
+        })
+
+        if (!res.ok) {
+            throw new Error(await getErrorMessage(res))
+        }
+
+        const payload = await res.json() as { url?: string }
+        if (!payload.url) {
+            throw new Error('Upload did not return a file URL')
+        }
+
+        return payload.url
+    }
+
     const handleFileChange = async (
         e: React.ChangeEvent<HTMLInputElement>,
         type: UploadType
     ) => {
         if (!e.target.files?.[0]) return
 
-        const file = e.target.files[0]
-        const body = new FormData()
-        body.append('file', file)
+        const input = e.target
+        const file = input.files[0]
         setErrorMessage('')
         setUploading((prev) => ({ ...prev, [type]: true }))
 
         try {
-            const res = await fetch('/api/upload', {
-                method: 'POST',
-                body,
-            })
-
-            if (!res.ok) {
-                throw new Error(await getErrorMessage(res))
-            }
-
-            const payload = await res.json() as { url?: string }
-            if (!payload.url) {
-                throw new Error('Upload did not return a file URL')
-            }
-
+            const url = await uploadFile(file)
             const key = type === 'logo' ? 'logoUrl' : 'videoUrl'
-            setFormData((prev) => ({ ...prev, [key]: payload.url || '' }))
+            setFormData((prev) => ({ ...prev, [key]: url }))
         } catch (error) {
             console.error(error)
             const message = error instanceof Error ? error.message : 'Upload failed'
             setErrorMessage(message)
         } finally {
+            input.value = ''
             setUploading((prev) => ({ ...prev, [type]: false }))
+        }
+    }
+
+    const addCustomSection = () => {
+        setCustomSections((prev) => [
+            ...prev,
+            {
+                id: createCustomSectionId(),
+                title: '',
+                body: '',
+                imageUrl: '',
+                caption: '',
+            },
+        ])
+    }
+
+    const updateCustomSection = (id: string, patch: Partial<CustomSection>) => {
+        setCustomSections((prev) =>
+            prev.map((section) => (section.id === id ? { ...section, ...patch } : section))
+        )
+    }
+
+    const removeCustomSection = (id: string) => {
+        setCustomSections((prev) => prev.filter((section) => section.id !== id))
+    }
+
+    const handleCustomSectionImageChange = async (
+        e: React.ChangeEvent<HTMLInputElement>,
+        sectionId: string
+    ) => {
+        if (!e.target.files?.[0]) return
+
+        const input = e.target
+        const file = input.files[0]
+        setErrorMessage('')
+        setUploadingSectionId(sectionId)
+
+        try {
+            const url = await uploadFile(file)
+            updateCustomSection(sectionId, { imageUrl: url })
+        } catch (error) {
+            console.error(error)
+            const message = error instanceof Error ? error.message : 'Upload failed'
+            setErrorMessage(message)
+        } finally {
+            input.value = ''
+            setUploadingSectionId((current) => (current === sectionId ? null : current))
         }
     }
 
@@ -118,6 +201,7 @@ export default function CompanyWizard() {
                     ...formData,
                     name: formData.name.trim(),
                     tagline: formData.tagline.trim(),
+                    customSections: sanitizeCustomSections(customSections),
                 }),
             })
 
@@ -147,19 +231,11 @@ export default function CompanyWizard() {
         }
     }
 
-    const uploadingMedia = uploading.logo || uploading.video
+    const uploadingMedia = uploading.logo || uploading.video || Boolean(uploadingSectionId)
 
     return (
         <div className={styles.profile}>
             <div className={styles.feed}>
-                <section className={styles.introCard}>
-                    <h1 className={styles.pageTitle}>Create Your Company Page</h1>
-                    <p className={styles.pageSubtitle}>
-                        This is a blank product-page template. Add your name, fields, images,
-                        and pitch video before publishing.
-                    </p>
-                </section>
-
                 <section className={styles.videoHero}>
                     <label className={styles.videoUploadArea}>
                         <input
@@ -220,86 +296,84 @@ export default function CompanyWizard() {
                                     className={styles.hiddenInput}
                                 />
                                 {formData.logoUrl ? (
-                                    <div className={styles.logoPreviewWrapper}>
-                                        <Image
-                                            src={formData.logoUrl}
-                                            alt="Company logo preview"
-                                            fill
-                                            sizes="110px"
-                                            className={styles.logoPreview}
-                                        />
-                                    </div>
-                                ) : (
-                                    <div className={styles.logoPlaceholder}>Click to add image</div>
-                                )}
-                            </label>
-                            {uploading.logo && (
-                                <p className={styles.helperText}>Uploading image...</p>
+                                <div className={styles.logoPreviewWrapper}>
+                                    <Image
+                                        src={formData.logoUrl}
+                                        alt="Company logo preview"
+                                        fill
+                                        sizes="(max-width: 720px) 160px, 200px"
+                                        className={styles.logoPreview}
+                                    />
+                                </div>
+                            ) : (
+                                <div className={styles.logoPlaceholder}>Click to add icon</div>
                             )}
-                            {!uploading.logo && (
-                                <p className={styles.helperText}>Click the image area to upload.</p>
-                            )}
-                        </div>
+                        </label>
+                        {uploading.logo && (
+                            <p className={styles.helperText}>Uploading icon...</p>
+                        )}
+                        {!uploading.logo && (
+                            <p className={styles.helperText}>Click the icon area to upload.</p>
+                        )}
+                    </div>
 
-                        <div className={styles.headerFields}>
-                            <div className={styles.field}>
-                                <label className={styles.label}>Company Name</label>
-                                <input
-                                    name="name"
+                    <div className={styles.headerFields}>
+                        <div className={`${styles.field} ${styles.fieldFull}`}>
+                            <label className={styles.label}>Company Name</label>
+                            <input
+                                name="name"
                                     value={formData.name}
                                     onChange={handleInputChange}
                                     className={styles.nameInput}
                                     placeholder="Acme Labs"
                                     maxLength={100}
-                                />
-                            </div>
+                            />
+                        </div>
 
-                            <div className={styles.field}>
-                                <label className={styles.label}>One-Line Tagline</label>
-                                <input
-                                    name="tagline"
+                        <div className={`${styles.field} ${styles.fieldFull}`}>
+                            <label className={styles.label}>One-Line Tagline</label>
+                            <input
+                                name="tagline"
                                     value={formData.tagline}
                                     onChange={handleInputChange}
                                     className={styles.input}
                                     placeholder="A faster way to do X"
-                                    maxLength={200}
-                                />
-                            </div>
+                                maxLength={200}
+                            />
+                        </div>
 
-                            <div className={styles.row}>
-                                <div className={styles.field}>
-                                    <label className={styles.label}>Stage</label>
-                                    <select
-                                        name="stage"
-                                        value={formData.stage}
-                                        onChange={handleInputChange}
-                                        className={styles.select}
-                                    >
-                                        <option value="Pre-Seed">Pre-Seed</option>
-                                        <option value="Seed">Seed</option>
-                                        <option value="Series A">Series A</option>
-                                        <option value="Series B">Series B</option>
-                                    </select>
-                                </div>
+                        <div className={styles.field}>
+                            <label className={styles.label}>Stage</label>
+                            <select
+                                name="stage"
+                                value={formData.stage}
+                                onChange={handleInputChange}
+                                className={styles.select}
+                            >
+                                <option value="Pre-Seed">Pre-Seed</option>
+                                <option value="Seed">Seed</option>
+                                <option value="Series A">Series A</option>
+                                <option value="Series B">Series B</option>
+                            </select>
+                        </div>
 
-                                <div className={styles.field}>
-                                    <label className={styles.label}>Ask Amount (USD)</label>
-                                    <input
-                                        name="askAmount"
-                                        type="number"
-                                        value={formData.askAmount}
-                                        onChange={handleInputChange}
-                                        className={styles.input}
-                                        placeholder="1000000"
-                                        min={0}
-                                    />
-                                </div>
-                            </div>
+                        <div className={styles.field}>
+                            <label className={styles.label}>Ask Amount (USD)</label>
+                            <input
+                                name="askAmount"
+                                type="number"
+                                value={formData.askAmount}
+                                onChange={handleInputChange}
+                                className={styles.input}
+                                placeholder="1000000"
+                                min={0}
+                            />
+                        </div>
 
-                            <div className={styles.field}>
-                                <label className={styles.label}>Website</label>
-                                <input
-                                    name="websiteUrl"
+                        <div className={`${styles.field} ${styles.fieldFull}`}>
+                            <label className={styles.label}>Website</label>
+                            <input
+                                name="websiteUrl"
                                     value={formData.websiteUrl}
                                     onChange={handleInputChange}
                                     className={styles.input}
@@ -347,6 +421,127 @@ export default function CompanyWizard() {
                         rows={4}
                         maxLength={500}
                     />
+                </section>
+
+                <section className={styles.section}>
+                    <div className={styles.customSectionHeader}>
+                        <h2 className={styles.sectionTitle}>Additional Sections</h2>
+                        <button
+                            type="button"
+                            className={styles.addSectionButton}
+                            onClick={addCustomSection}
+                            disabled={loading}
+                        >
+                            <span className={styles.plusIcon}>+</span>
+                            <span>Add Section</span>
+                        </button>
+                    </div>
+                    <p className={styles.sectionHint}>
+                        Add optional text blocks or image + caption blocks to expand your page.
+                    </p>
+
+                    {customSections.length === 0 && (
+                        <div className={styles.emptyCustomState}>
+                            No additional sections yet. Click + Add Section to create one.
+                        </div>
+                    )}
+
+                    {customSections.length > 0 && (
+                        <div className={styles.customSectionList}>
+                            {customSections.map((section, index) => (
+                                <article key={section.id} className={styles.customSectionCard}>
+                                    <div className={styles.customSectionToolbar}>
+                                        <p className={styles.customSectionLabel}>Section {index + 1}</p>
+                                        <button
+                                            type="button"
+                                            onClick={() => removeCustomSection(section.id)}
+                                            className={styles.removeSectionButton}
+                                        >
+                                            Remove section
+                                        </button>
+                                    </div>
+
+                                    <div className={styles.field}>
+                                        <label className={styles.label}>Section Title</label>
+                                        <input
+                                            value={section.title}
+                                            onChange={(e) =>
+                                                updateCustomSection(section.id, { title: e.target.value })
+                                            }
+                                            className={styles.input}
+                                            placeholder="Milestones, Traction, Roadmap..."
+                                            maxLength={120}
+                                        />
+                                    </div>
+
+                                    <div className={styles.field}>
+                                        <label className={styles.label}>Section Content</label>
+                                        <textarea
+                                            value={section.body}
+                                            onChange={(e) =>
+                                                updateCustomSection(section.id, { body: e.target.value })
+                                            }
+                                            className={`${styles.textarea} ${styles.customTextarea}`}
+                                            placeholder="Write any additional detail you want investors to see."
+                                            maxLength={600}
+                                            rows={4}
+                                        />
+                                    </div>
+
+                                    <div className={styles.customMediaRow}>
+                                        <label className={styles.customImageUploadArea}>
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={(e) => { void handleCustomSectionImageChange(e, section.id) }}
+                                                className={styles.hiddenInput}
+                                            />
+                                            {section.imageUrl ? (
+                                                <div className={styles.customImageWrapper}>
+                                                    <Image
+                                                        src={section.imageUrl}
+                                                        alt="Section image preview"
+                                                        fill
+                                                        sizes="(max-width: 720px) 100vw, 260px"
+                                                        className={styles.customImage}
+                                                    />
+                                                </div>
+                                            ) : (
+                                                <div className={styles.customImagePlaceholder}>
+                                                    Click to add image
+                                                </div>
+                                            )}
+                                        </label>
+
+                                        <div className={styles.field}>
+                                            <label className={styles.label}>Image Caption</label>
+                                            <input
+                                                value={section.caption}
+                                                onChange={(e) =>
+                                                    updateCustomSection(section.id, { caption: e.target.value })
+                                                }
+                                                className={styles.input}
+                                                placeholder="What does this image show?"
+                                                maxLength={150}
+                                            />
+                                            {uploadingSectionId === section.id && (
+                                                <p className={styles.helperText}>Uploading section image...</p>
+                                            )}
+                                            {section.imageUrl && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => updateCustomSection(section.id, { imageUrl: '' })}
+                                                    className={styles.removeMediaButton}
+                                                >
+                                                    Remove image
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                </article>
+                            ))}
+                        </div>
+                    )}
                 </section>
 
                 {errorMessage && (

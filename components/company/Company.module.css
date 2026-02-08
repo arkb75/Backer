@@ -4,38 +4,19 @@
 }
 
 .feed {
-    max-width: 420px;
+    width: min(100%, 860px);
     margin: 0 auto;
-    padding: var(--space-md);
+    padding: clamp(12px, 2.5vw, 24px);
     display: flex;
     flex-direction: column;
     gap: var(--space-md);
-}
-
-.introCard {
-    background: white;
-    padding: var(--space-lg);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-sm);
-}
-
-.pageTitle {
-    margin: 0;
-    font-size: 1.5rem;
-    color: var(--color-text);
-}
-
-.pageSubtitle {
-    margin: var(--space-sm) 0 0 0;
-    font-size: 0.9375rem;
-    line-height: 1.55;
-    color: var(--color-text-secondary);
 }
 
 .videoHero {
     background: black;
     border-radius: var(--radius-lg);
     overflow: hidden;
+    box-shadow: var(--shadow-sm);
 }
 
 .videoUploadArea {
@@ -45,14 +26,15 @@
 
 .videoPreviewWrapper {
     position: relative;
+    aspect-ratio: 16 / 9;
 }
 
 .videoPreview {
     width: 100%;
-    max-height: 300px;
+    height: 100%;
     display: block;
-    background: black;
     object-fit: cover;
+    background: black;
 }
 
 .uploadOverlay {
@@ -74,7 +56,7 @@
 
 .videoPlaceholder {
     width: 100%;
-    min-height: 200px;
+    aspect-ratio: 16 / 9;
     display: grid;
     place-items: center;
     text-align: center;
@@ -101,17 +83,22 @@
 
 .mediaActions {
     background: white;
-    padding: var(--space-md);
+    border-top: 1px solid var(--color-border);
+    padding: 10px 14px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 12px;
 }
 
 .helperText {
-    margin-top: 4px;
+    margin: 0;
     font-size: 0.8125rem;
     color: var(--color-text-secondary);
 }
 
 .removeMediaButton {
-    margin-top: 10px;
     color: hsl(0, 75%, 45%);
     font-size: 0.8125rem;
     font-weight: 600;
@@ -125,14 +112,17 @@
 }
 
 .headerContent {
-    display: flex;
-    gap: var(--space-md);
-    align-items: flex-start;
+    display: grid;
+    grid-template-columns: minmax(130px, 180px) minmax(0, 1fr);
+    gap: clamp(12px, 2vw, 22px);
+    align-items: start;
 }
 
 .logoPanel {
-    width: 110px;
-    flex-shrink: 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
 .logoUploadArea {
@@ -145,7 +135,6 @@
     width: 100%;
     aspect-ratio: 1 / 1;
     border-radius: var(--radius-md);
-    margin-bottom: 10px;
     overflow: hidden;
 }
 
@@ -163,6 +152,8 @@
     border: 1px dashed var(--color-border);
     display: grid;
     place-items: center;
+    text-align: center;
+    padding: 10px;
     color: var(--color-text-secondary);
     font-size: 0.8125rem;
     background: hsl(220, 15%, 98%);
@@ -178,14 +169,17 @@
 }
 
 .headerFields {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-sm);
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 14px;
 }
 
 .field {
-    width: 100%;
+    min-width: 0;
+}
+
+.fieldFull {
+    grid-column: 1 / -1;
 }
 
 .label {
@@ -196,6 +190,7 @@
     text-transform: uppercase;
     color: var(--color-text-secondary);
     font-weight: 600;
+    line-height: 1.25;
 }
 
 .nameInput,
@@ -208,12 +203,12 @@
     background: white;
     color: var(--color-text);
     font-size: 0.9375rem;
-    padding: 10px 12px;
+    padding: 11px 12px;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .nameInput {
-    font-size: 1.25rem;
+    font-size: clamp(1.1rem, 2.4vw, 1.8rem);
     font-weight: 700;
 }
 
@@ -232,12 +227,6 @@
     box-shadow: 0 0 0 3px hsla(220, 90%, 56%, 0.14);
 }
 
-.row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-sm);
-}
-
 .section {
     background: white;
     border-radius: var(--radius-lg);
@@ -246,9 +235,158 @@
 }
 
 .sectionTitle {
-    margin: 0 0 var(--space-sm) 0;
+    margin: 0;
     font-size: 1rem;
     color: var(--color-text);
+}
+
+.customSectionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.addSectionButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px dashed hsl(220, 20%, 76%);
+    border-radius: 999px;
+    padding: 8px 12px;
+    background: hsl(220, 20%, 98%);
+    color: hsl(220, 20%, 30%);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.addSectionButton:hover:not(:disabled) {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.addSectionButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.plusIcon {
+    width: 20px;
+    height: 20px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    background: var(--color-primary);
+    color: white;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.sectionHint {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+}
+
+.emptyCustomState {
+    margin-top: 12px;
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    background: hsl(220, 20%, 98%);
+}
+
+.customSectionList {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.customSectionCard {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    background: hsl(220, 20%, 99%);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.customSectionToolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.customSectionLabel {
+    margin: 0;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-secondary);
+    font-weight: 700;
+}
+
+.removeSectionButton {
+    font-size: 0.8125rem;
+    color: hsl(0, 72%, 38%);
+    font-weight: 600;
+}
+
+.customTextarea {
+    min-height: 100px;
+}
+
+.customMediaRow {
+    display: grid;
+    grid-template-columns: minmax(150px, 220px) minmax(0, 1fr);
+    gap: 12px;
+    align-items: start;
+}
+
+.customImageUploadArea {
+    display: block;
+    cursor: pointer;
+}
+
+.customImageWrapper,
+.customImagePlaceholder {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.customImageWrapper {
+    position: relative;
+    border: 1px solid transparent;
+    background: hsl(220, 15%, 96%);
+}
+
+.customImage {
+    object-fit: cover;
+}
+
+.customImagePlaceholder {
+    border: 1px dashed var(--color-border);
+    background: white;
+    color: var(--color-text-secondary);
+    display: grid;
+    place-items: center;
+    text-align: center;
+    font-size: 0.8125rem;
+    padding: 10px;
+}
+
+.customImageUploadArea:hover .customImageWrapper,
+.customImageUploadArea:hover .customImagePlaceholder {
+    border-color: var(--color-primary);
 }
 
 .errorBanner {
@@ -261,13 +399,14 @@
 }
 
 .actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    justify-content: flex-end;
     gap: var(--space-sm);
     margin-top: var(--space-xs);
 }
 
 .actionButton {
+    min-width: 150px;
     border-radius: var(--radius-md);
     padding: 12px 14px;
     font-size: 0.9375rem;
@@ -299,24 +438,35 @@
     cursor: not-allowed;
 }
 
-@media (max-width: 560px) {
-    .headerContent {
-        flex-direction: column;
-    }
-
-    .logoPanel {
-        width: 100%;
-        max-width: 140px;
-    }
-
-    .row,
-    .actions {
-        grid-template-columns: 1fr;
+@media (max-width: 900px) {
+    .feed {
+        width: min(100%, 760px);
     }
 }
 
-@media (min-width: 768px) {
-    .feed {
-        padding: var(--space-lg);
+@media (max-width: 720px) {
+    .headerContent {
+        grid-template-columns: 1fr;
+    }
+
+    .logoPanel {
+        max-width: 170px;
+    }
+
+    .headerFields {
+        grid-template-columns: 1fr;
+    }
+
+    .customMediaRow {
+        grid-template-columns: 1fr;
+    }
+
+    .actions {
+        flex-direction: column-reverse;
+    }
+
+    .actionButton {
+        width: 100%;
+        min-width: 0;
     }
 }
