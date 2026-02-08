@@ -1,9 +1,14 @@
-import { prisma } from '@/lib/prisma'
 import { FounderWithRelations, InvestorStats } from '@/lib/types'
 import FounderProfile from '@/components/founder/FounderProfile'
 import { notFound } from 'next/navigation'
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
+import {
+    getFounderById,
+    getProductsByIds,
+    listFounderProductsByFounderId,
+    listInvestorInterestsByFounderId,
+} from "@/lib/db/repository"
 
 interface PageProps {
     params: Promise<{ id: string }>
@@ -12,41 +17,46 @@ interface PageProps {
 export default async function FounderPage({ params }: PageProps) {
     const { id } = await params
 
-    // Fetch founder with all relations
-    const founder = await prisma.founder.findUnique({
-        where: { id },
-        include: {
-            products: {
-                include: {
-                    product: true,
-                },
-            },
-            workExperience: true,
-            skills: true,
-            photos: true,
-            prompts: true,
-            investorInterests: {
-                select: {
-                    interestType: true,
-                    amountCommitted: true,
-                },
-            },
-        },
-    })
+    const founder = await getFounderById(id)
 
     if (!founder) {
         notFound()
     }
 
+    const [founderProducts, investorInterests] = await Promise.all([
+        listFounderProductsByFounderId(founder.id),
+        listInvestorInterestsByFounderId(founder.id),
+    ])
+
+    const products = await getProductsByIds(founderProducts.map((relation) => relation.productId))
+    const productsById = new Map(products.map((product) => [product.id, product]))
+
+    const founderProductRows: FounderWithRelations["products"] = founderProducts
+        .map((relation) => {
+            const product = productsById.get(relation.productId)
+            if (!product) return null
+            return {
+                ...relation,
+                product,
+            }
+        })
+        .filter((row): row is FounderWithRelations["products"][number] => row !== null)
+
+    const founderWithRelations: FounderWithRelations = {
+        ...founder,
+        products: founderProductRows,
+    }
+
     // Calculate investor stats from interests
+    const committedInterests = investorInterests.filter(
+        (interest) => interest.interestType === 'COMMITTED'
+    )
+
     const investorStats: InvestorStats = {
-        likeCount: founder.investorInterests.filter((i) => i.interestType === 'LIKED')
-            .length,
-        committedCount: founder.investorInterests.filter(
-            (i) => i.interestType === 'COMMITTED'
-        ).length,
-        totalCommitted: founder.investorInterests.reduce(
-            (sum, i) => sum + (i.amountCommitted || 0),
+        likeCount: investorInterests.filter((interest) => interest.interestType === 'LIKED').length,
+        committedCount: committedInterests.length,
+        totalCommitted: committedInterests.reduce(
+            (sum, interest) => sum + (interest.amountCommitted || 0),
             0
         ),
     }
@@ -62,7 +72,7 @@ export default async function FounderPage({ params }: PageProps) {
     return (
         <main>
             <FounderProfile
-                founder={founder as FounderWithRelations}
+                founder={founderWithRelations}
                 investorStats={investorStats}
                 isInvestor={isInvestor}
                 isOwnProfile={isOwnProfile}

@@ -1,48 +1,14 @@
-import { prisma } from '@/lib/prisma'
-import { ReelsFeed } from '@/components/feed/ReelsFeed'
+import { ReelsFeed, type FeedItem } from '@/components/feed/ReelsFeed'
+import {
+    getFoundersByIds,
+    listFounderProductsByProductId,
+    listProducts,
+} from '@/lib/db/repository'
 
-// Type for product with founders
-interface ProductWithFounders {
-    id: string
-    name: string
-    tagline: string
-    description: string | null
-    videoUrl: string | null
-    logoUrl: string | null
-    stage: string | null
-    founders: {
-        founder: {
-            id: string
-            name: string
-            photos: { url: string; order: number }[]
-        }
-    }[]
-}
+export const dynamic = 'force-dynamic'
 
 export default async function FeedPage() {
-    // Fetch products with videos and their founders
-    const products = await prisma.product.findMany({
-        where: {
-            videoUrl: { not: null }
-        },
-        include: {
-            founders: {
-                include: {
-                    founder: {
-                        select: {
-                            id: true,
-                            name: true,
-                            photos: {
-                                orderBy: { order: 'asc' },
-                                take: 1
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        orderBy: { createdAt: 'desc' }
-    }) as ProductWithFounders[]
+    const products = (await listProducts()).filter((product) => Boolean(product.videoUrl))
 
     // If no products with videos, show empty state
     if (products.length === 0) {
@@ -65,20 +31,40 @@ export default async function FeedPage() {
         )
     }
 
+    const founderRelationsByProduct = await Promise.all(
+        products.map((product) => listFounderProductsByProductId(product.id))
+    )
+
+    const founderIds = Array.from(new Set(
+        founderRelationsByProduct.flatMap((relations) =>
+            relations.map((relation) => relation.founderId)
+        )
+    ))
+    const founders = await getFoundersByIds(founderIds)
+    const foundersById = new Map(founders.map((founder) => [founder.id, founder]))
+
     // Transform data for client component
-    const feedItems = products.map(product => ({
+    const feedItems: FeedItem[] = products.map((product, index) => ({
         id: product.id,
         name: product.name,
         tagline: product.tagline,
-        description: product.description,
-        videoUrl: product.videoUrl!,
-        logoUrl: product.logoUrl,
-        stage: product.stage,
-        founders: product.founders.map(fp => ({
-            id: fp.founder.id,
-            name: fp.founder.name,
-            avatar: fp.founder.photos[0]?.url || null
-        }))
+        description: product.description ?? null,
+        videoUrl: product.videoUrl as string,
+        logoUrl: product.logoUrl ?? null,
+        stage: product.stage ?? null,
+        founders: founderRelationsByProduct[index]
+            .map((relation) => {
+                const founder = foundersById.get(relation.founderId)
+                if (!founder) return null
+
+                const avatar = [...founder.photos].sort((a, b) => a.order - b.order)[0]?.url || null
+                return {
+                    id: founder.id,
+                    name: founder.name,
+                    avatar,
+                }
+            })
+            .filter((founder): founder is FeedItem["founders"][number] => founder !== null),
     }))
 
     return <ReelsFeed items={feedItems} />

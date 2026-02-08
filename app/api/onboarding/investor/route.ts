@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth"
-import { prisma } from "@/lib/prisma"
-import { InvestmentStage } from "@prisma/client"
+import { createInvestorOnboarding } from "@/lib/db/repository"
+import type { InvestmentStage } from "@/lib/db/types"
 
 export async function POST(req: Request) {
     try {
@@ -36,52 +36,36 @@ export async function POST(req: Request) {
             )
         }
 
-        // Create Investor Profile with nested writes
-        const investor = await prisma.$transaction(async (tx) => {
-            // 1. Check if investor profile already exists
-            const existing = await tx.investor.findUnique({
-                where: { userId: session.user.id },
-            })
+        const normalizedStage = String(investmentStagePreference || "SEED").toUpperCase()
+        if (!["SEED", "SERIES_A", "SERIES_B", "GROWTH"].includes(normalizedStage)) {
+            return NextResponse.json(
+                { error: "Invalid investment stage preference" },
+                { status: 400 }
+            )
+        }
 
-            if (existing) {
-                // If profile exists, return it (idempotency)
-                return existing
-            }
-
-            // 2. Create the investor
-            return await tx.investor.create({
-                data: {
-                    userId: session.user.id,
-                    name: name.trim(),
-                    firmName: firmName?.trim() || null,
-                    title: title?.trim() || null,
-                    location: location?.trim() || null,
-                    bio: bio?.trim() || null,
-                    profileImage: profileImage?.trim() || null,
-                    investmentStagePreference: investmentStagePreference as InvestmentStage,
-                    linkedinUrl: linkedinUrl?.trim() || null,
-                    twitterUrl: twitterUrl?.trim() || null,
-                    websiteUrl: websiteUrl?.trim() || null,
-
-                    // Create Interest Tags
-                    interestTags: {
-                        create: (interestTags || []).map((tag: string, index: number) => ({
-                            name: tag,
-                        })),
-                    },
-
-                    // Create Portfolio Companies
-                    portfolio: {
-                        create: (portfolio || []).map((company: any, index: number) => ({
-                            name: company.name,
-                            stage: company.stage as InvestmentStage,
-                            logoUrl: company.logoUrl || null,
-                            isExited: false,
-                            order: index,
-                        })),
-                    },
-                },
-            })
+        const investor = await createInvestorOnboarding({
+            userId: session.user.id,
+            name,
+            firmName,
+            title,
+            location,
+            bio,
+            profileImage,
+            investmentStagePreference: normalizedStage as InvestmentStage,
+            linkedinUrl,
+            twitterUrl,
+            websiteUrl,
+            interestTags: Array.isArray(interestTags) ? interestTags : [],
+            portfolio: Array.isArray(portfolio)
+                ? portfolio.map((company: any) => ({
+                    name: String(company?.name || "").trim(),
+                    stage: String(company?.stage || "SEED").toUpperCase() as InvestmentStage,
+                    logoUrl: typeof company?.logoUrl === "string" ? company.logoUrl : null,
+                    isExited: Boolean(company?.isExited),
+                    exitYear: company?.exitYear ? Number(company.exitYear) : null,
+                }))
+                : [],
         })
 
         return NextResponse.json({ id: investor.id })

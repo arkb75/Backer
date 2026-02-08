@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth"
-import { prisma } from "@/lib/prisma"
-import { FounderType } from "@prisma/client"
+import { createFounderOnboarding } from "@/lib/db/repository"
+import type { FounderType } from "@/lib/db/types"
 
 export async function POST(req: Request) {
     try {
@@ -40,47 +40,24 @@ export async function POST(req: Request) {
             )
         }
 
-        // Create Founder Profile with nested writes for photos and prompts
-        const founder = await prisma.$transaction(async (tx) => {
-            // 1. Check if founder profile already exists
-            const existing = await tx.founder.findUnique({
-                where: { userId: session.user.id },
-            })
+        const normalizedFounderType = String(founderType).toUpperCase()
+        if (!["FIRST_TIME", "SERIAL", "EXITED"].includes(normalizedFounderType)) {
+            return NextResponse.json(
+                { error: "Invalid founder type" },
+                { status: 400 }
+            )
+        }
 
-            if (existing) {
-                // If profile exists, return it (idempotency for double-clicks/refreshes)
-                return existing
-            }
-
-            // 2. Create the founder
-            return await tx.founder.create({
-                data: {
-                    userId: session.user.id,
-                    name,
-                    headline,
-                    location,
-                    bio,
-                    founderType: founderType as FounderType,
-                    videoUrl: videoUrl || null,
-
-                    // Create Photos
-                    photos: {
-                        create: photos.map((url: string, index: number) => ({
-                            url,
-                            order: index,
-                        })),
-                    },
-
-                    // Create Prompts
-                    prompts: {
-                        create: prompts.map((p: any, index: number) => ({
-                            prompt: p.prompt,
-                            answer: p.answer,
-                            order: index,
-                        })),
-                    },
-                },
-            })
+        const founder = await createFounderOnboarding({
+            userId: session.user.id,
+            name: String(name).trim(),
+            headline: String(headline).trim(),
+            location: String(location).trim(),
+            bio: String(bio).trim(),
+            founderType: normalizedFounderType as FounderType,
+            videoUrl: typeof videoUrl === "string" ? videoUrl.trim() || null : null,
+            photos: photos as string[],
+            prompts: Array.isArray(prompts) ? prompts : [],
         })
 
         return NextResponse.json({ id: founder.id })

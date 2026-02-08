@@ -1,6 +1,22 @@
-import { prisma } from '@/lib/prisma'
 import ProductProfile from '@/components/product/ProductProfile'
 import { notFound } from 'next/navigation'
+import {
+    getFoundersByIds,
+    getProductById,
+    listFounderProductsByProductId,
+    listInvestorInterestsByProductId,
+} from '@/lib/db/repository'
+import type { FounderRecord, FounderPhotoRecord, FounderProductRecord, ProductRecord } from '@/lib/db/types'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+
+type ProductWithRelations = ProductRecord & {
+    founders: (FounderProductRecord & {
+        founder: FounderRecord & {
+            photos: FounderPhotoRecord[]
+        }
+    })[]
+}
 
 interface PageProps {
     params: Promise<{ id: string }>
@@ -9,43 +25,47 @@ interface PageProps {
 export default async function ProductPage({ params }: PageProps) {
     const { id } = await params
 
-    const product = await prisma.product.findUnique({
-        where: { id },
-        include: {
-            founders: {
-                include: {
-                    founder: {
-                        include: {
-                            photos: true,
-                        },
-                    },
-                },
-            },
-            investorInterests: {
-                select: {
-                    interestType: true,
-                    amountCommitted: true,
-                },
-            },
-        },
-    })
+    const product = await getProductById(id)
 
     if (!product) {
         notFound()
     }
 
+    const [founderRelations, investorInterests] = await Promise.all([
+        listFounderProductsByProductId(product.id),
+        listInvestorInterestsByProductId(product.id),
+    ])
+
+    const founders = await getFoundersByIds(founderRelations.map((relation) => relation.founderId))
+    const foundersById = new Map(founders.map((founder) => [founder.id, founder]))
+
+    const foundersWithRelations: ProductWithRelations["founders"] = founderRelations
+        .map((relation) => {
+            const founder = foundersById.get(relation.founderId)
+            if (!founder) return null
+            return {
+                ...relation,
+                founder,
+            }
+        })
+        .filter((row): row is ProductWithRelations["founders"][number] => row !== null)
+
+    const productWithRelations: ProductWithRelations = {
+        ...product,
+        founders: foundersWithRelations,
+    }
+
     // Calculate stats
     const stats = {
-        interestedCount: product.investorInterests.filter((i) => i.interestType === 'LIKED')
-            .length,
-        committedAmount: product.investorInterests.reduce(
-            (sum, i) => sum + (i.amountCommitted || 0),
+        interestedCount: investorInterests.filter((interest) => interest.interestType === 'LIKED').length,
+        committedAmount: investorInterests.reduce(
+            (sum, interest) => sum + (interest.amountCommitted || 0),
             0
         ),
     }
 
-    // TODO: Replace with actual auth check
-    const isInvestor = false
+    const session = await getServerSession(authOptions)
+    const isInvestor = session?.user?.userType === 'INVESTOR'
 
     const handleLike = async () => {
         'use server'
@@ -62,7 +82,7 @@ export default async function ProductPage({ params }: PageProps) {
     return (
         <main>
             <ProductProfile
-                product={product as any}
+                product={productWithRelations}
                 stats={stats}
                 isInvestor={isInvestor}
                 onLike={handleLike}

@@ -1,9 +1,9 @@
-import { Product } from '@prisma/client'
+import type { ProductRecord } from '@/lib/db/types'
 import styles from './ProductCard.module.css'
 import Link from 'next/link'
 
 interface ProductCardProps {
-    product: Product
+    product: ProductRecord
     role: string
     isPrimary: boolean
 }

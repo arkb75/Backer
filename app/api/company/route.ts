@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { createCompanyForFounder, getFounderByUserId } from '@/lib/db/repository'
 
 const trimString = (value: unknown): string => {
     return typeof value === 'string' ? value.trim() : ''
@@ -53,9 +53,7 @@ export async function POST(req: Request) {
         }
 
         // Get the founder record
-        const founder = await prisma.founder.findUnique({
-            where: { userId: session.user.id }
-        })
+        const founder = await getFounderByUserId(session.user.id)
 
         if (!founder) {
             return NextResponse.json(
@@ -86,41 +84,32 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: askAmountError }, { status: 400 })
         }
 
+        const customSections = Array.isArray(body?.customSections)
+            ? body.customSections
+                .map((section: any) => ({
+                    title: typeof section?.title === 'string' ? section.title.slice(0, 120) : '',
+                    body: typeof section?.body === 'string' ? section.body.slice(0, 600) : '',
+                    imageUrl: typeof section?.imageUrl === 'string' ? section.imageUrl : '',
+                    caption: typeof section?.caption === 'string' ? section.caption.slice(0, 150) : '',
+                }))
+                .filter((section: any) => section.title || section.body || section.imageUrl || section.caption)
+            : []
+
         // Create the product (company) and link to founder
-        const result = await prisma.$transaction(async (tx) => {
-            // 1. Create Product
-            const product = await tx.product.create({
-                data: {
-                    name: truncate(name, 100),
-                    tagline: truncate(tagline, 200),
-                    description: description ? truncate(description, 1000) : null,
-                    problem: problem ? truncate(problem, 500) : null,
-                    solution: solution ? truncate(solution, 500) : null,
-                    websiteUrl,
-                    stage: stage ? truncate(stage, 50) : null,
-                    askAmount: parsedAskAmount ?? null,
-                    videoUrl,
-                    logoUrl,
-                    status: 'BUILDING', // Default status
-                }
-            })
-
-            // 2. Link to Founder
-            // Check if this is their first product to set isPrimary
-            const productCount = await tx.founderProduct.count({
-                where: { founderId: founder.id }
-            })
-
-            const founderProduct = await tx.founderProduct.create({
-                data: {
-                    founderId: founder.id,
-                    productId: product.id,
-                    role: 'Founder', // Default role
-                    isPrimary: productCount === 0 // Make primary if first
-                }
-            })
-
-            return { product, founderProduct }
+        const result = await createCompanyForFounder({
+            founderId: founder.id,
+            name: truncate(name, 100),
+            tagline: truncate(tagline, 200),
+            description: description ? truncate(description, 1000) : null,
+            problem: problem ? truncate(problem, 500) : null,
+            solution: solution ? truncate(solution, 500) : null,
+            websiteUrl,
+            stage: stage ? truncate(stage, 50) : null,
+            askAmount: parsedAskAmount ?? null,
+            videoUrl,
+            logoUrl,
+            customSections,
+            status: 'BUILDING',
         })
 
         return NextResponse.json(result)

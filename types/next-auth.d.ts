@@ -1,5 +1,5 @@
 import { DefaultSession } from "next-auth"
-import { UserType } from "@prisma/client"
+import type { UserType } from "@/lib/db/types"
 
 declare module "next-auth" {
     interface Session {

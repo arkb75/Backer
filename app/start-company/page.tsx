@@ -1,9 +1,9 @@
 import CompanyWizard from "@/components/company/CompanyWizard"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import FounderControls from "@/components/founder/FounderControls"
+import { getFounderByUserId } from "@/lib/db/repository"
 
 export default async function StartCompanyPage() {
     const session = await getServerSession(authOptions)
@@ -12,10 +12,7 @@ export default async function StartCompanyPage() {
         redirect('/')
     }
 
-    const founder = await prisma.founder.findUnique({
-        where: { userId: session.user.id },
-        select: { id: true },
-    })
+    const founder = await getFounderByUserId(session.user.id)
 
     if (!founder) {
         redirect('/onboarding')

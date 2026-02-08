@@ -1,8 +1,8 @@
 import { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 
-import { prisma } from "@/lib/prisma"
 import { compare } from "bcryptjs"
+import { getUserByEmail } from "@/lib/db/repository"
 
 export const authOptions: NextAuthOptions = {
     session: {
@@ -24,11 +24,7 @@ export const authOptions: NextAuthOptions = {
                     return null
                 }
 
-                const user = await prisma.user.findUnique({
-                    where: {
-                        email: credentials.email
-                    }
-                })
+                const user = await getUserByEmail(credentials.email)
 
                 if (!user) {
                     return null

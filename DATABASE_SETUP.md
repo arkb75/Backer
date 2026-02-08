@@ -1,41 +1,66 @@
-# Quick Database Setup with Neon (2 minutes)
+# DynamoDB Setup
 
-## Step 1: Create Neon Account
-1. Visit [neon.tech](https://neon.tech)
-2. Click "Sign up" (use GitHub for fastest signup)
+This project now uses DynamoDB for app data storage.
 
-## Step 2: Create Database
-1. After signup, click "Create Project"
-2. Name: `Backer`
-3. PostgreSQL version: 16 (or latest)
-4. Region: Choose closest to you
-5. Click "Create Project"
+## 1. Configure `.env`
 
-## Step 3: Get Connection String
-1. On project dashboard, click "Connection Details"
-2. Copy the connection string (looks like):
-   ```
-   postgresql://username:password@ep-xxx.region.aws.neon.tech/backer?sslmode=require
-   ```
-
-## Step 4: Update .env File
-Paste the connection string into `/Users/karanjhanji/repos/Backer/.env`:
+Set these values (or keep defaults):
 
 ```bash
-DATABASE_URL="your-connection-string-here"
+AWS_REGION="us-east-2"
+
+DYNAMODB_TABLE_USERS="backer-dev-users"
+DYNAMODB_TABLE_FOUNDERS="backer-dev-founders"
+DYNAMODB_TABLE_PRODUCTS="backer-dev-products"
+DYNAMODB_TABLE_FOUNDER_PRODUCTS="backer-dev-founder-products"
+DYNAMODB_TABLE_INVESTORS="backer-dev-investors"
+DYNAMODB_TABLE_INVESTOR_INTERESTS="backer-dev-investor-interests"
 ```
 
-## Step 5: Tell me when ready!
-Once you've updated the `.env` file, let me know and I'll:
-- Run the Prisma migration
-- Seed the database with investor data
-- Give you the investor profile URL to test
+Optional for local DynamoDB:
 
----
+```bash
+AWS_DYNAMODB_ENDPOINT="http://localhost:8000"
+```
 
-**Why Neon?**
-- ✅ Free tier (no credit card required)
-- ✅ 30 seconds to set up
-- ✅ No local PostgreSQL installation needed
-- ✅ Auto-scaling, managed database
-- ✅ Perfect for development
+## 2. Create Tables
+
+Run:
+
+```bash
+npm run setup:dynamodb
+```
+
+The script is idempotent:
+- Creates only missing tables
+- Leaves existing tables untouched
+- Uses on-demand billing (`PAY_PER_REQUEST`)
+
+## 3. AWS Credentials
+
+The app/script uses the standard AWS SDK provider chain.
+If you use profiles, set:
+
+```bash
+AWS_PROFILE="root"
+```
+
+## Table Design
+
+- `users`
+  - PK: `id`
+  - GSI: `email-index` (`email`)
+- `founders`
+  - PK: `id`
+  - GSI: `userId-index` (`userId`)
+- `products`
+  - PK: `id`
+- `founder-products`
+  - PK: `id`
+  - GSIs: `founderId-index`, `productId-index`
+- `investors`
+  - PK: `id`
+  - GSI: `userId-index` (`userId`)
+- `investor-interests`
+  - PK: `id`
+  - GSIs: `founderId-index`, `productId-index`

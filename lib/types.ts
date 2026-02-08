@@ -1,13 +1,24 @@
-import { Founder, Product, WorkExperience, Skill, FounderProduct, FounderPhoto, FounderPrompt, Investor, PortfolioCompany, InvestorInterestTag } from '@prisma/client'
+import type {
+    FounderProductRecord,
+    FounderPromptRecord,
+    FounderPhotoRecord,
+    FounderRecord,
+    InvestorRecord,
+    InvestorInterestTagRecord,
+    PortfolioCompanyRecord,
+    ProductRecord,
+    SkillRecord,
+    WorkExperienceRecord,
+} from "@/lib/db/types"
 
-export type FounderWithRelations = Founder & {
-    products: (FounderProduct & {
-        product: Product
+export type FounderWithRelations = FounderRecord & {
+    products: (FounderProductRecord & {
+        product: ProductRecord
     })[]
-    workExperience: WorkExperience[]
-    skills: Skill[]
-    photos: FounderPhoto[]
-    prompts: FounderPrompt[]
+    workExperience: WorkExperienceRecord[]
+    skills: SkillRecord[]
+    photos: FounderPhotoRecord[]
+    prompts: FounderPromptRecord[]
     _count?: {
         investorInterests: number
     }
@@ -19,7 +30,7 @@ export interface InvestorStats {
     totalCommitted: number
 }
 
-export type InvestorWithRelations = Investor & {
-    portfolio: PortfolioCompany[]
-    interestTags: InvestorInterestTag[]
+export type InvestorWithRelations = InvestorRecord & {
+    portfolio: PortfolioCompanyRecord[]
+    interestTags: InvestorInterestTagRecord[]
 }

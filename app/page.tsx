@@ -3,32 +3,32 @@ import { redirect } from "next/navigation"
 import { authOptions } from "@/lib/auth"
 import AuthLayout from "@/components/auth/AuthLayout"
 import LoginForm from "@/components/auth/LoginForm"
-import { prisma } from "@/lib/prisma"
+import {
+    getFounderByUserId,
+    getInvestorByUserId,
+    getUserById,
+} from "@/lib/db/repository"
 
 export default async function Home() {
     const session = await getServerSession(authOptions)
 
     if (session) {
         if (session.user?.id) {
-            const user = await prisma.user.findUnique({
-                where: { id: session.user.id },
-                include: {
-                    founder: true,
-                    investor: true
-                }
-            })
+            const user = await getUserById(session.user.id)
 
             if (user) {
                 // Check if user has completed their profile based on type
                 if (user.userType === 'FOUNDER') {
-                    if (user.founder) {
-                        redirect(`/founder/${user.founder.id}`)
+                    const founder = await getFounderByUserId(user.id)
+                    if (founder) {
+                        redirect(`/founder/${founder.id}`)
                     } else {
                         redirect("/onboarding")
                     }
                 } else if (user.userType === 'INVESTOR') {
-                    if (user.investor) {
-                        redirect(`/investor/${user.investor.id}`)
+                    const investor = await getInvestorByUserId(user.id)
+                    if (investor) {
+                        redirect(`/investor/${investor.id}`)
                     } else {
                         redirect("/investor/onboarding")
                     }

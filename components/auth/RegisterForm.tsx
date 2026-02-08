@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { signIn } from 'next-auth/react'
 import styles from './AuthForm.module.css'
 
 export default function RegisterForm() {
@@ -26,7 +27,22 @@ export default function RegisterForm() {
             })
 
             if (res.ok) {
-                // Automatically sign in or redirect to login
+                const signInResult = await signIn('credentials', {
+                    email,
+                    password,
+                    redirect: false,
+                })
+
+                if (!signInResult?.error) {
+                    if (userType === 'INVESTOR') {
+                        router.push('/investor/onboarding')
+                    } else {
+                        router.push('/onboarding')
+                    }
+                    router.refresh()
+                    return
+                }
+
                 router.push('/login?registered=true')
             } else {
                 const data = await res.json()

@@ -116,10 +116,9 @@ export default function CompanyWizard() {
         e: React.ChangeEvent<HTMLInputElement>,
         type: UploadType
     ) => {
-        if (!e.target.files?.[0]) return
-
-        const input = e.target
-        const file = input.files[0]
+        const input = e.currentTarget
+        const file = input.files?.[0]
+        if (!file) return
         setErrorMessage('')
         setUploading((prev) => ({ ...prev, [type]: true }))
 
@@ -164,10 +163,9 @@ export default function CompanyWizard() {
         e: React.ChangeEvent<HTMLInputElement>,
         sectionId: string
     ) => {
-        if (!e.target.files?.[0]) return
-
-        const input = e.target
-        const file = input.files[0]
+        const input = e.currentTarget
+        const file = input.files?.[0]
+        if (!file) return
         setErrorMessage('')
         setUploadingSectionId(sectionId)
 

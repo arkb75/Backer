@@ -1,12 +1,12 @@
-import { Product, FounderProduct, Founder, FounderPhoto } from '@prisma/client'
+import type { ProductRecord, FounderProductRecord, FounderRecord, FounderPhotoRecord } from '@/lib/db/types'
 import styles from './ProductProfile.module.css'
 import { BackButton, VideoPlayer, StatsGrid, StatItem } from '@/components/ui'
 import TeamCard from './TeamCard'
 
-type ProductWithRelations = Product & {
-    founders: (FounderProduct & {
-        founder: Founder & {
-            photos: FounderPhoto[]
+type ProductWithRelations = ProductRecord & {
+    founders: (FounderProductRecord & {
+        founder: FounderRecord & {
+            photos: FounderPhotoRecord[]
         }
     })[]
     _count?: {

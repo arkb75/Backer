@@ -1,8 +1,8 @@
 import styles from './PortfolioGrid.module.css'
-import { PortfolioCompany } from '@prisma/client'
+import type { PortfolioCompanyRecord } from '@/lib/db/types'
 
 interface PortfolioGridProps {
-    companies: PortfolioCompany[]
+    companies: PortfolioCompanyRecord[]
     maxDisplay?: number
 }
 

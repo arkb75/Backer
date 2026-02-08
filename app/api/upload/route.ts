@@ -102,6 +102,11 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: configError }, { status: 500 })
         }
 
+        const configuredS3Client = s3Client
+        if (!configuredS3Client) {
+            return NextResponse.json({ error: "S3 client is not configured" }, { status: 500 })
+        }
+
         const bucketName = bucket as string
         const awsRegion = region as string
 
@@ -129,7 +134,7 @@ export async function POST(request: Request) {
         const folder = file.type.startsWith("video/") ? "videos" : "images"
         const key = `${uploadPrefix.replace(/\/+$/, "")}/${folder}/${Date.now()}-${randomUUID()}-${safeName}`
 
-        await s3Client.send(new PutObjectCommand({
+        await configuredS3Client.send(new PutObjectCommand({
             Bucket: bucketName,
             Key: key,
             Body: body,
