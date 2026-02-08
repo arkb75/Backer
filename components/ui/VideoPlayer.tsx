@@ -1,3 +1,4 @@
+import type { Ref } from 'react'
 import styles from './VideoPlayer.module.css'
 
 interface VideoPlayerProps {
@@ -8,6 +9,8 @@ interface VideoPlayerProps {
     loop?: boolean
     playsInline?: boolean
     showControls?: boolean
+    containerRef?: Ref<HTMLDivElement>
+    videoRef?: Ref<HTMLVideoElement>
 }
 
 export default function VideoPlayer({
@@ -18,10 +21,13 @@ export default function VideoPlayer({
     loop = false,
     playsInline = false,
     showControls = true,
+    containerRef,
+    videoRef,
 }: VideoPlayerProps) {
     return (
-        <div className={styles.videoWrapper}>
+        <div ref={containerRef} className={styles.videoWrapper}>
             <video
+                ref={videoRef}
                 className={styles.video}
                 controls={showControls}
                 autoPlay={autoPlay}

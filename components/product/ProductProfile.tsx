@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import type { ProductRecord, FounderProductRecord, FounderRecord, FounderPhotoRecord } from '@/lib/db/types'
@@ -9,6 +9,7 @@ import { BackButton, VideoPlayer, StatsGrid, StatItem } from '@/components/ui'
 import TeamCard from './TeamCard'
 import ProductActions from './ProductActions'
 import CofounderInvitesPanel from '@/components/founder/CofounderInvitesPanel'
+import { finishReelToProductTransition } from '@/lib/ui/reelProductTransition'
 
 type ProductWithRelations = ProductRecord & {
     founders: (FounderProductRecord & {
@@ -51,6 +52,16 @@ export default function ProductProfile({
     const [likeCount, setLikeCount] = useState(stats.interestedCount)
     const [deleting, setDeleting] = useState(false)
     const [ownerActionError, setOwnerActionError] = useState<string | null>(null)
+    const heroVideoContainerRef = useRef<HTMLDivElement>(null)
+    const heroVideoRef = useRef<HTMLVideoElement>(null)
+
+    useEffect(() => {
+        if (!product.videoUrl) return
+        finishReelToProductTransition({
+            targetContainer: heroVideoContainerRef.current,
+            targetVideo: heroVideoRef.current,
+        })
+    }, [product.id, product.videoUrl])
 
     const formatStatus = (status: string): string => {
         const statusMap: Record<string, string> = {
@@ -105,6 +116,8 @@ export default function ProductProfile({
                         muted={isInvestor}
                         loop={isInvestor}
                         playsInline={isInvestor}
+                        containerRef={heroVideoContainerRef}
+                        videoRef={heroVideoRef}
                     />
                 </div>
             )}

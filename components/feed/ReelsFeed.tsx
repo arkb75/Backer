@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useRef, useEffect, useMemo } from 'react'
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { ReelCard } from './ReelCard'
 import styles from './ReelsFeed.module.css'
+import { startReelToProductTransition } from '@/lib/ui/reelProductTransition'
 
 export interface FeedItem {
     id: string
@@ -38,15 +39,37 @@ export function ReelsFeed({ items }: ReelsFeedProps) {
     const containerRef = useRef<HTMLDivElement>(null)
     const paneRefs = useRef<Array<HTMLElement | null>>([])
     const isRecenteringRef = useRef(false)
+    const isOpeningProductRef = useRef(false)
     const touchStartRef = useRef<{ x: number; y: number } | null>(null)
     const lastTapRef = useRef(0)
 
-    const getRealIndex = (index: number): number => {
+    const getRealIndex = useCallback((index: number): number => {
         if (items.length === 0) return 0
         return ((index % items.length) + items.length) % items.length
-    }
+    }, [items.length])
 
     const activeItem = items[getRealIndex(activeVirtualIndex)]
+    const activeTargetUrl = activeItem?.targetUrl
+
+    const openActiveProduct = useCallback(() => {
+        if (!activeItem || isOpeningProductRef.current) return
+        isOpeningProductRef.current = true
+
+        const activePane = paneRefs.current[activeVirtualIndex]
+        const sourceVideo = activePane?.querySelector<HTMLVideoElement>('video') ?? null
+        startReelToProductTransition({
+            sourceVideo,
+            fallbackVideoUrl: activeItem.videoUrl,
+            targetUrl: activeItem.targetUrl,
+            navigate: (url) => {
+                router.push(url)
+            },
+        })
+
+        window.setTimeout(() => {
+            isOpeningProductRef.current = false
+        }, 1500)
+    }, [activeItem, activeVirtualIndex, router])
 
     useEffect(() => {
         if (!containerRef.current || virtualItems.length === 0) return
@@ -107,7 +130,12 @@ export function ReelsFeed({ items }: ReelsFeedProps) {
         requestAnimationFrame(() => {
             isRecenteringRef.current = false
         })
-    }, [activeVirtualIndex, items.length, supportsLooping])
+    }, [activeVirtualIndex, getRealIndex, items.length, supportsLooping])
+
+    useEffect(() => {
+        if (!activeTargetUrl) return
+        router.prefetch(activeTargetUrl)
+    }, [activeTargetUrl, router])
 
     const handleTouchStart = (e: React.TouchEvent) => {
         const touch = e.touches[0]
@@ -127,7 +155,7 @@ export function ReelsFeed({ items }: ReelsFeedProps) {
         const deltaY = end.clientY - start.y
         const isHorizontalSwipe = Math.abs(deltaX) > 70 && Math.abs(deltaX) > Math.abs(deltaY) + 20
         if (isHorizontalSwipe && deltaX > 0) {
-            router.push(activeItem.targetUrl)
+            openActiveProduct()
         }
     }
 
@@ -138,7 +166,7 @@ export function ReelsFeed({ items }: ReelsFeedProps) {
 
         if (now - lastTapRef.current < DOUBLE_TAP_DELAY) {
             // Double tap - go to detail
-            router.push(activeItem.targetUrl)
+            openActiveProduct()
         }
         lastTapRef.current = now
     }
@@ -150,7 +178,7 @@ export function ReelsFeed({ items }: ReelsFeedProps) {
 
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'ArrowRight' && activeItem) {
-                router.push(activeItem.targetUrl)
+                openActiveProduct()
                 return
             }
 
@@ -165,7 +193,7 @@ export function ReelsFeed({ items }: ReelsFeedProps) {
 
         window.addEventListener('keydown', handleKeyDown)
         return () => window.removeEventListener('keydown', handleKeyDown)
-    }, [activeItem, router])
+    }, [activeItem, openActiveProduct])
 
     if (virtualItems.length === 0) {
         return null
