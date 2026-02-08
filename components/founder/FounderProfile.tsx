@@ -5,6 +5,7 @@ import { LogoutButton } from '@/components/investor/LogoutButton'
 import Link from 'next/link'
 import {
     BackButton,
+    ThemeToggle,
     SocialLinks,
     SocialLink,
     StatsGrid,
@@ -114,13 +115,14 @@ export default function FounderProfile({
                     if (item.type === 'info') {
                         return (
                             <div key={item.key} className={styles.infoCard}>
-                                {isOwnProfile && (
-                                    <div className={styles.infoActions}>
+                                <div className={styles.infoActions}>
+                                    <ThemeToggle />
+                                    {isOwnProfile && (
                                         <Link href="/founder/edit" className={styles.editLink}>
                                             Edit Profile
                                         </Link>
-                                    </div>
-                                )}
+                                    )}
+                                </div>
                                 <div className={styles.identityRow}>
                                     {primaryPhotoUrl && (
                                         <img

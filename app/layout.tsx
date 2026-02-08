@@ -19,7 +19,22 @@ export default function RootLayout({
     children: React.ReactNode
 }) {
     return (
-        <html lang="en">
+        <html lang="en" suppressHydrationWarning>
+            <head>
+                <script
+                    dangerouslySetInnerHTML={{
+                        __html: `(() => {
+  try {
+    const stored = localStorage.getItem('theme');
+    const theme = stored === 'dark' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', theme);
+  } catch (_) {
+    document.documentElement.setAttribute('data-theme', 'light');
+  }
+})();`,
+                    }}
+                />
+            </head>
             <body className={manrope.variable}>{children}</body>
         </html>
     )

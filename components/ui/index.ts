@@ -7,6 +7,7 @@ export type { ProfileHeaderProps } from './ProfileHeader'
 
 // Navigation
 export { default as BackButton } from './BackButton'
+export { default as ThemeToggle } from './ThemeToggle'
 
 // Social links
 export { default as SocialLinks } from './SocialLinks'
@@ -25,4 +26,3 @@ export { default as PromptCard } from './PromptCard'
 
 // Media
 export { default as VideoPlayer } from './VideoPlayer'
-

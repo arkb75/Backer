@@ -7,6 +7,7 @@ import {
     SocialLinks,
     SocialLink,
     TagList,
+    ThemeToggle,
 } from '@/components/ui'
 
 interface InvestorProfileProps {
@@ -43,13 +44,14 @@ export default function InvestorProfile({ investor, isOwnProfile = false }: Inve
                     if (item.type === 'info') {
                         return (
                             <div key={item.key} className={styles.infoCard}>
-                                {isOwnProfile && (
-                                    <div className={styles.infoActions}>
+                                <div className={styles.infoActions}>
+                                    <ThemeToggle />
+                                    {isOwnProfile && (
                                         <Link href="/investor/edit" className={styles.editLink}>
                                             Edit Profile
                                         </Link>
-                                    </div>
-                                )}
+                                    )}
+                                </div>
                                 <div className={styles.identityRow}>
                                     {investor.profileImage && (
                                         <img

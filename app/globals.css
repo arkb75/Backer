@@ -60,55 +60,53 @@
     --font-body: 'Manrope', 'Avenir Next', 'Segoe UI', sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-    :root {
-        --color-primary: #2563eb;
-        --color-primary-hover: #1d4ed8;
-        --color-secondary: #1f3b8f;
-        --color-accent: #10b981;
+:root[data-theme='dark'] {
+    --color-primary: #2563eb;
+    --color-primary-hover: #1d4ed8;
+    --color-secondary: #1f3b8f;
+    --color-accent: #10b981;
 
-        --color-bg: #0b1220;
-        --color-surface: #111827;
-        --color-surface-muted: #1f2937;
-        --color-surface-subtle: #0f172a;
-        --color-surface-muted-hover: #334155;
-        --color-border: #2b3648;
-        --color-border-strong: #3c4a61;
-        --color-text: #e5e7eb;
-        --color-text-secondary: #94a3b8;
-        --color-text-muted: #64748b;
-        --color-text-inverse: #f8fafc;
+    --color-bg: #0b1220;
+    --color-surface: #111827;
+    --color-surface-muted: #1f2937;
+    --color-surface-subtle: #0f172a;
+    --color-surface-muted-hover: #334155;
+    --color-border: #2b3648;
+    --color-border-strong: #3c4a61;
+    --color-text: #e5e7eb;
+    --color-text-secondary: #94a3b8;
+    --color-text-muted: #64748b;
+    --color-text-inverse: #f8fafc;
 
-        --color-overlay-surface: rgba(17, 24, 39, 0.9);
-        --color-overlay-border: rgba(148, 163, 184, 0.3);
-        --color-overlay-hover: rgba(148, 163, 184, 0.14);
+    --color-overlay-surface: rgba(17, 24, 39, 0.9);
+    --color-overlay-border: rgba(148, 163, 184, 0.3);
+    --color-overlay-hover: rgba(148, 163, 184, 0.14);
 
-        --color-info: #60a5fa;
-        --color-info-bg: rgba(59, 130, 246, 0.18);
-        --color-info-border: rgba(96, 165, 250, 0.46);
+    --color-info: #60a5fa;
+    --color-info-bg: rgba(59, 130, 246, 0.18);
+    --color-info-border: rgba(96, 165, 250, 0.46);
 
-        --color-danger: #f43f5e;
-        --color-danger-bg: rgba(239, 68, 68, 0.16);
-        --color-danger-border: rgba(248, 113, 113, 0.45);
+    --color-danger: #f43f5e;
+    --color-danger-bg: rgba(239, 68, 68, 0.16);
+    --color-danger-border: rgba(248, 113, 113, 0.45);
 
-        --color-success: #10b981;
-        --color-success-bg: rgba(16, 185, 129, 0.16);
-        --color-success-border: rgba(52, 211, 153, 0.45);
+    --color-success: #10b981;
+    --color-success-bg: rgba(16, 185, 129, 0.16);
+    --color-success-border: rgba(52, 211, 153, 0.45);
 
-        --color-disabled-bg: #334155;
+    --color-disabled-bg: #334155;
 
-        --body-radial-accent: rgba(16, 185, 129, 0.2);
-        --body-radial-secondary: rgba(37, 99, 235, 0.2);
-        --body-gradient-start: #111827;
-        --body-gradient-end: #0b1220;
+    --body-radial-accent: rgba(16, 185, 129, 0.2);
+    --body-radial-secondary: rgba(37, 99, 235, 0.2);
+    --body-gradient-start: #111827;
+    --body-gradient-end: #0b1220;
 
-        --skeleton-start: #1f2937;
-        --skeleton-mid: #2a3648;
+    --skeleton-start: #1f2937;
+    --skeleton-mid: #2a3648;
 
-        --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.32);
-        --shadow-md: 0 12px 24px rgba(0, 0, 0, 0.36);
-        --shadow-lg: 0 24px 48px rgba(0, 0, 0, 0.45);
-    }
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.32);
+    --shadow-md: 0 12px 24px rgba(0, 0, 0, 0.36);
+    --shadow-lg: 0 24px 48px rgba(0, 0, 0, 0.45);
 }
 
 * {
@@ -127,10 +125,8 @@ html {
     color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-    html {
-        color-scheme: dark;
-    }
+:root[data-theme='dark'] {
+    color-scheme: dark;
 }
 
 body {
