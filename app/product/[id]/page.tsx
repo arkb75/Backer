@@ -5,6 +5,8 @@ import {
     getProductById,
     listFounderProductsByProductId,
     listInvestorInterestsByProductId,
+    getInvestorByUserId,
+    getInvestorInterestByInvestorAndProduct,
 } from '@/lib/db/repository'
 import type { FounderRecord, FounderPhotoRecord, FounderProductRecord, ProductRecord } from '@/lib/db/types'
 import { getServerSession } from 'next-auth'
@@ -67,16 +69,22 @@ export default async function ProductPage({ params }: PageProps) {
     const session = await getServerSession(authOptions)
     const isInvestor = session?.user?.userType === 'INVESTOR'
 
-    const handleLike = async () => {
-        'use server'
-        // TODO: Implement like functionality
-        console.log('Like product:', id)
-    }
+    // Get primary founder for messaging
+    const primaryFounderRelation = foundersWithRelations.find((f) => f.isPrimary) || foundersWithRelations[0]
+    const primaryFounderId = primaryFounderRelation?.founderId || null
 
-    const handleCommit = async () => {
-        'use server'
-        // TODO: Implement commit functionality
-        console.log('Commit to product:', id)
+    // Check if current investor has already liked this product
+    let hasLiked = false
+    let hasCommitted = false
+    if (isInvestor && session?.user?.id) {
+        const investor = await getInvestorByUserId(session.user.id)
+        if (investor) {
+            const existingInterest = await getInvestorInterestByInvestorAndProduct(investor.id, product.id)
+            if (existingInterest) {
+                hasLiked = existingInterest.interestType === 'LIKED'
+                hasCommitted = existingInterest.interestType === 'COMMITTED'
+            }
+        }
     }
 
     return (
@@ -85,9 +93,11 @@ export default async function ProductPage({ params }: PageProps) {
                 product={productWithRelations}
                 stats={stats}
                 isInvestor={isInvestor}
-                onLike={handleLike}
-                onCommit={handleCommit}
+                founderId={primaryFounderId}
+                hasLiked={hasLiked}
+                hasCommitted={hasCommitted}
             />
         </main>
     )
 }
+

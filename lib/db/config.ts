@@ -12,6 +12,8 @@ export const DYNAMO_TABLES = {
     founderProducts: readEnv("DYNAMODB_TABLE_FOUNDER_PRODUCTS", "backer-dev-founder-products"),
     investors: readEnv("DYNAMODB_TABLE_INVESTORS", "backer-dev-investors"),
     investorInterests: readEnv("DYNAMODB_TABLE_INVESTOR_INTERESTS", "backer-dev-investor-interests"),
+    conversations: readEnv("DYNAMODB_TABLE_CONVERSATIONS", "backer-dev-conversations"),
+    messages: readEnv("DYNAMODB_TABLE_MESSAGES", "backer-dev-messages"),
 } as const
 
 export const DYNAMO_INDEXES = {
@@ -22,4 +24,8 @@ export const DYNAMO_INDEXES = {
     investorsByUserId: "userId-index",
     investorInterestsByFounderId: "founderId-index",
     investorInterestsByProductId: "productId-index",
+    investorInterestsByInvestorId: "investorId-index",
+    conversationsByInvestorId: "investorId-index",
+    conversationsByFounderId: "founderId-index",
+    messagesByConversationId: "conversationId-index",
 } as const

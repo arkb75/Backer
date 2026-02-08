@@ -1,5 +1,6 @@
 import { FounderWithRelations, InvestorStats } from '@/lib/types'
 import FounderProfile from '@/components/founder/FounderProfile'
+import FounderBottomNav from '@/components/founder/FounderBottomNav'
 import { notFound } from 'next/navigation'
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
@@ -69,14 +70,24 @@ export default async function FounderPage({ params }: PageProps) {
     // Or check session.user.userType === 'INVESTOR'
     const isInvestor = session?.user?.userType === 'INVESTOR'
 
+    // Count new interests for badge
+    const newInterestsCount = investorInterests.length
+
     return (
-        <main>
+        <div style={{ minHeight: "100vh", paddingBottom: isOwnProfile ? "96px" : "0", background: "black" }}>
             <FounderProfile
                 founder={founderWithRelations}
                 investorStats={investorStats}
                 isInvestor={isInvestor}
                 isOwnProfile={isOwnProfile}
             />
-        </main>
+            {isOwnProfile && (
+                <FounderBottomNav
+                    activeTab="profile"
+                    profileHref={`/founder/${founder.id}`}
+                    messageBadgeCount={newInterestsCount}
+                />
+            )}
+        </div>
     )
 }

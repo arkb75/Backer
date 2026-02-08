@@ -2,6 +2,7 @@ import type { ProductRecord, FounderProductRecord, FounderRecord, FounderPhotoRe
 import styles from './ProductProfile.module.css'
 import { BackButton, VideoPlayer, StatsGrid, StatItem } from '@/components/ui'
 import TeamCard from './TeamCard'
+import ProductActions from './ProductActions'
 
 type ProductWithRelations = ProductRecord & {
     founders: (FounderProductRecord & {
@@ -23,16 +24,18 @@ interface ProductProfileProps {
     product: ProductWithRelations
     stats: ProductStats
     isInvestor: boolean
-    onLike?: () => void
-    onCommit?: () => void
+    founderId?: string | null
+    hasLiked?: boolean
+    hasCommitted?: boolean
 }
 
 export default function ProductProfile({
     product,
     stats,
     isInvestor,
-    onLike,
-    onCommit,
+    founderId,
+    hasLiked = false,
+    hasCommitted = false,
 }: ProductProfileProps) {
     const formatStatus = (status: string): string => {
         const statusMap: Record<string, string> = {
@@ -141,20 +144,19 @@ export default function ProductProfile({
                 )}
 
                 {/* Investor Actions */}
-                {isInvestor && (
+                {isInvestor && founderId && (
                     <div className={`${styles.section} ${styles.investorActions}`}>
                         <h2 className={styles.sectionTitle}>Express Interest</h2>
-                        <div className={styles.actionButtons}>
-                            <button onClick={onLike} className={`${styles.button} ${styles.likeButton}`}>
-                                ❤️ Like This Startup
-                            </button>
-                            <button onClick={onCommit} className={`${styles.button} ${styles.commitButton}`}>
-                                💰 Commit to Invest
-                            </button>
-                        </div>
+                        <ProductActions
+                            productId={product.id}
+                            founderId={founderId}
+                            isLiked={hasLiked}
+                            isCommitted={hasCommitted}
+                        />
                     </div>
                 )}
             </div>
         </div>
     )
 }
+

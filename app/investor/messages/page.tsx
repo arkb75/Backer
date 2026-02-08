@@ -1,10 +1,18 @@
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
-import { getInvestorByUserId } from "@/lib/db/repository"
+import {
+    getInvestorByUserId,
+    listConversationsByInvestorId,
+    getFoundersByIds,
+    getProductsByIds,
+} from "@/lib/db/repository"
 import InvestorBottomNav from "@/components/investor/InvestorBottomNav"
+import ConversationList, { ConversationItem } from "@/components/messages/ConversationList"
 
-export default async function MessagesPage() {
+export const dynamic = 'force-dynamic'
+
+export default async function InvestorMessagesPage() {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
         redirect("/login")
@@ -14,25 +22,49 @@ export default async function MessagesPage() {
     }
 
     const viewerInvestor = await getInvestorByUserId(session.user.id)
-    const profileHref = viewerInvestor ? `/investor/${viewerInvestor.id}` : "/investor/onboarding"
+    if (!viewerInvestor) {
+        redirect("/investor/onboarding")
+    }
+
+    const profileHref = `/investor/${viewerInvestor.id}`
+
+    // Get conversations
+    const conversations = await listConversationsByInvestorId(viewerInvestor.id)
+
+    // Enrich with founder and product data
+    const founderIds = Array.from(new Set(conversations.map((c) => c.founderId)))
+    const productIds = Array.from(new Set(conversations.map((c) => c.productId)))
+
+    const [founders, products] = await Promise.all([
+        getFoundersByIds(founderIds),
+        getProductsByIds(productIds),
+    ])
+
+    const foundersById = new Map(founders.map((f) => [f.id, f]))
+    const productsById = new Map(products.map((p) => [p.id, p]))
+
+    const enrichedConversations: ConversationItem[] = conversations.map((conv) => {
+        const founder = foundersById.get(conv.founderId)
+        const product = productsById.get(conv.productId)
+        return {
+            ...conv,
+            otherPartyName: founder?.name || 'Unknown Founder',
+            otherPartyAvatar: founder?.photos?.[0]?.url || null,
+            productName: product?.name || undefined,
+        }
+    })
 
     return (
         <div style={{ minHeight: "100vh", paddingBottom: "96px", background: "black" }}>
-            <div style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                height: "100vh",
-                color: "white",
-                textAlign: "center",
-                padding: "2rem",
-                background: "black"
-            }}>
-                <h2 style={{ marginBottom: "1rem" }}>Messages</h2>
-                <p style={{ color: "rgba(255,255,255,0.7)" }}>
-                    Coming soon! Connect with founders here.
-                </p>
+            <div style={{ padding: "1rem", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+                <h1 style={{ color: "white", margin: 0, fontSize: "1.5rem" }}>Messages</h1>
+            </div>
+            <div style={{ height: "calc(100vh - 160px)" }}>
+                <ConversationList
+                    conversations={enrichedConversations}
+                    userType="INVESTOR"
+                    basePath="/investor/messages"
+                />
             </div>
             <InvestorBottomNav activeTab="messages" profileHref={profileHref} />
         </div>
