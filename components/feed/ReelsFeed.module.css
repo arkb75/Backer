@@ -4,45 +4,28 @@
     width: 100%;
     position: relative;
     background: black;
-    overflow: hidden;
-    touch-action: pan-y;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y pinch-zoom;
+    -webkit-overflow-scrolling: touch;
 }
 
-.progress {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 0.75rem;
-    background: rgba(0, 0, 0, 0.4);
-    padding: 0.5rem 0.75rem;
-    border-radius: 9999px;
-    z-index: 10;
+.container::-webkit-scrollbar {
+    display: none;
 }
 
-.instructions {
-    position: absolute;
-    top: 4rem;
-    left: 0;
-    right: 0;
-    padding: 0 1rem;
-    z-index: 10;
+.container {
+    scrollbar-width: none;
 }
 
-.instructions p {
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 0.75rem;
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    padding: 0.75rem;
-    border-radius: 0.5rem;
-    margin-bottom: 0.25rem;
-}
-
-/* Hide instructions after first visit (can be done with localStorage in future) */
-@media (min-width: 768px) {
-    .instructions {
-        display: none;
-    }
+.pane {
+    height: 100vh;
+    height: 100dvh;
+    width: 100%;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    position: relative;
 }

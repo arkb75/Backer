@@ -7,27 +7,41 @@ import styles from './ReelCard.module.css'
 
 interface ReelCardProps {
     item: FeedItem
+    isActive?: boolean
+    shouldLoadLikeState?: boolean
 }
 
-export function ReelCard({ item }: ReelCardProps) {
+export function ReelCard({
+    item,
+    isActive = true,
+    shouldLoadLikeState = true,
+}: ReelCardProps) {
     const videoRef = useRef<HTMLVideoElement>(null)
     const [likeCount, setLikeCount] = useState(0)
     const [isLiked, setIsLiked] = useState(false)
     const [isPaused, setIsPaused] = useState(false)
     const [isLikeLoading, setIsLikeLoading] = useState(false)
 
-    // Auto-play video when component mounts
     useEffect(() => {
         const video = videoRef.current
-        if (video) {
-            video.play().catch(() => {
-                // Autoplay blocked - user needs to interact first
-                setIsPaused(true)
-            })
+        if (!video) return
+
+        if (!isActive) {
+            video.pause()
+            return
         }
-    }, [item.id])
+
+        video.play().then(() => {
+            setIsPaused(false)
+        }).catch(() => {
+            // Autoplay blocked - user needs to interact first
+            setIsPaused(true)
+        })
+    }, [isActive, item.id])
 
     useEffect(() => {
+        if (!shouldLoadLikeState) return
+
         let active = true
 
         const loadLikeState = async () => {
@@ -56,7 +70,7 @@ export function ReelCard({ item }: ReelCardProps) {
         return () => {
             active = false
         }
-    }, [item.productId])
+    }, [item.productId, shouldLoadLikeState])
 
     const handleVideoClick = (e: React.MouseEvent) => {
         e.stopPropagation()
@@ -106,6 +120,7 @@ export function ReelCard({ item }: ReelCardProps) {
                 loop
                 muted
                 playsInline
+                preload={isActive ? 'auto' : 'metadata'}
                 onClick={handleVideoClick}
                 poster={item.logoUrl || undefined}
             />
