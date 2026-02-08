@@ -1,8 +1,7 @@
 import { FounderWithRelations, InvestorStats } from '@/lib/types'
 import ProductCard from './ProductCard'
 import styles from './FounderProfile.module.css'
-import FounderControls from './FounderControls'
-import CofounderInvitesPanel from './CofounderInvitesPanel'
+import { LogoutButton } from '@/components/investor/LogoutButton'
 import {
     BackButton,
     SocialLinks,
@@ -41,7 +40,6 @@ export default function FounderProfile({
             company: exp.company,
             years: exp.years,
         }))
-    const skills = founder.skills.map((s) => s.name)
 
     const socialLinks: SocialLink[] = [
         ...(founder.linkedinUrl ? [{ type: 'linkedin' as const, url: founder.linkedinUrl }] : []),
@@ -56,11 +54,6 @@ export default function FounderProfile({
             { value: investorStats.committedCount, label: 'Committed' },
         ]
         : []
-    const productOptions = founder.products.map((founderProduct) => ({
-        id: founderProduct.product.id,
-        name: founderProduct.product.name,
-    }))
-
     // Interleave photos with prompts (Hinge-style)
     const contentItems: { type: 'photo' | 'prompt' | 'video' | 'info'; data: unknown; key: string }[] = []
 
@@ -97,7 +90,7 @@ export default function FounderProfile({
 
     return (
         <div className={styles.profile}>
-            {!isOwnProfile ? <BackButton /> : <FounderControls />}
+            {!isOwnProfile && <BackButton />}
             {/* Hinge-style vertical scroll */}
             <div className={styles.feed}>
                 {contentItems.map((item) => {
@@ -141,10 +134,6 @@ export default function FounderProfile({
 
                     return null
                 })}
-
-                {isOwnProfile && (
-                    <CofounderInvitesPanel products={productOptions} />
-                )}
 
                 {/* Products Section */}
                 {(founder.products.length > 0 || isOwnProfile) && (
@@ -200,6 +189,8 @@ export default function FounderProfile({
                         <StatsGrid stats={investorStatsData} />
                     </div>
                 )}
+
+                {isOwnProfile && <LogoutButton />}
             </div>
         </div>
     )

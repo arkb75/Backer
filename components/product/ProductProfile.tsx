@@ -6,6 +6,7 @@ import styles from './ProductProfile.module.css'
 import { BackButton, VideoPlayer, StatsGrid, StatItem } from '@/components/ui'
 import TeamCard from './TeamCard'
 import ProductActions from './ProductActions'
+import CofounderInvitesPanel from '@/components/founder/CofounderInvitesPanel'
 
 type ProductWithRelations = ProductRecord & {
     founders: (FounderProductRecord & {
@@ -27,6 +28,7 @@ interface ProductProfileProps {
     product: ProductWithRelations
     stats: ProductStats
     isInvestor: boolean
+    isFounderOwner?: boolean
     founderId?: string | null
     hasLiked?: boolean
     hasCommitted?: boolean
@@ -36,6 +38,7 @@ export default function ProductProfile({
     product,
     stats,
     isInvestor,
+    isFounderOwner = false,
     founderId,
     hasLiked = false,
     hasCommitted = false,
@@ -146,6 +149,13 @@ export default function ProductProfile({
                             })}
                         </div>
                     </div>
+                )}
+
+                {isFounderOwner && (
+                    <CofounderInvitesPanel
+                        productId={product.id}
+                        productName={product.name}
+                    />
                 )}
 
                 {/* Investor Actions */}

@@ -2,6 +2,7 @@ import ProductProfile from '@/components/product/ProductProfile'
 import { notFound } from 'next/navigation'
 import {
     getFoundersByIds,
+    getFounderByUserId,
     getInvestorByUserId,
     getProductById,
     listFounderProductsByProductId,
@@ -68,6 +69,12 @@ export default async function ProductPage({ params }: PageProps) {
 
     const session = await getServerSession(authOptions)
     const isInvestor = session?.user?.userType === 'INVESTOR'
+    const viewerFounder = session?.user?.id && session.user.userType === 'FOUNDER'
+        ? await getFounderByUserId(session.user.id)
+        : null
+    const isFounderOwner = viewerFounder
+        ? founderRelations.some((relation) => relation.founderId === viewerFounder.id)
+        : false
 
     // Get primary founder for messaging
     const primaryFounderRelation = foundersWithRelations.find((f) => f.isPrimary) || foundersWithRelations[0]
@@ -93,6 +100,7 @@ export default async function ProductPage({ params }: PageProps) {
                 product={productWithRelations}
                 stats={stats}
                 isInvestor={isInvestor}
+                isFounderOwner={isFounderOwner}
                 founderId={primaryFounderId}
                 hasLiked={hasLiked}
                 hasCommitted={hasCommitted}

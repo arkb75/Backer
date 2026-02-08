@@ -4,13 +4,9 @@ import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import styles from "./CofounderInvitesPanel.module.css"
 
-interface ProductOption {
-    id: string
-    name: string
-}
-
 interface InviteRecord {
     id: string
+    productId: string
     productName: string
     inviterFounderName: string
     role: string
@@ -24,15 +20,18 @@ interface InvitesResponse {
 }
 
 interface CofounderInvitesPanelProps {
-    products: ProductOption[]
+    productId: string
+    productName?: string
 }
 
-export default function CofounderInvitesPanel({ products }: CofounderInvitesPanelProps) {
+export default function CofounderInvitesPanel({
+    productId,
+    productName,
+}: CofounderInvitesPanelProps) {
     const router = useRouter()
     const [email, setEmail] = useState("")
     const [role, setRole] = useState("Co-Founder")
     const [message, setMessage] = useState("")
-    const [selectedProductId, setSelectedProductId] = useState(products[0]?.id || "")
     const [sending, setSending] = useState(false)
     const [error, setError] = useState("")
     const [success, setSuccess] = useState("")
@@ -41,14 +40,6 @@ export default function CofounderInvitesPanel({ products }: CofounderInvitesPane
     const [canRespond, setCanRespond] = useState(false)
     const [pendingInvites, setPendingInvites] = useState<InviteRecord[]>([])
     const [respondingInviteId, setRespondingInviteId] = useState<string | null>(null)
-
-    const hasProducts = products.length > 0
-
-    useEffect(() => {
-        if (!selectedProductId && products[0]?.id) {
-            setSelectedProductId(products[0].id)
-        }
-    }, [products, selectedProductId])
 
     const loadInvites = async () => {
         setLoadingInvites(true)
@@ -74,13 +65,17 @@ export default function CofounderInvitesPanel({ products }: CofounderInvitesPane
         void loadInvites()
     }, [])
 
+    const visibleInvites = useMemo(() => (
+        pendingInvites.filter((invite) => invite.productId === productId)
+    ), [pendingInvites, productId])
+
     const submitInvite = async () => {
-        if (!hasProducts) {
-            setError("Create a company first before inviting co-founders.")
+        if (!productId) {
+            setError("Missing company context.")
             return
         }
-        if (!selectedProductId || !email.trim()) {
-            setError("Select a company and enter an email.")
+        if (!email.trim()) {
+            setError("Enter an email.")
             return
         }
 
@@ -92,7 +87,7 @@ export default function CofounderInvitesPanel({ products }: CofounderInvitesPane
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    productId: selectedProductId,
+                    productId,
                     email: email.trim(),
                     role: role.trim() || "Co-Founder",
                     message: message.trim(),
@@ -172,18 +167,21 @@ export default function CofounderInvitesPanel({ products }: CofounderInvitesPane
 
     const pendingCountLabel = useMemo(() => {
         if (loadingInvites) return "Checking invitations..."
-        if (pendingInvites.length === 0) return "No pending invitations right now."
-        return `You have ${pendingInvites.length} pending co-founder invitation${pendingInvites.length > 1 ? "s" : ""}.`
-    }, [loadingInvites, pendingInvites.length])
+        if (visibleInvites.length === 0) return "No pending invitations for this startup right now."
+        return `You have ${visibleInvites.length} pending co-founder invitation${visibleInvites.length > 1 ? "s" : ""} for this startup.`
+    }, [loadingInvites, visibleInvites.length])
 
     return (
         <section className={styles.panel}>
-            <h3 className={styles.title}>Co-Founder Invitations</h3>
+            <h3 className={styles.title}>
+                Co-Founder Invitations
+                {productName ? ` - ${productName}` : ""}
+            </h3>
             <p className={styles.hint}>{pendingCountLabel}</p>
 
-            {pendingInvites.length > 0 && (
+            {visibleInvites.length > 0 && (
                 <div className={styles.inviteList}>
-                    {pendingInvites.map((invite) => (
+                    {visibleInvites.map((invite) => (
                         <article key={invite.id} className={styles.inviteCard}>
                             <p className={styles.inviteMeta}>
                                 <strong>{invite.inviterFounderName}</strong> invited you to join <strong>{invite.productName}</strong> as {invite.role}.
@@ -220,38 +218,12 @@ export default function CofounderInvitesPanel({ products }: CofounderInvitesPane
 
             <div className={styles.form}>
                 <div className={styles.row}>
-                    <select
-                        value={selectedProductId}
-                        onChange={(e) => setSelectedProductId(e.target.value)}
-                        className={styles.select}
-                        disabled={!hasProducts || sending}
-                    >
-                        {hasProducts
-                            ? products.map((product) => (
-                                <option key={product.id} value={product.id}>
-                                    {product.name}
-                                </option>
-                            ))
-                            : <option value="">No companies yet</option>}
-                    </select>
-
                     <input
                         type="email"
                         className={styles.input}
                         placeholder="cofounder@email.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        disabled={sending}
-                    />
-                </div>
-
-                <div className={styles.row}>
-                    <input
-                        type="text"
-                        className={styles.input}
-                        placeholder="Role (e.g. CTO, Co-Founder)"
-                        value={role}
-                        onChange={(e) => setRole(e.target.value)}
                         disabled={sending}
                     />
                     <button
@@ -262,6 +234,17 @@ export default function CofounderInvitesPanel({ products }: CofounderInvitesPane
                     >
                         {sending ? "Sending..." : "Send Invite"}
                     </button>
+                </div>
+
+                <div className={styles.rowSingle}>
+                    <input
+                        type="text"
+                        className={styles.input}
+                        placeholder="Role (e.g. CTO, Co-Founder)"
+                        value={role}
+                        onChange={(e) => setRole(e.target.value)}
+                        disabled={sending}
+                    />
                 </div>
 
                 <textarea

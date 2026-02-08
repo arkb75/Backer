@@ -28,7 +28,13 @@
 .row {
     display: grid;
     gap: 10px;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.rowSingle {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: minmax(0, 1fr);
 }
 
 .input,
@@ -130,5 +136,9 @@
 @media (max-width: 640px) {
     .row {
         grid-template-columns: 1fr;
+    }
+
+    .button {
+        width: 100%;
     }
 }
