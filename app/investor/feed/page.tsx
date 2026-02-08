@@ -5,6 +5,7 @@ import {
     listFounders,
     getInvestorByUserId,
 } from '@/lib/db/repository'
+import type { ProductRecord } from '@/lib/db/types'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
@@ -39,28 +40,35 @@ export default async function FeedPage() {
     // Transform data for client component
     const feedItems: FeedItem[] = founders.flatMap((founder, index) => {
             const relations = founderProductRelations[index]
-            const primaryRelation = relations.find((relation) => relation.isPrimary) || relations[0]
-            const firstProductWithVideo = relations
-                .map((relation) => productsById.get(relation.productId))
-                .find((product) => Boolean(product?.videoUrl))
-        const primaryProduct = primaryRelation
-            ? productsById.get(primaryRelation.productId)
-            : null
-        const avatar = founder.photos[0]?.url || null
-            const videoUrl = founder.videoUrl || firstProductWithVideo?.videoUrl || null
+            const relationProducts = relations
+                .map((relation) => ({
+                    relation,
+                    product: productsById.get(relation.productId),
+                }))
+                .filter((entry): entry is { relation: typeof relations[number]; product: ProductRecord } => Boolean(entry.product))
+
+            const primaryEntry = relationProducts.find((entry) => entry.relation.isPrimary) || relationProducts[0]
+            const productWithVideoEntry = relationProducts.find((entry) => Boolean(entry.product.videoUrl))
+            const selectedProduct = productWithVideoEntry?.product || primaryEntry?.product || null
+            const avatar = founder.photos[0]?.url || null
+            const videoUrl = selectedProduct?.videoUrl || founder.videoUrl || null
+
+            if (!selectedProduct) {
+                return []
+            }
             if (!videoUrl) {
                 return []
             }
 
             return [{
                 id: founder.id,
-                targetUrl: `/founder/${founder.id}`,
-                name: primaryProduct?.name || founder.name,
-                tagline: primaryProduct?.tagline || founder.headline,
-                description: primaryProduct?.description ?? founder.bio ?? null,
+                targetUrl: `/product/${selectedProduct.id}`,
+                name: selectedProduct.name || founder.name,
+                tagline: selectedProduct.tagline || founder.headline,
+                description: selectedProduct.description ?? founder.bio ?? null,
                 videoUrl,
-                logoUrl: primaryProduct?.logoUrl ?? avatar ?? null,
-                stage: primaryProduct?.stage ?? null,
+                logoUrl: selectedProduct.logoUrl ?? avatar ?? null,
+                stage: selectedProduct.stage ?? null,
                 founders: [{
                     id: founder.id,
                     name: founder.name,

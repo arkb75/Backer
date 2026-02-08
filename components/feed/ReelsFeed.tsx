@@ -35,6 +35,7 @@ export function ReelsFeed({ items }: ReelsFeedProps) {
     const containerRef = useRef<HTMLDivElement>(null)
     const lastTapRef = useRef(0)
 
+    const totalItems = items.length
     const currentItem = items[currentIndex]
 
     const handleTouchStart = (e: React.TouchEvent) => {
@@ -60,11 +61,11 @@ export function ReelsFeed({ items }: ReelsFeedProps) {
         const isUpSwipe = distanceY > 50
         const isDownSwipe = distanceY < -50
 
-        // Vertical swiping - navigate between videos
-        if (isUpSwipe && currentIndex < items.length - 1) {
-            setCurrentIndex(currentIndex + 1)
-        } else if (isDownSwipe && currentIndex > 0) {
-            setCurrentIndex(currentIndex - 1)
+        // Vertical swiping - loop infinitely through videos
+        if (totalItems > 1 && isUpSwipe) {
+            setCurrentIndex((prev) => (prev + 1) % totalItems)
+        } else if (totalItems > 1 && isDownSwipe) {
+            setCurrentIndex((prev) => (prev - 1 + totalItems) % totalItems)
         }
 
         // Horizontal swipe right - go to detail
@@ -75,7 +76,7 @@ export function ReelsFeed({ items }: ReelsFeedProps) {
         setTouchStart(0)
         setTouchEnd(0)
         setSwipeDirection(null)
-    }, [touchStart, touchEnd, currentIndex, items.length, swipeDirection, currentItem?.targetUrl, router])
+    }, [touchStart, touchEnd, swipeDirection, currentItem?.targetUrl, router, totalItems])
 
     const handleDoubleTap = () => {
         const now = Date.now()
@@ -91,10 +92,10 @@ export function ReelsFeed({ items }: ReelsFeedProps) {
     // Keyboard navigation for testing
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'ArrowUp' && currentIndex > 0) {
-                setCurrentIndex(currentIndex - 1)
-            } else if (e.key === 'ArrowDown' && currentIndex < items.length - 1) {
-                setCurrentIndex(currentIndex + 1)
+            if (e.key === 'ArrowUp' && totalItems > 1) {
+                setCurrentIndex((prev) => (prev - 1 + totalItems) % totalItems)
+            } else if (e.key === 'ArrowDown' && totalItems > 1) {
+                setCurrentIndex((prev) => (prev + 1) % totalItems)
             } else if (e.key === 'ArrowRight') {
                 router.push(currentItem.targetUrl)
             }
@@ -102,7 +103,7 @@ export function ReelsFeed({ items }: ReelsFeedProps) {
 
         window.addEventListener('keydown', handleKeyDown)
         return () => window.removeEventListener('keydown', handleKeyDown)
-    }, [currentIndex, items.length, currentItem?.targetUrl, router])
+    }, [currentItem?.targetUrl, router, totalItems])
 
     if (!currentItem) {
         return null
@@ -119,15 +120,10 @@ export function ReelsFeed({ items }: ReelsFeedProps) {
         >
             <ReelCard item={currentItem} />
 
-            {/* Progress indicator */}
-            <div className={styles.progress}>
-                {currentIndex + 1} / {items.length}
-            </div>
-
             {/* Instructions overlay */}
             <div className={styles.instructions}>
                 <p>↑↓ Swipe to browse</p>
-                <p>→ Swipe right or double tap for founder details</p>
+                <p>→ Swipe right or double tap for product details</p>
             </div>
         </div>
     )
