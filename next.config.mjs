@@ -8,7 +8,7 @@ const toRemotePattern = (urlString) => {
         return {
             protocol: parsed.protocol.replace(":", ""),
             hostname: parsed.hostname,
-            port: parsed.port,
+            port: parsed.port || undefined,
             pathname,
         }
     } catch {
@@ -17,7 +17,14 @@ const toRemotePattern = (urlString) => {
 }
 
 const buildRemotePatterns = () => {
-    const patterns = []
+    const patterns = [
+        // Fallback for standard AWS S3 object URLs
+        {
+            protocol: "https",
+            hostname: "**.amazonaws.com",
+            pathname: "/**",
+        },
+    ]
 
     if (process.env.AWS_S3_PUBLIC_URL) {
         const pattern = toRemotePattern(process.env.AWS_S3_PUBLIC_URL)
