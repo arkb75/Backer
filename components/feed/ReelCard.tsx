@@ -1,7 +1,8 @@
 'use client'
 
 import { useRef, useEffect, useState } from 'react'
-import { Heart, User } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Heart, MessageCircle, HandCoins, User } from 'lucide-react'
 import { FeedItem } from './ReelsFeed'
 import styles from './ReelCard.module.css'
 
@@ -16,11 +17,16 @@ export function ReelCard({
     isActive = true,
     shouldLoadLikeState = true,
 }: ReelCardProps) {
+    const router = useRouter()
     const videoRef = useRef<HTMLVideoElement>(null)
     const [likeCount, setLikeCount] = useState(0)
     const [isLiked, setIsLiked] = useState(false)
     const [isPaused, setIsPaused] = useState(false)
     const [isLikeLoading, setIsLikeLoading] = useState(false)
+    const [isMessageLoading, setIsMessageLoading] = useState(false)
+    const [isFundLoading, setIsFundLoading] = useState(false)
+    const [actionError, setActionError] = useState<string | null>(null)
+    const [actionSuccess, setActionSuccess] = useState<string | null>(null)
 
     useEffect(() => {
         const video = videoRef.current
@@ -110,6 +116,107 @@ export function ReelCard({
         void toggleLike()
     }
 
+    const handleMessageClick = (e: React.MouseEvent) => {
+        e.stopPropagation()
+        if (isMessageLoading) return
+
+        const founderId = item.founders[0]?.id
+        if (!founderId) {
+            setActionSuccess(null)
+            setActionError('No founder linked to this startup yet.')
+            return
+        }
+
+        const startConversation = async () => {
+            setIsMessageLoading(true)
+            setActionError(null)
+            setActionSuccess(null)
+
+            try {
+                const res = await fetch('/api/messages/conversations', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        founderId,
+                        productId: item.productId,
+                    }),
+                })
+
+                const data = await res.json().catch(() => null) as
+                    | { conversation?: { id?: string }; error?: string }
+                    | null
+                const conversationId = data?.conversation?.id
+                if (!res.ok || !conversationId) {
+                    throw new Error(data?.error || 'Failed to start conversation')
+                }
+
+                router.push(`/investor/messages/${conversationId}`)
+            } catch (error) {
+                setActionSuccess(null)
+                setActionError(error instanceof Error ? error.message : 'Failed to start conversation')
+            } finally {
+                setIsMessageLoading(false)
+            }
+        }
+
+        void startConversation()
+    }
+
+    const handleFundClick = (e: React.MouseEvent) => {
+        e.stopPropagation()
+        if (isFundLoading) return
+
+        const amountInput = window.prompt('How much would you like to commit (USD)?', '25000')
+        if (amountInput === null) return
+
+        const amount = Number.parseFloat(amountInput.replace(/[^0-9.]/g, ''))
+        if (!Number.isFinite(amount) || amount <= 0) {
+            setActionSuccess(null)
+            setActionError('Enter a valid funding amount.')
+            return
+        }
+
+        const roundedAmount = Math.round(amount)
+
+        const fundStartup = async () => {
+            setIsFundLoading(true)
+            setActionError(null)
+            setActionSuccess(null)
+
+            try {
+                const res = await fetch('/api/interest/like', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        productId: item.productId,
+                        interestType: 'COMMITTED',
+                        amountCommitted: roundedAmount,
+                    }),
+                })
+
+                const data = await res.json().catch(() => null) as
+                    | { message?: string; error?: string }
+                    | null
+                if (!res.ok) {
+                    throw new Error(data?.error || 'Failed to commit funding')
+                }
+
+                if (!isLiked) {
+                    setLikeCount((prev) => prev + 1)
+                }
+                setIsLiked(true)
+                setActionSuccess(`Committed $${roundedAmount.toLocaleString()} successfully.`)
+            } catch (error) {
+                setActionSuccess(null)
+                setActionError(error instanceof Error ? error.message : 'Failed to commit funding')
+            } finally {
+                setIsFundLoading(false)
+            }
+        }
+
+        void fundStartup()
+    }
+
     return (
         <div className={styles.card}>
             {/* Video Player */}
@@ -148,7 +255,44 @@ export function ReelCard({
                     </button>
                     <span className={styles.actionCount}>{likeCount}</span>
                 </div>
+
+                <div className={styles.actionItem}>
+                    <button
+                        className={`${styles.actionButton} ${styles.messageButton}`}
+                        onClick={handleMessageClick}
+                        disabled={isMessageLoading}
+                        aria-label="Message founder"
+                    >
+                        <MessageCircle className={styles.actionIcon} />
+                    </button>
+                    <span className={styles.actionLabel}>
+                        {isMessageLoading ? 'Opening...' : 'Message'}
+                    </span>
+                </div>
+
+                <div className={styles.actionItem}>
+                    <button
+                        className={`${styles.actionButton} ${styles.fundButton}`}
+                        onClick={handleFundClick}
+                        disabled={isFundLoading}
+                        aria-label="Fund startup"
+                    >
+                        <HandCoins className={styles.actionIcon} />
+                    </button>
+                    <span className={styles.actionLabel}>
+                        {isFundLoading ? 'Funding...' : 'Fund'}
+                    </span>
+                </div>
             </div>
+
+            {(actionError || actionSuccess) && (
+                <p
+                    className={`${styles.actionFeedback} ${actionError ? styles.actionError : styles.actionSuccess}`}
+                    role="status"
+                >
+                    {actionError || actionSuccess}
+                </p>
+            )}
 
             {/* Bottom info overlay */}
             <div className={styles.info}>

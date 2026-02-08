@@ -98,7 +98,14 @@ export default function ProductProfile({
             {/* Hero Video - Full Width */}
             {product.videoUrl && (
                 <div className={styles.videoHero}>
-                    <VideoPlayer videoUrl={product.videoUrl} title={`${product.name} pitch`} />
+                    <VideoPlayer
+                        videoUrl={product.videoUrl}
+                        title={`${product.name} pitch`}
+                        autoPlay={isInvestor}
+                        muted={isInvestor}
+                        loop={isInvestor}
+                        playsInline={isInvestor}
+                    />
                 </div>
             )}
 

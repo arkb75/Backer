@@ -7,6 +7,7 @@ import {
     getInvestorInterestByInvestorAndProduct,
     getProductById,
     listFounderProductsByProductId,
+    updateInvestorInterest,
 } from "@/lib/db/repository"
 import type { InterestType } from "@/lib/db/types"
 
@@ -76,7 +77,21 @@ export async function POST(req: Request) {
         )
 
         if (existingInterest) {
-            // If already liked and trying to commit, we could update, but for simplicity return existing
+            if (interestType === "COMMITTED") {
+                const updatedInterest = await updateInvestorInterest({
+                    id: existingInterest.id,
+                    interestType: "COMMITTED",
+                    amountCommitted,
+                })
+
+                return NextResponse.json({
+                    interest: updatedInterest,
+                    message: existingInterest.interestType === "COMMITTED"
+                        ? "Commitment updated"
+                        : "Interest upgraded to commitment",
+                })
+            }
+
             return NextResponse.json({
                 interest: existingInterest,
                 message: "Interest already recorded",

@@ -3,15 +3,32 @@ import styles from './VideoPlayer.module.css'
 interface VideoPlayerProps {
     videoUrl: string
     title?: string
+    autoPlay?: boolean
+    muted?: boolean
+    loop?: boolean
+    playsInline?: boolean
+    showControls?: boolean
 }
 
-export default function VideoPlayer({ videoUrl, title }: VideoPlayerProps) {
+export default function VideoPlayer({
+    videoUrl,
+    title,
+    autoPlay = false,
+    muted = false,
+    loop = false,
+    playsInline = false,
+    showControls = true,
+}: VideoPlayerProps) {
     return (
         <div className={styles.videoWrapper}>
             <video
                 className={styles.video}
-                controls
-                preload="metadata"
+                controls={showControls}
+                autoPlay={autoPlay}
+                muted={muted}
+                loop={loop}
+                playsInline={playsInline}
+                preload={autoPlay ? "auto" : "metadata"}
                 aria-label={title || 'Video'}
             >
                 <source src={videoUrl} type="video/mp4" />

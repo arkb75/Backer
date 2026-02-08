@@ -1179,12 +1179,17 @@ export async function getProductLikeState(input: {
     investorId?: string | null
 }): Promise<{ likeCount: number; liked: boolean }> {
     const interests = await listInvestorInterestsByProductId(input.productId)
-    const likes = interests.filter((interest) => interest.interestType === "LIKED")
+    const interestedInvestorIds = new Set(interests
+        .filter(
+        (interest) => interest.interestType === "LIKED" || interest.interestType === "COMMITTED"
+        )
+        .map((interest) => interest.investorId)
+    )
 
     return {
-        likeCount: likes.length,
+        likeCount: interestedInvestorIds.size,
         liked: input.investorId
-            ? likes.some((interest) => interest.investorId === input.investorId)
+            ? interestedInvestorIds.has(input.investorId)
             : false,
     }
 }
@@ -1195,6 +1200,19 @@ export async function toggleProductLike(input: {
     founderId?: string | null
 }): Promise<{ likeCount: number; liked: boolean }> {
     const existingInterests = await listInvestorInterestsByProductId(input.productId)
+    const existingCommitment = existingInterests.find(
+        (interest) =>
+            interest.investorId === input.investorId &&
+            interest.interestType === "COMMITTED"
+    )
+    if (existingCommitment) {
+        // Keep committed investors in an interested state; the heart toggle should not remove commitments.
+        return getProductLikeState({
+            productId: input.productId,
+            investorId: input.investorId,
+        })
+    }
+
     const existingLikes = existingInterests.filter(
         (interest) =>
             interest.interestType === "LIKED" &&
@@ -1542,6 +1560,39 @@ export async function createInvestorInterest(input: {
     }))
 
     return interest
+}
+
+export async function updateInvestorInterest(input: {
+    id: string
+    interestType: InterestType
+    amountCommitted?: number | null
+}): Promise<InvestorInterestRecord> {
+    const nextAmountCommitted = input.interestType === "COMMITTED"
+        ? (input.amountCommitted || null)
+        : null
+
+    await dynamo.send(new UpdateCommand({
+        TableName: DYNAMO_TABLES.investorInterests,
+        Key: { id: input.id },
+        UpdateExpression: "SET #interestType = :interestType, #amountCommitted = :amountCommitted",
+        ConditionExpression: "attribute_exists(#id)",
+        ExpressionAttributeNames: {
+            "#id": "id",
+            "#interestType": "interestType",
+            "#amountCommitted": "amountCommitted",
+        },
+        ExpressionAttributeValues: {
+            ":interestType": input.interestType,
+            ":amountCommitted": nextAmountCommitted,
+        },
+    }))
+
+    const updated = await getSingleById<InvestorInterestRecord>(DYNAMO_TABLES.investorInterests, input.id)
+    if (!updated) {
+        throw new Error("INTEREST_NOT_FOUND")
+    }
+
+    return updated
 }
 
 export async function getInvestorInterestByInvestorAndProduct(
