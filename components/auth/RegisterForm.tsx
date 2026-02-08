@@ -76,14 +76,14 @@ export default function RegisterForm({ lockedEmail }: RegisterFormProps) {
                     className={`${styles.toggleOption} ${userType === 'FOUNDER' ? styles.active : ''}`}
                     onClick={() => setUserType('FOUNDER')}
                 >
-                    I'm a Founder
+                    I&apos;m a Founder
                 </button>
                 <button
                     type="button"
                     className={`${styles.toggleOption} ${userType === 'INVESTOR' ? styles.active : ''}`}
                     onClick={() => setUserType('INVESTOR')}
                 >
-                    I'm an Investor
+                    I&apos;m an Investor
                 </button>
             </div>
 

@@ -67,7 +67,7 @@ export default function IndustryTagInput({ selectedTags, onChange }: IndustryTag
                 })}
             </div>
             <p style={{ fontSize: '14px', color: '#666', marginTop: '8px' }}>
-                Select up to 10 industries you're interested in ({selectedTags.length}/10)
+                Select up to 10 industries you&apos;re interested in ({selectedTags.length}/10)
             </p>
         </div>
     )

@@ -83,7 +83,7 @@ export default function LoginForm({ lockedEmail }: LoginFormProps) {
             </button>
 
             <div className={styles.footer}>
-                Don't have an account?{' '}
+                Don&apos;t have an account?{' '}
                 <Link href={registerHref} className={styles.link}>
                     Sign up
                 </Link>

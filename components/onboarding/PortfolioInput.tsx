@@ -162,7 +162,7 @@ export default function PortfolioInput({ companies, onChange }: PortfolioInputPr
             )}
 
             <p style={{ fontSize: '14px', color: '#666', marginTop: '8px' }}>
-                Add companies you've invested in to build credibility ({companies.length}/10)
+                Add companies you&apos;ve invested in to build credibility ({companies.length}/10)
             </p>
         </div>
     )
