@@ -1,0 +1,158 @@
+.container {
+    max-width: 600px;
+    /* Wider than auth card for more content */
+    margin: 40px auto;
+    padding: 40px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.title {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #1a1a1a;
+}
+
+.subtitle {
+    color: #666;
+    font-size: 16px;
+}
+
+.progress {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 32px;
+}
+
+.stepIndicator {
+    width: 40px;
+    height: 4px;
+    background: #e5e5e5;
+    border-radius: 2px;
+    transition: background 0.3s;
+}
+
+.stepIndicator.active {
+    background: #10a37f;
+    /* Brand color */
+}
+
+.hidden {
+    display: none;
+}
+
+.buttonGroup {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 32px;
+    gap: 16px;
+}
+
+.button {
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    font-size: 16px;
+    transition: all 0.2s;
+}
+
+.backButton {
+    background: #f4f4f5;
+    color: #333;
+}
+
+.backButton:hover {
+    background: #e4e4e7;
+}
+
+.nextButton {
+    background: #000;
+    color: white;
+    flex: 1;
+    /* Make primary action prominent */
+}
+
+.nextButton:hover {
+    background: #333;
+}
+
+.inputGroup {
+    margin-bottom: 20px;
+}
+
+.label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+    font-size: 14px;
+}
+
+.input,
+.textarea,
+.select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.2s;
+}
+
+.input:focus,
+.textarea:focus,
+.select:focus {
+    border-color: #10a37f;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(16, 163, 127, 0.1);
+}
+
+.textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.tagsInput {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    min-height: 48px;
+}
+
+.tag {
+    background: #f0fdf4;
+    color: #166534;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.removeTag {
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+}
+
+.tagInputRaw {
+    border: none;
+    outline: none;
+    flex: 1;
+    min-width: 120px;
+    font-size: 16px;
+}
