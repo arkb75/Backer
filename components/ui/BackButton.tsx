@@ -3,11 +3,25 @@
 import { useRouter } from 'next/navigation'
 import styles from './BackButton.module.css'
 
-export default function BackButton() {
+interface BackButtonProps {
+    href?: string
+}
+
+export default function BackButton({ href }: BackButtonProps) {
     const router = useRouter()
 
     return (
-        <button onClick={() => router.back()} className={styles.backButton} aria-label="Go back">
+        <button
+            onClick={() => {
+                if (href) {
+                    router.push(href)
+                    return
+                }
+                router.back()
+            }}
+            className={styles.backButton}
+            aria-label="Go back"
+        >
             <svg
                 width="24"
                 height="24"

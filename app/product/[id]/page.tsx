@@ -69,12 +69,21 @@ export default async function ProductPage({ params }: PageProps) {
 
     const session = await getServerSession(authOptions)
     const isInvestor = session?.user?.userType === 'INVESTOR'
+    const viewerInvestor = session?.user?.id && session.user.userType === 'INVESTOR'
+        ? await getInvestorByUserId(session.user.id)
+        : null
     const viewerFounder = session?.user?.id && session.user.userType === 'FOUNDER'
         ? await getFounderByUserId(session.user.id)
         : null
     const isFounderOwner = viewerFounder
         ? founderRelations.some((relation) => relation.founderId === viewerFounder.id)
         : false
+
+    const backHref = isInvestor
+        ? '/investor/feed'
+        : viewerFounder
+            ? '/founder/products'
+            : '/'
 
     // Get primary founder for messaging
     const primaryFounderRelation = foundersWithRelations.find((f) => f.isPrimary) || foundersWithRelations[0]
@@ -83,14 +92,11 @@ export default async function ProductPage({ params }: PageProps) {
     // Check if current investor has already liked this product
     let hasLiked = false
     let hasCommitted = false
-    if (isInvestor && session?.user?.id) {
-        const investor = await getInvestorByUserId(session.user.id)
-        if (investor) {
-            const existingInterest = await getInvestorInterestByInvestorAndProduct(investor.id, product.id)
-            if (existingInterest) {
-                hasLiked = existingInterest.interestType === 'LIKED'
-                hasCommitted = existingInterest.interestType === 'COMMITTED'
-            }
+    if (viewerInvestor) {
+        const existingInterest = await getInvestorInterestByInvestorAndProduct(viewerInvestor.id, product.id)
+        if (existingInterest) {
+            hasLiked = existingInterest.interestType === 'LIKED'
+            hasCommitted = existingInterest.interestType === 'COMMITTED'
         }
     }
 
@@ -104,6 +110,7 @@ export default async function ProductPage({ params }: PageProps) {
                 founderId={primaryFounderId}
                 hasLiked={hasLiked}
                 hasCommitted={hasCommitted}
+                backHref={backHref}
             />
         </main>
     )

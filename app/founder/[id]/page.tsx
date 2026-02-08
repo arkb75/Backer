@@ -70,6 +70,11 @@ export default async function FounderPage({ params }: PageProps) {
     // For now, we'll pass isInvestor as false - will be implemented with NextAuth
     // Or check session.user.userType === 'INVESTOR'
     const isInvestor = session?.user?.userType === 'INVESTOR'
+    const backHref = session?.user?.userType === 'INVESTOR'
+        ? '/investor/feed'
+        : session?.user?.userType === 'FOUNDER'
+            ? '/founder/products'
+            : '/'
 
     const unreadMessagesCount = isOwnProfile
         ? await countUnreadConversationsForFounder(founder.id)
@@ -82,6 +87,7 @@ export default async function FounderPage({ params }: PageProps) {
                 investorStats={investorStats}
                 isInvestor={isInvestor}
                 isOwnProfile={isOwnProfile}
+                backHref={backHref}
             />
             {isOwnProfile && (
                 <FounderBottomNav

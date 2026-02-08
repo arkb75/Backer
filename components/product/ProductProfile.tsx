@@ -34,6 +34,7 @@ interface ProductProfileProps {
     founderId?: string | null
     hasLiked?: boolean
     hasCommitted?: boolean
+    backHref?: string
 }
 
 export default function ProductProfile({
@@ -44,6 +45,7 @@ export default function ProductProfile({
     founderId,
     hasLiked = false,
     hasCommitted = false,
+    backHref,
 }: ProductProfileProps) {
     const router = useRouter()
     const [likeCount, setLikeCount] = useState(stats.interestedCount)
@@ -92,7 +94,7 @@ export default function ProductProfile({
 
     return (
         <div className={styles.profile}>
-            <BackButton />
+            <BackButton href={backHref} />
             {/* Hero Video - Full Width */}
             {product.videoUrl && (
                 <div className={styles.videoHero}>
