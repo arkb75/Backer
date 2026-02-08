@@ -58,6 +58,7 @@ export default function PromptSelector({ prompts, onChange }: PromptSelectorProp
                             ))}
                         </select>
                         <button
+                            type="button"
                             onClick={() => removePrompt(index)}
                             className={styles.promptRemove}
                         >
@@ -75,7 +76,7 @@ export default function PromptSelector({ prompts, onChange }: PromptSelectorProp
             ))}
 
             {prompts.length < 3 && (
-                <button onClick={addPrompt} className={styles.addPromptButton}>
+                <button type="button" onClick={addPrompt} className={styles.addPromptButton}>
                     + Add a Prompt
                 </button>
             )}

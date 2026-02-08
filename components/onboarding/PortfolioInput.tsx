@@ -63,6 +63,7 @@ export default function PortfolioInput({ companies, onChange }: PortfolioInputPr
                                 <p style={{ fontSize: '14px', color: '#666' }}>{formatStage(company.stage)}</p>
                             </div>
                             <button
+                                type="button"
                                 onClick={() => handleRemove(index)}
                                 style={{
                                     background: 'none',
@@ -114,6 +115,7 @@ export default function PortfolioInput({ companies, onChange }: PortfolioInputPr
                     </div>
                     <div style={{ display: 'flex', gap: '8px' }}>
                         <button
+                            type="button"
                             onClick={handleAdd}
                             disabled={!currentCompany.name.trim()}
                             style={{
@@ -129,6 +131,7 @@ export default function PortfolioInput({ companies, onChange }: PortfolioInputPr
                             Add
                         </button>
                         <button
+                            type="button"
                             onClick={() => {
                                 setShowForm(false)
                                 setCurrentCompany({ name: '', stage: 'SEED', logoUrl: '' })
@@ -149,6 +152,7 @@ export default function PortfolioInput({ companies, onChange }: PortfolioInputPr
             ) : (
                 companies.length < 10 && (
                     <button
+                        type="button"
                         onClick={() => setShowForm(true)}
                         className={styles.addPromptButton}
                     >

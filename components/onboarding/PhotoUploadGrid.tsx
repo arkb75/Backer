@@ -77,6 +77,7 @@ export default function PhotoUploadGrid({ photos, onChange }: PhotoUploadGridPro
                                 <>
                                     <img src={photoUrl} alt={`Photo ${index + 1}`} className={styles.photoImage} />
                                     <button
+                                        type="button"
                                         className={styles.removePhoto}
                                         onClick={(e) => {
                                             e.stopPropagation()
