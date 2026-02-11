@@ -5,17 +5,26 @@ import { useRouter } from 'next/navigation'
 import { Heart, MessageCircle, HandCoins, User } from 'lucide-react'
 import { FeedItem } from './ReelsFeed'
 import styles from './ReelCard.module.css'
+import type { FeedEventType } from '@/lib/db/types'
 
 interface ReelCardProps {
     item: FeedItem
     isActive?: boolean
     shouldLoadLikeState?: boolean
+    onTrackEvent?: (event: {
+        productId: string
+        eventType: FeedEventType
+        watchMs?: number
+        durationMs?: number
+        metadata?: Record<string, string | number | boolean | null>
+    }) => void
 }
 
 export function ReelCard({
     item,
     isActive = true,
     shouldLoadLikeState = true,
+    onTrackEvent,
 }: ReelCardProps) {
     const router = useRouter()
     const videoRef = useRef<HTMLVideoElement>(null)
@@ -30,6 +39,11 @@ export function ReelCard({
     const [isFundModalOpen, setIsFundModalOpen] = useState(false)
     const [fundAmountInput, setFundAmountInput] = useState('25000')
     const [fundFormError, setFundFormError] = useState<string | null>(null)
+    const watchMilestoneFiredRef = useRef({
+        twoSeconds: false,
+        fiftyPercent: false,
+        complete: false,
+    })
 
     useEffect(() => {
         const video = videoRef.current
@@ -38,6 +52,12 @@ export function ReelCard({
         if (!isActive) {
             video.pause()
             return
+        }
+
+        watchMilestoneFiredRef.current = {
+            twoSeconds: false,
+            fiftyPercent: false,
+            complete: false,
         }
 
         video.play().then(() => {
@@ -123,13 +143,66 @@ export function ReelCard({
                 if (!res.ok) return
                 const data = await res.json() as { likeCount?: number; liked?: boolean }
                 setLikeCount(typeof data.likeCount === 'number' ? data.likeCount : 0)
-                setIsLiked(Boolean(data.liked))
+                const nextLiked = Boolean(data.liked)
+                setIsLiked(nextLiked)
+                onTrackEvent?.({
+                    productId: item.productId,
+                    eventType: nextLiked ? 'LIKE' : 'UNLIKE',
+                    metadata: { source: 'reels-feed' },
+                })
             } finally {
                 setIsLikeLoading(false)
             }
         }
 
         void toggleLike()
+    }
+
+    const handleVideoTimeUpdate = () => {
+        const video = videoRef.current
+        if (!video || !isActive || !onTrackEvent) return
+
+        const duration = video.duration
+        if (!Number.isFinite(duration) || duration <= 0) return
+        const current = video.currentTime
+        if (!Number.isFinite(current) || current < 0) return
+
+        const watchMs = Math.round(current * 1000)
+        const durationMs = Math.round(duration * 1000)
+
+        if (current >= 2 && !watchMilestoneFiredRef.current.twoSeconds) {
+            watchMilestoneFiredRef.current.twoSeconds = true
+            onTrackEvent({
+                productId: item.productId,
+                eventType: 'WATCH_2S',
+                watchMs,
+                durationMs,
+                metadata: { source: 'reels-feed' },
+            })
+        }
+
+        const progress = current / duration
+        if (progress >= 0.5 && !watchMilestoneFiredRef.current.fiftyPercent) {
+            watchMilestoneFiredRef.current.fiftyPercent = true
+            onTrackEvent({
+                productId: item.productId,
+                eventType: 'WATCH_50',
+                watchMs,
+                durationMs,
+                metadata: { source: 'reels-feed' },
+            })
+        }
+
+        if (progress >= 0.95 && !watchMilestoneFiredRef.current.complete) {
+            watchMilestoneFiredRef.current.complete = true
+            onTrackEvent({
+                productId: item.productId,
+                eventType: 'WATCH_COMPLETE',
+                watchMs,
+                durationMs,
+                metadata: { source: 'reels-feed' },
+            })
+        }
     }
 
     const handleMessageClick = (e: React.MouseEvent) => {
@@ -143,6 +216,11 @@ export function ReelCard({
 
             try {
                 const conversationId = await getOrCreateConversationId()
+                onTrackEvent?.({
+                    productId: item.productId,
+                    eventType: 'MESSAGE_CLICK',
+                    metadata: { source: 'reels-feed' },
+                })
                 router.push(`/investor/messages/${conversationId}`)
             } catch (error) {
                 setActionSuccess(null)
@@ -202,6 +280,14 @@ export function ReelCard({
                     setLikeCount((prev) => prev + 1)
                 }
                 setIsLiked(true)
+                onTrackEvent?.({
+                    productId: item.productId,
+                    eventType: 'COMMIT',
+                    metadata: {
+                        source: 'reels-feed',
+                        amountCommitted: roundedAmount,
+                    },
+                })
 
                 try {
                     const conversationId = await getOrCreateConversationId()
@@ -278,6 +364,7 @@ export function ReelCard({
                 playsInline
                 preload={isActive ? 'auto' : 'metadata'}
                 onClick={handleVideoClick}
+                onTimeUpdate={handleVideoTimeUpdate}
                 poster={item.logoUrl || undefined}
             />
 

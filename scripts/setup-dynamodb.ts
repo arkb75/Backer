@@ -71,6 +71,16 @@ const tables: TableDefinition[] = [
         gsi: [
             { name: "founderId-index", partitionKey: "founderId" },
             { name: "productId-index", partitionKey: "productId" },
+            { name: "investorId-index", partitionKey: "investorId" },
+        ],
+    },
+    {
+        envName: "DYNAMODB_TABLE_FEED_EVENTS",
+        fallbackName: "backer-dev-feed-events",
+        gsi: [
+            { name: "investorId-index", partitionKey: "investorId" },
+            { name: "productId-index", partitionKey: "productId" },
+            { name: "eventType-index", partitionKey: "eventType" },
         ],
     },
     {

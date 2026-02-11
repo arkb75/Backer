@@ -20,6 +20,8 @@ import type {
     FounderPromptRecord,
     FounderRecord,
     FounderType,
+    FeedEventRecord,
+    FeedEventType,
     InterestType,
     InvestmentRecord,
     InvestmentStage,
@@ -400,6 +402,20 @@ export async function updateFounderProfile(input: {
 export async function getInvestorById(id: string): Promise<InvestorRecord | null> {
     const investor = await getSingleById<InvestorRecord>(DYNAMO_TABLES.investors, id)
     return investor ? normalizeInvestor(investor) : null
+}
+
+export async function getInvestorsByIds(ids: string[]): Promise<InvestorRecord[]> {
+    const investors = await batchGetByIds<InvestorRecord>(DYNAMO_TABLES.investors, ids)
+    return investors.map(normalizeInvestor)
+}
+
+export async function listInvestors(): Promise<InvestorRecord[]> {
+    const response = await dynamo.send(new ScanCommand({
+        TableName: DYNAMO_TABLES.investors,
+    }))
+
+    const items = (response.Items || []) as InvestorRecord[]
+    return sortByCreatedAtDesc(items.map(normalizeInvestor))
 }
 
 export async function getInvestorByUserId(userId: string): Promise<InvestorRecord | null> {
@@ -813,6 +829,103 @@ export async function listInvestorInterests(): Promise<InvestorInterestRecord[]>
     } while (lastEvaluatedKey)
 
     return interests
+}
+
+export async function createFeedEvent(input: {
+    investorId: string
+    productId: string
+    eventType: FeedEventType
+    watchMs?: number | null
+    durationMs?: number | null
+    metadata?: Record<string, string | number | boolean | null> | null
+}): Promise<FeedEventRecord> {
+    const event: FeedEventRecord = {
+        id: randomUUID(),
+        investorId: input.investorId,
+        productId: input.productId,
+        eventType: input.eventType,
+        watchMs: input.watchMs ?? null,
+        durationMs: input.durationMs ?? null,
+        metadata: input.metadata ?? null,
+        createdAt: nowIso(),
+    }
+
+    await dynamo.send(new PutCommand({
+        TableName: DYNAMO_TABLES.feedEvents,
+        Item: event,
+        ConditionExpression: "attribute_not_exists(#id)",
+        ExpressionAttributeNames: {
+            "#id": "id",
+        },
+    }))
+
+    return event
+}
+
+export async function listFeedEvents(): Promise<FeedEventRecord[]> {
+    try {
+        const events: FeedEventRecord[] = []
+        let lastEvaluatedKey: Record<string, unknown> | undefined
+
+        do {
+            const response = await dynamo.send(new ScanCommand({
+                TableName: DYNAMO_TABLES.feedEvents,
+                ExclusiveStartKey: lastEvaluatedKey,
+            }))
+
+            events.push(...((response.Items || []) as FeedEventRecord[]))
+            lastEvaluatedKey = response.LastEvaluatedKey as Record<string, unknown> | undefined
+        } while (lastEvaluatedKey)
+
+        return sortByCreatedAtDesc(events)
+    } catch (error) {
+        const code = (error as { name?: string })?.name
+        if (code === "ResourceNotFoundException") {
+            return []
+        }
+        throw error
+    }
+}
+
+export async function listFeedEventsByInvestorId(investorId: string): Promise<FeedEventRecord[]> {
+    try {
+        const response = await dynamo.send(new QueryCommand({
+            TableName: DYNAMO_TABLES.feedEvents,
+            IndexName: DYNAMO_INDEXES.feedEvents.byInvestorId,
+            KeyConditionExpression: "#investorId = :investorId",
+            ExpressionAttributeNames: {
+                "#investorId": "investorId",
+            },
+            ExpressionAttributeValues: {
+                ":investorId": investorId,
+            },
+        }))
+
+        return sortByCreatedAtDesc((response.Items || []) as FeedEventRecord[])
+    } catch (error) {
+        console.warn("[DYNAMO_FEED_EVENTS_BY_INVESTOR_FALLBACK]", error)
+    }
+
+    try {
+        const fallback = await dynamo.send(new ScanCommand({
+            TableName: DYNAMO_TABLES.feedEvents,
+            FilterExpression: "#investorId = :investorId",
+            ExpressionAttributeNames: {
+                "#investorId": "investorId",
+            },
+            ExpressionAttributeValues: {
+                ":investorId": investorId,
+            },
+        }))
+
+        return sortByCreatedAtDesc((fallback.Items || []) as FeedEventRecord[])
+    } catch (error) {
+        const code = (error as { name?: string })?.name
+        if (code === "ResourceNotFoundException") {
+            return []
+        }
+        throw error
+    }
 }
 
 export async function getFounderInviteById(id: string): Promise<FounderInviteRecord | null> {

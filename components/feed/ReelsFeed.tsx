@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { ReelCard } from './ReelCard'
 import styles from './ReelsFeed.module.css'
 import { startReelToProductTransition } from '@/lib/ui/reelProductTransition'
+import { trackFeedEvent } from '@/lib/feed/clientEvents'
 
 export interface FeedItem {
     id: string
@@ -40,6 +41,7 @@ export function ReelsFeed({ items }: ReelsFeedProps) {
     const paneRefs = useRef<Array<HTMLElement | null>>([])
     const isRecenteringRef = useRef(false)
     const isOpeningProductRef = useRef(false)
+    const seenImpressionProductIdsRef = useRef(new Set<string>())
     const touchStartRef = useRef<{ x: number; y: number } | null>(null)
     const lastTapRef = useRef(0)
 
@@ -54,6 +56,15 @@ export function ReelsFeed({ items }: ReelsFeedProps) {
     const openActiveProduct = useCallback(() => {
         if (!activeItem || isOpeningProductRef.current) return
         isOpeningProductRef.current = true
+
+        trackFeedEvent({
+            productId: activeItem.productId,
+            eventType: 'PRODUCT_OPEN',
+            metadata: { source: 'reels-feed' },
+        }, {
+            dedupeKey: `product-open:${activeItem.productId}`,
+            dedupeWindowMs: 800,
+        })
 
         const activePane = paneRefs.current[activeVirtualIndex]
         const sourceVideo = activePane?.querySelector<HTMLVideoElement>('video') ?? null
@@ -136,6 +147,21 @@ export function ReelsFeed({ items }: ReelsFeedProps) {
         if (!activeTargetUrl) return
         router.prefetch(activeTargetUrl)
     }, [activeTargetUrl, router])
+
+    useEffect(() => {
+        if (!activeItem) return
+        if (seenImpressionProductIdsRef.current.has(activeItem.productId)) return
+        seenImpressionProductIdsRef.current.add(activeItem.productId)
+
+        trackFeedEvent({
+            productId: activeItem.productId,
+            eventType: 'IMPRESSION',
+            metadata: { source: 'reels-feed' },
+        }, {
+            dedupeKey: `impression:${activeItem.productId}`,
+            dedupeWindowMs: 60_000,
+        })
+    }, [activeItem])
 
     const handleTouchStart = (e: React.TouchEvent) => {
         const touch = e.touches[0]
@@ -224,6 +250,7 @@ export function ReelsFeed({ items }: ReelsFeedProps) {
                             item={item}
                             isActive={isActive}
                             shouldLoadLikeState={shouldLoadLikeState}
+                            onTrackEvent={trackFeedEvent}
                         />
                     </section>
                 )

@@ -63,9 +63,13 @@ DYNAMODB_TABLE_FOUNDER_PRODUCTS="backer-dev-founder-products"
 DYNAMODB_TABLE_FOUNDER_INVITES="backer-dev-founder-invites"
 DYNAMODB_TABLE_INVESTORS="backer-dev-investors"
 DYNAMODB_TABLE_INVESTOR_INTERESTS="backer-dev-investor-interests"
+DYNAMODB_TABLE_FEED_EVENTS="backer-dev-feed-events"
 DYNAMODB_TABLE_CONVERSATIONS="backer-dev-conversations"
 DYNAMODB_TABLE_MESSAGES="backer-dev-messages"
 DYNAMODB_TABLE_INVESTMENTS="backer-dev-investments"
+
+# Optional ML model output path
+# FEED_MODEL_PATH="lib/feed/model/feed-model.json"
 
 # Optional local DynamoDB endpoint
 # AWS_DYNAMODB_ENDPOINT="http://localhost:8000"
@@ -95,7 +99,13 @@ npm run setup:dynamodb
 npm run dev
 ```
 
-4. Open:
+4. Train the feed model (recommended after generating some usage data):
+
+```bash
+npm run train:feed-model
+```
+
+5. Open:
 
 `http://localhost:3000`
 
@@ -106,6 +116,35 @@ npm run dev
 - `npm run start` - start production server
 - `npm run lint` - run ESLint
 - `npm run setup:dynamodb` - create required DynamoDB tables if missing
+- `npm run train:feed-model` - train and persist feed ranking model weights
+
+## ML Feed Ranking
+
+The investor reels feed uses a trainable logistic ranking model. At request time, each candidate startup is featurized and scored, then sorted by predicted relevance.
+
+### Feature Signals
+
+- Stage match between investor preference and startup stage
+- Investor stage affinity learned from prior investor actions
+- Text affinity between investor history/tags and startup content
+- Interest tag overlap
+- Global product popularity from likes/commitments
+- Freshness decay
+
+### Training Pipeline
+
+- Training script: `scripts/train-feed-model.ts`
+- Model artifact output: `lib/feed/model/feed-model.json` (or `FEED_MODEL_PATH`)
+- Data sources:
+  - `investorInterests` (`LIKED`/`COMMITTED`) for supervised positives
+  - sampled negatives from unseen products per investor
+  - optional behavioral signal enrichment from `feedEvents`
+
+The runtime ranker in `lib/feed/ranking.ts` loads model weights via `lib/feed/model.ts`. If no model artifact is found, it falls back to deterministic heuristic scoring.
+
+### Event Logging for Online Signals
+
+The feed now records investor interaction events (impressions, watch milestones, product opens, like/unlike, message click, commit) via `POST /api/feed/events` into DynamoDB table `DYNAMODB_TABLE_FEED_EVENTS`.
 
 ## Project Structure
 

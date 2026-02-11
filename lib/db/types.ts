@@ -10,6 +10,17 @@ export type InterestType = "LIKED" | "COMMITTED"
 
 export type FounderInviteStatus = "PENDING" | "ACCEPTED" | "DECLINED" | "REVOKED"
 
+export type FeedEventType =
+    | "IMPRESSION"
+    | "WATCH_2S"
+    | "WATCH_50"
+    | "WATCH_COMPLETE"
+    | "PRODUCT_OPEN"
+    | "LIKE"
+    | "UNLIKE"
+    | "MESSAGE_CLICK"
+    | "COMMIT"
+
 export interface UserRecord {
     id: string
     email: string
@@ -200,4 +211,15 @@ export interface FounderInviteRecord {
     status: FounderInviteStatus
     createdAt: string
     respondedAt?: string | null
+}
+
+export interface FeedEventRecord {
+    id: string
+    investorId: string
+    productId: string
+    eventType: FeedEventType
+    watchMs?: number | null
+    durationMs?: number | null
+    metadata?: Record<string, string | number | boolean | null> | null
+    createdAt: string
 }

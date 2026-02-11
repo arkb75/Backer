@@ -8,7 +8,8 @@
         "start": "next start",
         "lint": "next lint",
         "postinstall": "prisma generate",
-        "setup:dynamodb": "tsx scripts/setup-dynamodb.ts"
+        "setup:dynamodb": "tsx scripts/setup-dynamodb.ts",
+        "train:feed-model": "tsx scripts/train-feed-model.ts"
     },
     "dependencies": {
         "@aws-sdk/client-dynamodb": "^3.985.0",

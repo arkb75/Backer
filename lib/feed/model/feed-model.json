@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "trainedAt": "2026-02-11T23:02:26.060Z",
+  "featureNames": [
+    "bias",
+    "stage_match",
+    "stage_affinity",
+    "text_affinity",
+    "tag_overlap",
+    "popularity",
+    "freshness"
+  ],
+  "weights": [
+    -0.6346765369903588,
+    -0.25555209787614386,
+    1.416538191293001,
+    1.2688653852379672,
+    0,
+    0.6189414571795933,
+    -0.5906211308776718
+  ],
+  "metrics": {
+    "train": {
+      "accuracy": 0.6585365853658537,
+      "logLoss": 0.6064946390053342,
+      "auc": 0.7743589743589744,
+      "positiveRate": 0.36585365853658536
+    },
+    "test": {
+      "accuracy": 0.8571428571428571,
+      "logLoss": 0.5007689025378764,
+      "auc": 1,
+      "positiveRate": 0.5714285714285714
+    },
+    "samples": 48
+  },
+  "dataSummary": {
+    "investors": 16,
+    "products": 9,
+    "interests": 24,
+    "feedEvents": 0,
+    "trainSamples": 41,
+    "testSamples": 7
+  },
+  "trainingConfig": {
+    "epochs": 320,
+    "learningRate": 0.28,
+    "l2": 0.0015
+  }
+}
