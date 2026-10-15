@@ -1,24 +1,32 @@
 # Backer
 
-Backer is a Next.js 14 platform that connects founders and investors through short-form pitch content, profile matching, messaging, and investment intent workflows.
+A founder–investor discovery prototype with short-form startup pitches, personalized feed ranking, profiles, messaging, and investment intent workflows.
 
-## Tech Stack
+Built as a team project for Hack The Coast 2026. Abdul Khurram’s contributions focused on the typed DynamoDB data layer and the feed-ranking pipeline.
 
-- Next.js 14 (App Router) + React 18 + TypeScript
-- NextAuth (credentials provider)
-- DynamoDB (primary app data store)
-- AWS S3 (media uploads)
-- AWS SES (optional invite email delivery)
-- Prisma (present in repo for schema/client tooling and legacy scripts)
+[Open the hosted app](https://backer-gray.vercel.app) · [Explore the feed ranker](lib/feed/ranking.ts) · [Training pipeline](scripts/train-feed-model.ts)
 
-## Core Product Flows
+**Built with:** TypeScript · Next.js 14 · React 18 · NextAuth · DynamoDB · S3 · SES
 
-- Founder and investor registration/login
-- Founder onboarding/profile + startup/company creation
-- Investor onboarding/profile + reels-style feed (`/investor/feed`)
-- Product like/interest and commitment flow
-- Founder/investor messaging
-- Co-founder invite flow
+## What it does
+
+- Onboards founders and investors and supports startup/company profiles.
+- Presents startup pitches in a reels-style investor feed.
+- Ranks candidates with a trainable logistic model using stage, text, tag, popularity, and freshness signals, with a heuristic fallback.
+- Records feed interactions, likes, and investment intent.
+- Supports founder–investor conversations and co-founder invitations.
+
+## Explore the implementation
+
+| Area | Start here |
+| --- | --- |
+| Feed ranking and features | [Ranker](lib/feed/ranking.ts) · [feature extraction](lib/feed/mlFeatures.ts) |
+| Training and evaluation | [Training script](scripts/train-feed-model.ts) · [saved model artifact](lib/feed/model/feed-model.json) |
+| Interaction telemetry | [Client events](lib/feed/clientEvents.ts) · [event API](app/api/feed/events/route.ts) |
+| Messaging and access checks | [Send-message API](app/api/messages/send/route.ts) |
+| Data access | [DynamoDB repository](lib/db/repository.ts) · [table setup](scripts/setup-dynamodb.ts) |
+
+The saved model is a small development artifact: it records 48 examples with a 7-example test split. Its metrics are useful for inspecting the pipeline and are not a production recommendation benchmark. The repository currently provides lint/build checks; it has no automated test suite.
 
 ## Prerequisites
 
